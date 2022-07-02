@@ -104,6 +104,7 @@ function MyOrders({ navigation }) {
         keyExtractor={item => item.id}
         renderItem={orderRender}
         ListEmptyComponent={<EmptyComponent />}
+        showsVerticalScrollIndicator={false}
         />
 
       </View>

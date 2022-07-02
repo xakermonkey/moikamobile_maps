@@ -32,7 +32,8 @@ function DataScreen({ navigation }) {
                         "Authorization": 'Token ' + token
                     }
                 });
-                const ret = await axios.get(domain_web + "/get_country")
+                const ret = await axios.get(domain_web + "/get_country");
+                console.warn(ret);
                 setCountry(ret.data.country);
                 setName(res.data.first_name);
                 setEmail(res.data.email);
@@ -50,8 +51,9 @@ function DataScreen({ navigation }) {
 
 
     const getLocation = async () => {
-        const permiss = await getPermissionLocation();
-        if (permiss) {
+        const permiss = await Location.requestForegroundPermissionsAsync();
+        console.warn(permiss);
+        if (permiss.status == 'granted') {
             let location = await Location.getLastKnownPositionAsync();
             let geocod = await Location.reverseGeocodeAsync({ latitude: location.coords.latitude, longitude: location.coords.longitude });
             setLocation(geocod[0].city)
