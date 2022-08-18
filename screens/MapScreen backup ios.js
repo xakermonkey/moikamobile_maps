@@ -1,5 +1,5 @@
 import { View, Image, StyleSheet, TouchableOpacity, SafeAreaView } from 'react-native';
-import { DrawerActions, useFocusEffect } from '@react-navigation/native';
+import { DrawerActions } from '@react-navigation/native';
 import React, { useEffect, useLayoutEffect, useState } from 'react';
 import { YaMap, Animation, Marker, Polyline } from 'react-native-yamap';
 import { Dimensions } from 'react-native'
@@ -18,18 +18,17 @@ function MapScreen({ navigation }) {
   const [washes, setWashes] = useState(null);
   const [route, setRoute] = useState([]);
   const [washeses, setWasheses] = useState([]);
-  // const [bLocation, setBLocation] = useState(false);
-  const [isOpen, setDrawer] = useState(false);
+  const [bLocation, setBLocation] = useState(false);
 
 
   useLayoutEffect(() => {
     (async () => {
       let { status } = await Location.requestForegroundPermissionsAsync();
-      // setBLocation(status === 'granted')
+      setBLocation(status === 'granted')
       if (status !== 'granted') {
         Alert.alert("Ошибка", "Необходимо включить определение геопозиции");
       }
-
+    
       const phone = await AsyncStorage.getItem("phone");
       const location = await AsyncStorage.getItem("location");
       const ret = await axios.get(domain_web + "/get_all_washes", { params: { location: location, phone: phone } });
@@ -57,9 +56,6 @@ function MapScreen({ navigation }) {
 
   useEffect(() => {
     (async () => {
-      if (isOpen === true) {
-        setDrawer(false)
-      }
       if (map.current) {
         const loc = await Location.getLastKnownPositionAsync();
         // console.warn(loc.coords.latitude);
@@ -99,51 +95,47 @@ function MapScreen({ navigation }) {
 
   findRoute = async () => {
     if (map.current) {
-      if (washes == null) {
+      if(washes == null){
         const loc = await Location.getLastKnownPositionAsync();
-        // console.warn({ lon: loc.coords.longitude, lat: loc.coords.latitude });
-        map.current.findDrivingRoutes([{ lon: loc.coords.longitude, lat: loc.coords.latitude }, { lon: parseFloat(washes.lon), lat: parseFloat(washes.lat) }], (event) => {
-          const len = event.nativeEvent.routes[0].sections.length
-          let arr = new Array();
-          for (let i = 0; i < len; i++) {
-            arr = [...arr, ...event.nativeEvent.routes[0].sections[i].points];
-          }
-          setRoute(arr);
-        })
-      } else {
+      // console.warn({ lon: loc.coords.longitude, lat: loc.coords.latitude });
+      map.current.findDrivingRoutes([{ lon: loc.coords.longitude, lat: loc.coords.latitude }, { lon: parseFloat(washes.lon), lat: parseFloat(washes.lat) }], (event) => {
+        const len = event.nativeEvent.routes[0].sections.length
+        let arr = new Array();
+        for (let i = 0; i < len; i++) {
+          arr = [...arr, ...event.nativeEvent.routes[0].sections[i].points];
+        }
+        setRoute(arr);
+      })
+      }else{
         const loc = await Location.getLastKnownPositionAsync();
         map.current.setCenter({ lon: loc.coords.longitude, lat: loc.coords.latitude }, 12, 0, 0, 1, Animation.SMOOTH);
       }
-
+      
     }
   }
 
   // YaMap.resetLocale(); // язык системы
   return (
     <View style={styles.container}>
-      <StatusBar style='auto' />
+      <StatusBar style='auto'/>
       <YaMap
-        ref={map}
+        ref={this.map}
         // userLocationIcon={{ uri: 'https://www.clipartmax.com/png/middle/180-1801760_pin-png.png' }}
-        style={styles.container}
+        style={{ flex: 1 }}
       >
         {washeses.map(obj => <Marker scale={0.05} key={obj.id} point={{ lat: parseFloat(obj.lat), lon: parseFloat(obj.lon) }}
           source={{ uri: domain_web + obj.avatar }}
-          onPress={() => {
-            (async () => {
-              await AsyncStorage.setItem("washer", obj.id.toString());
-              await AsyncStorage.setItem("sale", obj.sale.toString());
-              navigation.navigate('Catalog')
-              navigation.navigate('PointCarWash')
-            })();
-          }}
+          onPress={() => { (async () => {
+            await AsyncStorage.setItem("washer", obj.id.toString());
+            await AsyncStorage.setItem("sale", obj.sale.toString());
+            navigation.navigate('Catalog')
+            navigation.navigate('PointCarWash')})();}}
         />)}
         {route != [] && <Polyline strokeWidth={7} strokeColor="#7CD0FF" points={route} />}
       </YaMap>
-      {!isOpen && 
-      <View style={{ width: 1, margin: 20, marginTop: '10%', position: 'absolute' }}>
+      <View style={{ width: 1, margin: 20, marginTop: 80, position: 'absolute' }}>
         <View style={{ width: 60 }}>
-          <TouchableOpacity activeOpacity={0.8} onPress={() => {setDrawer(true); navigation.dispatch(DrawerActions.openDrawer())}} style={{}} >
+          <TouchableOpacity activeOpacity={0.8} onPress={() => navigation.dispatch(DrawerActions.openDrawer())} style={{}} >
             <Image source={require('../assets/images/map_main.png')} style={styles.bg_img} />
           </TouchableOpacity>
         </View>
@@ -153,7 +145,7 @@ function MapScreen({ navigation }) {
           </TouchableOpacity>
         </View>
 
-        <View style={{ width: 1, top: Dimensions.get('window').height * 0.5 }}>
+        <View style={{ width: 1, top: Dimensions.get('window').height - 400 }}>
           <View style={{ width: 60, bottom: 0 }}>
             <TouchableOpacity activeOpacity={0.9} onPress={zoomUp} style={{}} >
               <Image source={require('../assets/images/map_plus.png')} resizeMode='stretch' style={{ width: 60, height: 60 }} />
@@ -167,7 +159,7 @@ function MapScreen({ navigation }) {
         </View>
 
 
-        <View style={{ width: 1, left: Dimensions.get('window').width - 100, top: Dimensions.get('window').height * 0.35 }}>
+        <View style={{ width: 1, left: Dimensions.get('window').width - 100, top: Dimensions.get('window').height - 520 }}>
           <View style={{ width: 60, bottom: 20 }}>
             <TouchableOpacity activeOpacity={0.8} onPress={findRoute} style={{}} >
               <Image source={require('../assets/images/map_route.png')} style={styles.bg_img} />
@@ -179,7 +171,7 @@ function MapScreen({ navigation }) {
             </TouchableOpacity>
           </View>
         </View>
-      </View>}
+      </View>
     </View>
   );
 }

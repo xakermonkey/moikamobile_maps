@@ -47,7 +47,7 @@ function GeneralPriceList({ navigation }) {
           <TouchableOpacity style={{ flex:1 }} onPress={() => navigation.navigate('PointCarWash')} activeOpacity={0.7} >
             <Ionicons name='close' size={28} color={'#7CD0D7'} />
           </TouchableOpacity>
-          <Text style={[styles.bold_text, {flex:1}]}>ТИП КУЗОВА</Text>
+          <Text style={[styles.bold_text, {flex:4}]}>ТИП КУЗОВА</Text>
           <View style={{ flex:1 }}></View>
         </View>
 

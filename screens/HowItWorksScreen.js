@@ -4,6 +4,7 @@ import { Video } from 'expo-av';
 import { AntDesign } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import Carousel, { Pagination } from 'react-native-snap-carousel';
+import { StatusBar } from 'expo-status-bar';
 
 
 function HowItWorksScreen({ navigation }) {
@@ -58,6 +59,7 @@ function HowItWorksScreen({ navigation }) {
 
   return (
     <View style={styles.container}>
+      <StatusBar/>
         <Carousel
           data={videos}
           style={{ flex: 1 }}

@@ -1,5 +1,5 @@
 import React, { useState, useLayoutEffect } from 'react';
-import { StyleSheet, View, Text, TouchableOpacity, ImageBackground, Image } from 'react-native';
+import { StyleSheet, View, Text, TouchableOpacity, ImageBackground, Image, Platform } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons, } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -23,19 +23,19 @@ function AddEditCar({ navigation, route }) {
   useLayoutEffect(() => {
     navigation.setOptions({
       title: route.params.title,
-        headerShadowVisible: false,
-        headerStyle: {
-          backgroundColor: '#6E7476',
-        },
-        headerTitleStyle: {
-          color: '#fff',
-          textTransform: 'uppercase',
-        },
-        headerLeft: () => (
-          <TouchableOpacity style={{ left: 15 }} onPress={() => navigation.goBack()} activeOpacity={0.7}>
+      headerShadowVisible: false,
+      headerStyle: {
+        backgroundColor: '#6E7476',
+      },
+      headerTitleStyle: {
+        color: '#fff',
+        textTransform: 'uppercase',
+      },
+      headerLeft: () => (
+        <TouchableOpacity style={{ left: 15 }} onPress={() => navigation.goBack()} activeOpacity={0.7}>
           <Ionicons name='close' size={28} color={'#7CD0D7'} />
-            </TouchableOpacity>
-        ),
+        </TouchableOpacity>
+      ),
     });
     (async () => {
       try {
@@ -55,26 +55,26 @@ function AddEditCar({ navigation, route }) {
 
   const saveCar = async () => {
     try {
-      if (number.length >= 8){
+      if (number.length >= 8) {
         const token = await AsyncStorage.getItem("token");
-      const res = await axios.post(domain_mobile + "/api/edit_car",
-        {
-          "id": id,
-          "number": number,
-          "body": body
-        },
-        {
-          headers: {
-            "Authorization": "Token " + token
+        const res = await axios.post(domain_mobile + "/api/edit_car",
+          {
+            "id": id,
+            "number": number,
+            "body": body
+          },
+          {
+            headers: {
+              "Authorization": "Token " + token
+            }
           }
-        }
-      );
+        );
       }
-      
+
       navigation.dispatch(
         CommonActions.reset({
-            index: 0,
-            routes: [{name: "PersonalAccountScreen"},{ name: "MyCars" }]
+          index: 0,
+          routes: [{ name: "PersonalAccountScreen" }, { name: "MyCars" }]
         }));
     }
     catch (err) {
@@ -96,34 +96,64 @@ function AddEditCar({ navigation, route }) {
           <Text style={styles.bold_text}>{route.params.title}</Text>
         </View> */}
 
-        <LinearGradient
-          colors={['#01010199', '#35343499']}
-          start={[0, 1]}
-          style={styles.gradient_background} >
+        {Platform.OS === 'ios' ?
+          <LinearGradient
+            colors={['#01010199', '#35343499']}
+            start={[0, 1]}
+            style={styles.gradient_background} >
 
-          <View style={styles.mt}>
-            <Text style={styles.subtext}>тип кузова</Text>
-            <TouchableOpacity style={styles.row} onPress={() => setBCar(!bCar)}>
-              <Text style={styles.text}>{body}</Text>
-              <Ionicons name='chevron-forward' size={24} style={{ color: '#7CD0D7' }} />
-            </TouchableOpacity>
-            {bCar && <Picker
-              selectedValue={body}
-              onValueChange={(value, index) => setBody(value)}
-              itemStyle={{ height: 150 }}
-            >
-              {carBody.map((obj, ind) => <Picker.Item color='#fff' key={ind} label={obj.name} value={obj.name} />)}
-            </Picker>}
-            <LinearGradient colors={['#00266F', '#7BCFD6']} start={[1, 0]} style={styles.gradient_line} />
-          </View>
+            <View style={styles.mt}>
+              <Text style={styles.subtext}>тип кузова</Text>
+              <TouchableOpacity style={styles.row} onPress={() => setBCar(!bCar)}>
+                <Text style={styles.text}>{body}</Text>
+                <Ionicons name='chevron-forward' size={24} style={{ color: '#7CD0D7' }} />
+              </TouchableOpacity>
+              {bCar && <Picker
+                selectedValue={body}
+                onValueChange={(value, index) => setBody(value)}
+                itemStyle={{ height: 150 }}
+              >
+                {carBody.map((obj, ind) => <Picker.Item color='#fff' key={ind} label={obj.name} value={obj.name} />)}
+              </Picker>}
+              <LinearGradient colors={['#00266F', '#7BCFD6']} start={[1, 0]} style={styles.gradient_line} />
+            </View>
 
-          <View style={styles.mt}>
-            <Text style={styles.subtext}>номер автомобиля</Text>
-            <MaskInput style={[styles.text, {width:'100%'}]} maxLength={9} autoCapitalize="characters" value={number} mask={mask} onChangeText={(masked, unmasked) => setNumber(masked)} />
-            <LinearGradient colors={['#00266F', '#7BCFD6']} start={[1, 0]} style={styles.gradient_line} />
-          </View>
+            <View style={styles.mt}>
+              <Text style={styles.subtext}>номер автомобиля</Text>
+              <MaskInput style={[styles.text, { width: '100%' }]} maxLength={9} autoCapitalize="characters" value={number} mask={mask} onChangeText={(masked, unmasked) => setNumber(masked)} />
+              <LinearGradient colors={['#00266F', '#7BCFD6']} start={[1, 0]} style={styles.gradient_line} />
+            </View>
+          </LinearGradient> :
 
-        </LinearGradient>
+          <LinearGradient
+            colors={['#01010199', '#35343499']}
+            start={[0, 1]}
+            style={styles.gradient_background_android} >
+
+            <View style={styles.mt}>
+              <Text style={styles.subtext_android}>тип кузова</Text>
+              {/* <TouchableOpacity style={styles.row} onPress={() => setBCar(!bCar)}> */}
+              {/* <Text style={styles.text}>{body}</Text> */}
+              {/* <Ionicons name='chevron-forward' size={24} style={{ color: '#7CD0D7' }} /> */}
+              <Picker
+                selectedValue={body}
+                onValueChange={(value, index) => setBody(value)}
+                itemStyle={{}}
+                style={{ color: '#fff' }}
+              >
+                {carBody.map((obj, ind) => <Picker.Item key={ind} label={obj.name} value={obj.name} />)}
+              </Picker>
+              {/* </TouchableOpacity> */}
+              <LinearGradient colors={['#00266F', '#7BCFD6']} start={[1, 0]} style={styles.gradient_line_android} />
+            </View>
+
+            <View style={styles.mt}>
+              <Text style={styles.subtext_android}>номер автомобиля</Text>
+              <MaskInput style={[styles.text, { width: '100%', color:'#fff' }]} placeholderTextColor='#fff' maxLength={9} autoCapitalize="characters" value={number} mask={mask} onChangeText={(masked, unmasked) => setNumber(masked)} />
+              <LinearGradient colors={['#00266F', '#7BCFD6']} start={[1, 0]} style={styles.gradient_line_android} />
+            </View>
+          </LinearGradient>
+        }
 
         <TouchableOpacity activeOpacity={0.8} onPress={saveCar} style={{ marginTop: '5%' }} >
           <ImageBackground source={require('../assets/images/button.png')} resizeMode='stretch' style={styles.bg_img} >
@@ -151,10 +181,13 @@ const styles = StyleSheet.create({
     marginTop: 0
   },
 
-  gradient_background: {
+  gradient_line: {
+    marginVertical: '5%',
+    height: 2,
     borderRadius: 5,
   },
-  gradient_line: {
+  gradient_line_android: {
+    marginHorizontal:'5%',
     marginVertical: '5%',
     height: 2,
     borderRadius: 5,
@@ -179,13 +212,27 @@ const styles = StyleSheet.create({
     borderRadius: 5,
     padding: '5%',
   },
+  gradient_background_android: {
+    marginTop: '5%',
+    borderRadius: 5,
+    // padding: '5%',
+  },
   subtext: {
     fontSize: 11,
     color: '#B2B2B2',
     fontFamily: 'Montserrat_400Regular',
   },
+  subtext_android: {
+    marginLeft:'5%',
+    marginTop:'5%',
+    fontSize: 11,
+    color: '#B2B2B2',
+    fontFamily: 'Montserrat_400Regular',
+  },
+
   text: {
-    marginTop: '2%',
+    marginLeft:'5%',
+    marginTop:'2%',
     fontSize: 14,
     color: '#fff',
     fontFamily: 'Montserrat_400Regular',

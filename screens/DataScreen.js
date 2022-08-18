@@ -33,7 +33,7 @@ function DataScreen({ navigation }) {
                     }
                 });
                 const ret = await axios.get(domain_web + "/get_country");
-                console.warn(ret);
+                // console.warn(ret);
                 setCountry(ret.data.country);
                 setName(res.data.first_name);
                 setEmail(res.data.email);

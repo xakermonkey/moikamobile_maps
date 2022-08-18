@@ -27,7 +27,7 @@ function Feedback({ navigation }) {
           name: `img.${shir}`
         });
       }
-    }else{
+    } else {
       setPermission(await getPermissionImage());
     }
   };
@@ -70,20 +70,19 @@ function Feedback({ navigation }) {
           <Ionicons name='close' size={28} color={'#7CD0D7'} />
         </TouchableOpacity> */}
 
-      <Text style={styles.bold_text}>При необходимости вы можете</Text>
-      <Text style={styles.bold_text}>прикрепить файл:</Text>
+      <Text style={styles.bold_text}>При необходимости вы можете{'\n'}прикрепить файл:</Text>
 
       <View style={styles.row}>
         <LinearGradient
           colors={['#FFF737', '#7BCFD6']}
           start={[0, 1]}
-          style={styles.gradient_background} >
+          style={[styles.gradient_background, { width: '50%' }]} >
           <View style={styles.text_with_background}>
             <Text style={styles.file_text}>{file != null ? file.name : "Файл не выбран"}</Text>
           </View>
         </LinearGradient>
-
-        <TouchableOpacity onPress={Documents} activeOpacity={0.7} style={styles.touch_opac}>
+        <View style={{ width: 5 }}></View>
+        <TouchableOpacity onPress={Documents} activeOpacity={0.7} style={{ width: '50%' }}>
           <LinearGradient colors={['#00266F', '#7BCFD6']} start={[1, 0]} style={styles.gradient_btn} >
             <View style={styles.text_with_background}>
               <Text style={styles.btn_text}>Выбрать файл</Text>
@@ -99,8 +98,9 @@ function Feedback({ navigation }) {
         colors={['#FFF737', '#7BCFD6']}
         start={[1, 0]}
         style={styles.gradient_background_comment} >
-
-        <TextInput style={styles.text} value={text} onChangeText={text => setText(text)} multiline={true} placeholder='Описание проблемы' placeholderTextColor={'#B2B2B2'} />
+        <View style={styles.text}>
+          <TextInput style={{ top: 5, left: 5, fontSize: 14, fontFamily: 'Montserrat_400Regular', color: '#fff', }} value={text} onChangeText={text => setText(text)} multiline={true} textAlignVertical={'top'} placeholder='Описание проблемы' placeholderTextColor={'#B2B2B2'} />
+        </View>
       </LinearGradient>
 
       <TouchableOpacity activeOpacity={0.8} onPress={Send} >
@@ -133,9 +133,6 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
   },
 
-  touch_opac: {
-    // width:'50%',
-  },
 
   gradient_btn: {
     borderRadius: 5,
@@ -154,8 +151,7 @@ const styles = StyleSheet.create({
     color: '#FFF',
     fontSize: 14,
     textTransform: 'uppercase',
-    paddingVertical: '5%',
-    paddingHorizontal: '5%',
+    paddingVertical: '10%',
   },
   text_with_background: {
     alignItems: 'center',
@@ -182,8 +178,8 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: '#B5B5B5',
     // backgroundColor: '#f2f2f2',
-    paddingVertical: '5%',
-    paddingHorizontal: '11%', //14% ios
+    paddingVertical: '10%',
+    // paddingHorizontal: '11%', //14% ios
     fontFamily: 'Montserrat_400Regular',
     // borderRadius: 5,
     // textTransform: 'uppercase',
@@ -203,14 +199,10 @@ const styles = StyleSheet.create({
   },
   text: {
     // marginTop: '2%',
-    fontSize: 14,
-    color: '#000000',
     backgroundColor: '#6E7476',
     borderRadius: 5,
     // minHeight: '10%',
-    paddingVertical: '20%',
-    paddingHorizontal: '5%',
-    fontFamily: 'Montserrat_400Regular',
+    paddingBottom: '40%',
   },
 
   text_btn: {

@@ -9,6 +9,7 @@ import { domain_web } from '../domain';
 import { FlatList } from 'react-native';
 import { Montserrat_700Bold } from '@expo-google-fonts/montserrat';
 import { DrawerActions } from '@react-navigation/native';
+import { StatusBar } from 'expo-status-bar';
 
 
 function MyOrders({ navigation }) {
@@ -98,6 +99,7 @@ function MyOrders({ navigation }) {
 
   return (
     <SafeAreaView style={styles.container} >
+      <StatusBar/>
       <View style={styles.main}>
       <FlatList 
         data={orders}

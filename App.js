@@ -1,5 +1,5 @@
 import 'react-native-gesture-handler';
-import React from 'react';
+import React, { useEffect, useLayoutEffect, useState } from 'react';
 
 import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
@@ -29,6 +29,7 @@ export default function App() {
   //   SplashScreen.preventAutoHideAsync();
   //   return <View />
   // }
+
 
   return (
     <NavigationContainer>

@@ -7,6 +7,7 @@ import { DrawerActions } from '@react-navigation/native';
 import { LinearGradient } from 'expo-linear-gradient';
 import axios from 'axios';
 import { domain_web } from "../domain";
+import { StatusBar } from 'expo-status-bar';
 
 const Stack = createStackNavigator();
 
@@ -36,7 +37,7 @@ function FaQ({ navigation }) {
       <TouchableOpacity activeOpacity={0.7} onPress={() => selectAnswer(ind)} >
         <View style={styles.row}>
           <Text style={styles.city}>{obj.question}</Text>
-          <AntDesign name={select.indexOf(ind) == -1 ? 'plus' : "minus" } size={28} style={{ color: '#7CD0D7' }} />
+          <AntDesign name={select.indexOf(ind) == -1 ? 'plus' : "minus" } size={28} style={{ color: '#7CD0D7', width:'10%' }} />
         </View>
       </TouchableOpacity>
       {select.indexOf(ind) != -1 && <View style={{ marginLeft: "5%", marginHorizontal: "3%" }} ><Text style={styles.city}>{obj.answer}</Text></View>}
@@ -48,6 +49,7 @@ function FaQ({ navigation }) {
 
   return (
     <SafeAreaView style={styles.container} >
+      <StatusBar/>
       <View showsVerticalScrollIndicator='false' style={styles.main}>
         {faq.map((obj, ind) => {
           return (<Answer key={ind} obj={obj} ind={ind} />)
@@ -103,7 +105,8 @@ const styles = StyleSheet.create({
   city: {
     fontSize: 14,
     color: '#fff',
-    fontFamily: 'Raleway_400Regular'
+    fontFamily: 'Raleway_400Regular',
+    width:'90%'
   },
   gradient_line: {
     marginTop: '3%',

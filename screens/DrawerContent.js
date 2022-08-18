@@ -5,6 +5,7 @@ import { Ionicons, FontAwesome, AntDesign, FontAwesome5, MaterialIcons, Feather 
 import { DrawerActions } from '@react-navigation/native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { CommonActions } from '@react-navigation/native';
+// import { StatusBar } from 'expo-status-bar';
 
 
 const Drawer = createDrawerNavigator();
@@ -24,6 +25,7 @@ export function DrawerContent(props) {
 
     return (
         <SafeAreaView style={{ flex: 1 }}>
+            {/* <StatusBar/> */}
             <DrawerContentScrollView {...props}>
 
                 <View style={styles.row}>
@@ -40,7 +42,14 @@ export function DrawerContent(props) {
                     style={styles.mt}
                     label=" Карта"
                     labelStyle={{ color: '#fff', fontSize: 14, fontFamily: 'Raleway_400Regular', textTransform: 'uppercase' }}
-                    onPress={() => { props.navigation.navigate('Map') }}
+                    onPress={() => { 
+                        props.navigation.dispatch(
+                            CommonActions.reset({
+                                index: 0,
+                                routes: [{ name: "Map" }]
+                            }));
+                        // props.navigation.navigate('Map') 
+                    }}
                 />
                 <DrawerItem
                     icon={({ color, size }) => (

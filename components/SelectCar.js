@@ -52,7 +52,7 @@ function SelectCar({ navigation }) {
             <AntDesign name='pluscircleo' size={28} color={'#7CD0D7'} />
           </TouchableOpacity> */}
           {/* </View> */}
-          <Text style={[styles.main_text, {flex:4}]}>Выберите авто</Text>
+          <Text style={[styles.main_text, {flex:5}]}>Выберите авто</Text>
           <View style={{flex:1}}></View>
         </View>
 
@@ -64,10 +64,10 @@ function SelectCar({ navigation }) {
             return (
               <View key={obj.id} >
                 <TouchableOpacity activeOpacity={0.7} onPress={() => clickCar(obj.number)} style={styles.margin_TouchOpac}>
-                  <View style={styles.row}>
-                    <Text style={styles.text}>{obj.body}</Text>
-                    <Text style={styles.bold_text}>{obj.number}</Text>
-                    {selectCar == obj.number ? <FontAwesome5 name='check' size={28} color={'#7CD0D7'} />: <View></View>}
+                  <View style={[styles.row, {height:28}]}>
+                    <Text style={[styles.text, {width:'40%'}]}>{obj.body}</Text>
+                    <Text style={[styles.bold_text, {width:'40%'}]}>{obj.number}</Text>
+                    {selectCar == obj.number ? <FontAwesome5 name='check' size={28} color={'#7CD0D7'} style={{width:'10%'}}/> : <View style={{width:'10%'}}></View>}
                   </View>
                 </TouchableOpacity>
                 <LinearGradient colors={['#00266F', '#7BCFD6']} start={[1, 0]} style={styles.gradient_line} />

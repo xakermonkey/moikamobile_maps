@@ -5,6 +5,8 @@ import axios from 'axios';
 import { domain_mobile } from '../domain';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { CommonActions } from '@react-navigation/native';
+import { StatusBar } from 'expo-status-bar';
+
 
 function VerificationCodeScreen({ navigation, route }) {
     // const VerificationCodeScreen = ({ navigation }) => {
@@ -44,6 +46,7 @@ function VerificationCodeScreen({ navigation, route }) {
 
     return (
         <SafeAreaView style={styles.container} >
+            <StatusBar />
             <View style={styles.main}>
 
                 <Text style={styles.title_text}>Код из СМС</Text>

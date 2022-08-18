@@ -20,7 +20,7 @@ function PointCarWash({ navigation, route }) {
 
   useLayoutEffect(() => {
     navigation.setOptions({
-      title: 'АВТОМОЙКА 1',
+      title: 'ЗАГРУЗКА...',
         headerShadowVisible: false,
         headerStyle: {
           backgroundColor: '#6E7476',
@@ -86,7 +86,7 @@ function PointCarWash({ navigation, route }) {
   const renderPhoto = ({ item, index }) => {
     return (
       <View style={{ alignItems: 'center' }}>
-        <Image style={styles.img} width="97%" height="100%" source={{ uri: domain_web + item.photo }} />
+        <Image style={{width:"97%", height:"100%"}} width="97%" height="100%" source={{ uri: domain_web + item.photo }} />
         {/* resizeMethod='auto' resizeMode='contain' */}
       </View>
     );

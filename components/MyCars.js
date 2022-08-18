@@ -5,6 +5,7 @@ import { Ionicons, SimpleLineIcons, AntDesign } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios from 'axios';
 import { domain_mobile } from '../domain';
+import { StatusBar } from 'expo-status-bar';
 
 
 
@@ -70,8 +71,8 @@ function MyCars({ navigation }) {
     return (
       <View style={styles.gradient_background_padding}>
         <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', }}>
-          <Text style={styles.text}>{item.body}</Text>
-          <Text style={styles.bold_text}>{item.number}</Text>
+          <Text style={[styles.text, {width:'30%'}]}>{item.body}</Text>
+          <Text style={[styles.bold_text, {width:'30%'}]}>{item.number}</Text>
           <View style={styles.btn_edit}>
             <TouchableOpacity onPress={() => navigation.navigate('AddEditCar', {"body": item.body, "number":item.number, "id": item.id, "title": "Редактирование авто"})} activeOpacity={0.7} style={{ marginRight: '5%' }}>
               <SimpleLineIcons name='pencil' size={28} color={'#7CD0D7'} />
@@ -96,6 +97,7 @@ function MyCars({ navigation }) {
 
   return (
     <SafeAreaView style={styles.container} >
+      <StatusBar/>
       <View style={styles.main}>
 
         <LinearGradient

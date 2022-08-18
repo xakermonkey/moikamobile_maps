@@ -25,19 +25,22 @@ function MainMenuScreen({ navigation }) {
       drawerStyle: {
         backgroundColor: '#6E7476',
         width: '84%',
+        height:'100%'
+        // zIndex:30000,
       },
       drawerActiveTintColor: '#fff',
       drawerInactiveTintColor: '#fff',
+      
     }}>
       <Drawer.Screen name="Map" component={MapScreen} options={{
         headerShown: false,
-        headerStyle: {
-          backgroundColor: '#6E7476',
-        },
-        headerTitleStyle: {
-          color: '#fff',
-          textTransform: 'uppercase',
-        }
+        // headerStyle: {
+        //   backgroundColor: '#6E7476',
+        // },
+        // headerTitleStyle: {
+        //   color: '#fff',
+        //   textTransform: 'uppercase',
+        // }
       }} />
       <Drawer.Screen name="HowItWorks" component={HowItWorksScreen} options={{
         headerStyle: {

@@ -1,5 +1,5 @@
 import React, { useEffect, useLayoutEffect, useState } from 'react'
-import { Image, ImageBackground, SafeAreaView, StyleSheet, Text, TouchableOpacity, View, ScrollView, Alert } from 'react-native'
+import { Image, ImageBackground, SafeAreaView, StyleSheet, Text, TouchableOpacity, View, ScrollView, Alert, Platform } from 'react-native'
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
 import axios from 'axios';
@@ -7,7 +7,9 @@ import { domain_mobile, domain_web } from '../domain';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import MaskInput from 'react-native-mask-input';
 import { Picker } from '@react-native-picker/picker';
-import * as SplashScreen from "expo-splash-screen"
+import * as SplashScreen from "expo-splash-screen";
+import AppLoading from 'expo-app-loading';
+import { StatusBar } from 'expo-status-bar';
 
 function LoginScreen({ navigation }) {
     // const LoginScreen = ({ navigation }) => {
@@ -25,7 +27,7 @@ function LoginScreen({ navigation }) {
     useLayoutEffect(() => {
         (async () => {
             // await AsyncStorage.removeItem("token");
-            await AsyncStorage.removeItem("first_join_app");
+            // await AsyncStorage.removeItem("first_join_app");
             const token = await AsyncStorage.getItem("token");
             // let lastStock = await AsyncStorage.getAllKeys()
             // lastStock = lastStock.filter(key => key.startsWith("stock_"))
@@ -69,23 +71,29 @@ function LoginScreen({ navigation }) {
 
     const setCode = async () => {
         if (num.length < 14) {
-            Alert.alert('Внимание','Неверный формат номера телефона')
+            Alert.alert('Внимание', 'Неверный формат номера телефона')
         } else {
             const res = await axios.post(domain_mobile + "/api/login", { "number": regions[selectReg].code + num });
-            navigation.navigate('VerificationCode', { "number": regions[selectReg].code + num })    
+            navigation.navigate('VerificationCode', { "number": regions[selectReg].code + num })
         }
-     }
+    }
 
 
     if (regions == null) {
-        return (<View>
-            <Text>Нет регионов
-            </Text>
-        </View>)
+        return (
+            <View style={styles.container}>
+                <StatusBar />
+                <View style={{ justifyContent: 'center', alignItems: 'center', flex: 1, padding:'5%' }}>
+                    <Image source={require('../assets/images/logo_succes.png')} />
+                    <Text style={[styles.bold_text, { textAlign: 'center' }]}>Пытаемся установить соединение с сервером</Text>
+                </View>
+            </View>
+        )
     }
 
     return (
         <SafeAreaView style={styles.container} >
+            <StatusBar />
             <ScrollView style={styles.main}>
 
                 <View style={styles.logo}>
@@ -93,8 +101,9 @@ function LoginScreen({ navigation }) {
                 </View>
 
                 <View style={styles.mt} >
-                    <LinearGradient colors={['#7BCFD6', '#FFF737']} start={[1, 0]} style={styles.gradient_btn} >
+                    {Platform.OS === 'ios' ? <LinearGradient colors={['#7BCFD6', '#FFF737']} start={[1, 0]} style={styles.gradient_btn} >
                         <View style={styles.text_with_background}>
+
                             <TouchableOpacity onPress={() => setBReg(!bReg)} activeOpacity={0.7} >
                                 <Text style={styles.subtext}>страна</Text>
                                 <View style={styles.row}>
@@ -102,14 +111,32 @@ function LoginScreen({ navigation }) {
                                     <Ionicons name='chevron-forward' size={24} style={{ color: '#7CD0D7' }} />
                                 </View>
                             </TouchableOpacity>
-                            {bReg && <Picker
-                                selectedValue={selectReg}
-                                itemStyle={{ height: 150 }}
-                                onValueChange={(value, index) => setSelectReg(index)}>
-                                {regions.map((obj, ind) => <Picker.Item color='#fff' key={obj.code} label={obj.country} value={ind} />)}
-                            </Picker>}
+                            {bReg &&
+                                <Picker
+                                    selectedValue={selectReg}
+                                    itemStyle={{ height: 150 }}
+                                    onValueChange={(value, index) => setSelectReg(index)}>
+                                    {regions.map((obj, ind) => <Picker.Item color='#fff' key={obj.code} label={obj.country} value={ind} />)}
+                                </Picker>
+                            }
                         </View>
-                    </LinearGradient>
+                    </LinearGradient> :
+
+                        <LinearGradient colors={['#7BCFD6', '#FFF737']} start={[1, 0]} style={styles.gradient_btn} >
+                            <View style={styles.text_with_background_android}>
+                                <Text style={styles.subtext_android}>страна</Text>
+                                <Picker
+                                    // mode='dropdown'
+                                    selectedValue={selectReg}
+                                    itemStyle={{ }}
+                                    style={{ color: '#fff', }}
+                                    onValueChange={(value, index) => setSelectReg(index)}>
+                                    {regions.map((obj, ind) => <Picker.Item key={obj.code} label={obj.country} value={ind} />)}
+                                </Picker>
+
+                            </View>
+                        </LinearGradient>
+                        }
                 </View>
 
 
@@ -184,6 +211,13 @@ const styles = StyleSheet.create({
         color: '#CBCBCB',
         fontFamily: 'Raleway_400Regular'
     },
+    subtext_android: {
+        marginLeft: '5%',
+        marginTop: '2%',
+        fontSize: 11,
+        color: '#CBCBCB',
+        fontFamily: 'Raleway_400Regular'
+    },
 
 
     input: {
@@ -236,6 +270,13 @@ const styles = StyleSheet.create({
     text_with_background: {
         paddingHorizontal: '5%',
         paddingVertical: '2%',
+        // alignItems: 'center',
+        backgroundColor: '#6E7476',
+        borderRadius: 5,
+    },
+    text_with_background_android: {
+        // paddingLeft: '5%',
+        // paddingTop: '2%',
         // alignItems: 'center',
         backgroundColor: '#6E7476',
         borderRadius: 5,

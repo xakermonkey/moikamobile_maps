@@ -9,6 +9,8 @@ import * as Location from "expo-location"
 import { getDistance } from "geolib"
 import { Picker } from '@react-native-picker/picker';
 import { DrawerActions } from '@react-navigation/native';
+import { StatusBar } from 'expo-status-bar';
+import { Platform } from 'react-native';
 
 
 
@@ -215,8 +217,14 @@ function CarWashes({ navigation, route }) {
     setRefresing(true);
     try {
       let { status } = await Location.requestForegroundPermissionsAsync();
-      const location = await AsyncStorage.getItem("location");
-      setLocation(location)
+      let location = await AsyncStorage.getItem("location");
+      if (location != null) {
+        setLocation(location)
+      }
+      else {
+        location = locations[0];
+        setLocation(locations[0]);
+      }
       const phone = await AsyncStorage.getItem("phone");
       const res = await axios.get(domain_web + "/get_catalog",
         {
@@ -242,7 +250,7 @@ function CarWashes({ navigation, route }) {
       setRefresing(false)
     }
     catch (err) {
-      console.log(err);
+      console.warn(err);
     }
   }
 
@@ -255,7 +263,8 @@ function CarWashes({ navigation, route }) {
   }
 
   const renderWashes = ({ item }) => {
-    return (<TouchableOpacity onPress={() => selectWasher(item.id, item.sale)} activeOpacity={0.7} style={styles.mt_TouchOpac}>
+    return (
+    Platform.OS === 'ios' ? <TouchableOpacity onPress={() => selectWasher(item.id, item.sale)} activeOpacity={0.7} style={styles.mt_TouchOpac}>
       <LinearGradient
         colors={['#01010199', '#35343499']}
         start={[0, 1]}
@@ -272,7 +281,27 @@ function CarWashes({ navigation, route }) {
           </LinearGradient>
         </View>
       </LinearGradient>
-    </TouchableOpacity>)
+    </TouchableOpacity> :
+
+    <TouchableOpacity onPress={() => selectWasher(item.id, item.sale)} activeOpacity={0.7} style={styles.mt_TouchOpac}>
+    <LinearGradient
+      colors={['#01010199', '#35343499']}
+      start={[0, 1]}  
+      style={styles.gradient_background} >
+      <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+        <Image source={{ uri: domain_web + item.avatar }} style={{ width: '30%', height: '100%', borderRadius:5}} width={'100%'} height={'100%'} resizeMode='center' />
+        <View style={{ width:'50%' }}>
+          <Text style={styles.stocks}>{item.address}</Text>
+          <Text style={styles.text_in_item}>Скидка {item.sale}%</Text>
+          <Text style={styles.text_in_item}>{bLocation && "В " + getDistance(coords, { latitude: parseFloat(item.lat), longitude: parseFloat(item.lon) }) + " м от вас"}</Text>
+        </View>
+        <LinearGradient colors={['#FFF73780', '#FFF97480']} start={[1, 0]} style={styles.rating} >
+          <Text style={styles.stocks}>{item.rate.count_rate == 0 ? "0.00" : (item.rate.mean_rate / item.rate.count_rate).toFixed(2)}</Text>
+        </LinearGradient>
+      </View>
+    </LinearGradient>
+  </TouchableOpacity>
+    )
   }
 
   const renderStock = ({ item }) => {
@@ -288,12 +317,14 @@ function CarWashes({ navigation, route }) {
 
   return (
     <SafeAreaView style={styles.container} >
+      <StatusBar/>
       <View style={styles.main}>
         {/* <RefreshControl
           refreshing={refreshing}
           onRefresh={refresh}
         /> */}
         <Text style={styles.subtext}>местоположение</Text>
+        {Platform.OS === 'ios' ? <View>
         <TouchableOpacity activeOpacity={0.7} onPress={() => setBVeiw(!bView)}>
           <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingHorizontal: '0%' }}>
             <Text style={styles.city}>{location}</Text>
@@ -306,7 +337,16 @@ function CarWashes({ navigation, route }) {
             itemStyle={{ height: 150 }}
             onValueChange={(value, index) => newLocation(value)}>
             {locations.map(obj => <Picker.Item color='#fff' key={obj} label={obj} value={obj} />)}
-          </Picker>}
+          </Picker>}</View> :
+
+          <Picker
+          selectedValue={location}
+          itemStyle={{ }}
+          style={{marginHorizontal:'-5%', color:'#fff'}}
+          onValueChange={(value, index) => newLocation(value)}>
+          {locations.map(obj => <Picker.Item key={obj} label={obj} value={obj} />)}
+        </Picker>
+}
 
         <LinearGradient colors={['#00266F', '#7BCFD6']} start={[1, 0]} style={styles.gradient_line} />
 
@@ -434,7 +474,7 @@ const styles = StyleSheet.create({
 
 
   text_in_item: {
-    marginTop: '15%',
+    // marginTop: '15%',
     fontSize: 14,
     color: '#fff',
     fontFamily: 'Raleway_400Regular'

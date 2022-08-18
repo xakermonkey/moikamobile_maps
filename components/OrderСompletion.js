@@ -108,7 +108,7 @@ function OrderСompletion({ navigation }) {
           <View style={{flex:1}}></View>
         </View>
 
-        <ScrollView>
+        <ScrollView showsVerticalScrollIndicator={false}>
           <LinearGradient
             colors={['#01010199', '#35343499']}
             start={[0, 1]}

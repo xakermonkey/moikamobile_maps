@@ -5242,6 +5242,11 @@ react-native-mask-input@^1.2.0:
   resolved "https://registry.yarnpkg.com/react-native-mask-input/-/react-native-mask-input-1.2.0.tgz#08da62742b34697d1e42d086fb4640951caea5a2"
   integrity sha512-0bLJ9Szlly4tt59RrbLBS5TSJAGVoH22Hpka85HQ3q4qy10AH+UkcDkozXEonSY5oJK6sobnmzKQ4px5+mkCWg==
 
+react-native-navigation-bar-color@^2.0.1:
+  version "2.0.1"
+  resolved "https://registry.yarnpkg.com/react-native-navigation-bar-color/-/react-native-navigation-bar-color-2.0.1.tgz#ee2be25cc37105f7da355717b0a9a32c9c059ae6"
+  integrity sha512-1kE/oxWt+HYjRxdZdvke9tJ365xaee5n3+euOQA1En8zQuSbOxiE4SYEGM7TeaWnmLJ0l37mRnPHaB2H4mGh0A==
+
 react-native-ratings@8.0.4:
   version "8.0.4"
   resolved "https://registry.yarnpkg.com/react-native-ratings/-/react-native-ratings-8.0.4.tgz#efd5ebad8acc08bf98d34d39b18fb7a6813ef991"

@@ -5,6 +5,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { CommonActions } from '@react-navigation/native'; 
 import { Ionicons } from '@expo/vector-icons';
 import { DrawerActions } from '@react-navigation/native';
+import { StatusBar } from 'expo-status-bar';
 
 function PersonalAccount({ navigation }) {
 
@@ -51,6 +52,7 @@ function PersonalAccount({ navigation }) {
 
   return (
     <SafeAreaView style={styles.container} >
+      <StatusBar/>
       <View style={styles.main}>
 
         <LinearGradient
