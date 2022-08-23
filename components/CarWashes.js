@@ -1,4 +1,4 @@
-import React, { useState, useLayoutEffect } from 'react';
+import React, { useState, useLayoutEffect, useCallback } from 'react';
 import { StyleSheet, View, Text, SafeAreaView, TouchableOpacity, ActivityIndicator, Image, Alert, FlatList } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons, FontAwesome } from '@expo/vector-icons';
@@ -8,7 +8,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as Location from "expo-location"
 import { getDistance } from "geolib"
 import { Picker } from '@react-native-picker/picker';
-import { DrawerActions } from '@react-navigation/native';
+import { DrawerActions, useFocusEffect } from '@react-navigation/native';
 import { StatusBar } from 'expo-status-bar';
 import { Platform } from 'react-native';
 
@@ -18,29 +18,29 @@ import { Platform } from 'react-native';
 
 function CarWashes({ navigation, route }) {
 
-  const [washes, setWashes] = useState([]);
-  const [stock, setStock] = useState([]);
-  const [countCar, setCountCar] = useState(0);
-  const [location, setLocation] = useState("");
-  const [coords, setCoords] = useState({});
-  const [locations, setLocations] = useState([]);
-  const [bView, setBVeiw] = useState(false);
-  const [loading, setLoading] = useState(false);
-  const [bLocation, setBLocation] = useState(false);
+  const [washes, setWashes] = useState([]); // Массив автомоек
+  const [stock, setStock] = useState([]); // Массив акций
+  const [countCar, setCountCar] = useState(0); // Количество машин 
+  const [location, setLocation] = useState(""); // Выбранный город
+  const [coords, setCoords] = useState(null); // координаты устройство
+  const [locations, setLocations] = useState([]); // Массив всех городов
+  const [bView, setBVeiw] = useState(false); // Отображение Пикера (ios)
+  const [loading, setLoading] = useState(false); // Отображение загрузки
+  const [bLocation, setBLocation] = useState(false); // Вкл/Выкл геолокация
 
 
-  const dist_sort = (a, b, coords) => {
-    if (getDistance(coords, { latitude: parseFloat(a.lat), longitude: parseFloat(a.lon) }) < getDistance(coords, { latitude: parseFloat(b.lat), longitude: parseFloat(b.lon) })) {
+  const dist_sort = (a, b, coords) => { // функция сортировки моек по расстоянию 
+    if (getDistance({ latitude: coords.coords.latitude, longitude: coords.coords.longitude }, { latitude: parseFloat(a.lat), longitude: parseFloat(a.lon) }) < getDistance(coords, { latitude: parseFloat(b.lat), longitude: parseFloat(b.lon) })) {
       return -1;
     }
-    if (getDistance(coords, { latitude: parseFloat(a.lat), longitude: parseFloat(a.lon) }) > getDistance(coords, { latitude: parseFloat(b.lat), longitude: parseFloat(b.lon) })) {
+    if (getDistance({ latitude: coords.coords.latitude, longitude: coords.coords.longitude }, { latitude: parseFloat(a.lat), longitude: parseFloat(a.lon) }) > getDistance(coords, { latitude: parseFloat(b.lat), longitude: parseFloat(b.lon) })) {
       return 1;
     }
     return 0
   }
 
 
-  const rate_sort = (a, b) => {
+  const rate_sort = (a, b) => { // функция сортировки моек по рейтингу
     if (a.rate.count_rate == 0) {
       return 1;
     }
@@ -60,19 +60,19 @@ function CarWashes({ navigation, route }) {
 
   }
 
-  const WashesSorted = (washes, coord) => {
-    if (route.params == undefined) {
-      if (coord == {}) {
+  const WashesSorted = (washes, coord) => { // сортировка моек
+    if (route.params == undefined) { // если не переданы никакие параметры то сортируется по расстоянию
+      if (coord == null) { // если не переданы координаты, значит локация выключена
         return washes;
       } else {
-        return washes.sort((a, b) => dist_sort(a, b, coord));
+        return washes.sort((a, b) => dist_sort(a, b, coord)); // сортировка по расстоянию
       }
     }
-    if (route.params.sorted == 1) {
+    if (route.params.sorted == 1) { // сортировка по рейтингу 
       return washes.sort(rate_sort);;
     }
     else {
-      if (coord == {}) {
+      if (coord == null) {
         return washes;
       } else {
         return washes.sort((a, b) => dist_sort(a, b, coord));
@@ -81,9 +81,9 @@ function CarWashes({ navigation, route }) {
   }
 
 
-  useLayoutEffect(() => {
+  useLayoutEffect(() => { // вызывается при первом рендеринге
     navigation.setOptions({
-      title: 'АВТОМОЙКИ',
+      title: 'АВТОМОЙКИ', // текст заголовка
       headerShadowVisible: false,
       headerStyle: {
         backgroundColor: '#6E7476',
@@ -92,42 +92,54 @@ function CarWashes({ navigation, route }) {
       headerTitleStyle: {
         fontFamily: 'Raleway_700Bold',
       },
-      headerLeft: () => (
+      headerLeft: () => ( // левый компонент заголовка
         <TouchableOpacity style={{ left: 10 }} onPress={() => navigation.dispatch(DrawerActions.openDrawer())} activeOpacity={0.7}>
           <Ionicons name='chevron-back' size={32} color={'#7CD0D7'} />
         </TouchableOpacity>
       ),
-      headerRight: () => (
+      headerRight: () => ( // правый компонент заголовка
         <TouchableOpacity style={{ right: 20 }} onPress={() => navigation.navigate('CarFilters', { 'sorted': route.params == undefined ? 0 : route.params.sorted, "filters": route.params == undefined ? [] : route.params.filters })} activeOpacity={0.7}>
           <FontAwesome name='filter' size={28} color={'#7CD0D7'} />
         </TouchableOpacity>
       )
     });
+    console.log(route.params);
+  }, [navigation]);
+
+
+
+  useFocusEffect(useCallback(() => { // вызывается при каждом переходе на экран
     (async () => {
-      if (route.params == undefined) {
+      if (route.params == undefined) { // если не переданы параметры
         await navigation.setParams({
           sorted: 0,
           filters: []
         });
       }
-      let { status } = await Location.getForegroundPermissionsAsync();
-      setBLocation(status === 'granted')
-      if (status !== 'granted') {
-        Alert.alert("Внимание", "Для автоматического определения города и отображения расстояния до автомойки необходимо включить определение геопозиции");
-      }
+      let { status } = await Location.getForegroundPermissionsAsync(); // проверка прав на геолокацию
+      const col = await Location.getLastKnownPositionAsync(); // получение координат последнего местоположение
+      setBLocation(status === 'granted' && col != null) // true если есть права иначе false
+      if (status !== 'granted' || col == null) { // если нет прав на определение геолокации 
+        const viewAlert = await AsyncStorage.getItem("viewAlert");
+        if (viewAlert == null) {
+          Alert.alert("Внимание",
+            "Для автоматического определения города и отображения расстояния до автомойки необходимо включить определение геопозиции");
+          await AsyncStorage.setItem("viewAlert", "true");
+        }
 
+      }
       try {
-        const ret = await axios.get(domain_web + "/get_country")
-        setLocations(ret.data.country)
-        const location = await AsyncStorage.getItem("location");
-        if (location != null) {
+        const ret = await axios.get(domain_web + "/get_country") // получение всех городов
+        setLocations(ret.data.country) // передача городов в useState
+        const location = await AsyncStorage.getItem("location"); // получение города из хранилища
+        if (location != null) { // если город есть, то передаем его в useState
           setLocation(location)
         }
-        else {
+        else { // иначе берем первый город из ответа на запрос 
           setLocation(ret.data.country[0]);
         }
-        const phone = await AsyncStorage.getItem("phone");
-        const res = await axios.get(domain_web + "/get_catalog",
+        const phone = await AsyncStorage.getItem("phone"); // получение телефона из хранилища
+        const res = await axios.get(domain_web + "/get_catalog", // получение моек с фильтрами
           {
             params: {
               filter: route.params == undefined ? [] : route.params.filters,
@@ -137,34 +149,28 @@ function CarWashes({ navigation, route }) {
             }
           }
         );
-        if (status == "granted") {
-          const col = await Location.getLastKnownPositionAsync();
-          setCoords({ latitude: col.coords.latitude, longitude: col.coords.longitude });
-          setWashes(WashesSorted(res.data.washer, { latitude: col.coords.latitude, longitude: col.coords.longitude }));
+        setCoords(col); // сохранение полученных координат в State
+        setWashes(WashesSorted(res.data.washer, col)); // сортировка моек и сохранение в State
+        setStock(res.data.stock); // сохранение акций в State
+        const token = await AsyncStorage.getItem("token"); // получение токена из хранилища
+        if (token != null) { // если токен не равен null
+          const cars = await axios.get(domain_mobile + "/api/get_cars", { headers: { "Authorization": "Token " + token } }); // запрос на получение машин пользователя
+          setCountCar(cars.data.length); // сохранение ответа в useState
         } else {
-          setWashes(res.data.washer.sort(rate_sort));
+          setCountCar(1) // если пользователь не авторизирован
         }
-        setStock(res.data.stock);
-        const token = await AsyncStorage.getItem("token");
-        if (token != null) {
-          const cars = await axios.get(domain_mobile + "/api/get_cars", { headers: { "Authorization": "Token " + token } });
-          setCountCar(cars.data.length);
-        } else {
-          setCountCar(1)
-        }
-
-
       }
       catch (err) {
         console.log(err);
       }
     })();
-  }, [navigation]);
+  }, []))
+
 
 
   const selectWasher = async (id, sale) => {
     if (countCar === 0) {
-      Alert.alert("У вас еще нет машин", "Для оформления заказа необходимо добавить машину у себя в профиле");
+      Alert.alert("У вас еще нет машин!", "Для оформления заказа необходимо добавить машину у себя в профиле");
       return 0;
     }
     let keys = await AsyncStorage.getAllKeys()
@@ -181,17 +187,16 @@ function CarWashes({ navigation, route }) {
     navigation.navigate("PointCarWash");
   }
 
-  const [refreshing, setRefresing] = useState(false);
+  const [refreshing, setRefresing] = useState(false); // происходит ли обновление списка
 
 
 
-  const newLocation = async (value) => {
-    let { status } = await Location.getForegroundPermissionsAsync();
-    setLoading(true);
-    setLocation(value);
-    await AsyncStorage.setItem("location", value);
-    const phone = await AsyncStorage.getItem("phone");
-    const res = await axios.get(domain_web + "/get_catalog",
+  const newLocation = async (value) => { // изменение города
+    setLoading(true); // устанавливаем загрузку в true
+    setLocation(value); // передаем в useState название города (локации)
+    await AsyncStorage.setItem("location", value); // сохранение города в хранилище
+    const phone = await AsyncStorage.getItem("phone"); // получение номера из хранилища
+    const res = await axios.get(domain_web + "/get_catalog",  // получение моек с фильтрами
       {
         params: {
           filter: route.params == undefined ? [] : route.params.filters,
@@ -201,60 +206,48 @@ function CarWashes({ navigation, route }) {
         }
       }
     );
-    if (status == "granted") {
-      const col = await Location.getLastKnownPositionAsync();
-      setCoords({ latitude: col.coords.latitude, longitude: col.coords.longitude });
-      setWashes(WashesSorted(res.data.washer, { latitude: col.coords.latitude, longitude: col.coords.longitude }));
-    } else {
-      setWashes(res.data.washer.sort(rate_sort));
-    }
-    setStock(res.data.stock);
-    setLoading(false)
+    const col = await Location.getLastKnownPositionAsync(); // получение координат последнего местоположения
+    setCoords(col); // сохранение полученных координат в State
+    setWashes(WashesSorted(res.data.washer, col)); // сортировка моек и занесение их в State
+    setStock(res.data.stock); // сохранение акций в State
+    setLoading(false) // конец загрузки установка load в false
   }
 
 
-  const refresh = async () => {
-    setRefresing(true);
+  const refresh = async () => { // функция при оттягивании списка вниз
+    setRefresing(true); // установка загруки в true
     try {
-      let { status } = await Location.getForegroundPermissionsAsync();
-      let location = await AsyncStorage.getItem("location");
-      if (location != null) {
-        setLocation(location)
-      }
-      else {
-        location = locations[0];
-        setLocation(locations[0]);
-      }
-      const phone = await AsyncStorage.getItem("phone");
-      const res = await axios.get(domain_web + "/get_catalog",
+      const phone = await AsyncStorage.getItem("phone"); // получение телефона из хранилища
+      const res = await axios.get(domain_web + "/get_catalog", // запрос на получение моек с фильтрами
         {
           params: {
             filter: route.params == undefined ? [] : route.params.filters,
             sorted: route.params == undefined ? 0 : route.params.sorted,
-            location: location,
+            location: location, // location из State
             phone: phone
           }
         }
       );
-      if (status == "granted") {
-        const col = await Location.getLastKnownPositionAsync();
-        setCoords({ latitude: col.coords.latitude, longitude: col.coords.longitude });
-        setWashes(WashesSorted(res.data.washer, { latitude: col.coords.latitude, longitude: col.coords.longitude }));
+      const col = await Location.getLastKnownPositionAsync(); // получние последнего местоположения
+      setCoords(col); // сохранение полученных координат в State
+      setWashes(WashesSorted(res.data.washer, col)); // сортировка моек и сохранение в State
+      setStock(res.data.stock); // сохранение в State акций
+      const token = await AsyncStorage.getItem("token"); // получение токена авторизации 
+      if (token != null) { // если пользователь авторизирован
+        const cars = await axios.get(domain_mobile + "/api/get_cars", { headers: { "Authorization": "Token " + token } }); // отправка запроса на список машин пользователя
+        setCountCar(cars.data.length); // сохранение количества машин
+
       } else {
-        setWashes(res.data.washer.sort(rate_sort));
+        setCountCar(1); // если пользователь не авторизирован, то задаем количества машин равное 1, чтобы мог просматривать автомойки
       }
-      setStock(res.data.stock);
-      const token = await AsyncStorage.getItem("token");
-      const cars = await axios.get(domain_mobile + "/api/get_cars", { headers: { "Authorization": "Token " + token } });
-      setCountCar(cars.data.length);
-      setRefresing(false)
+      setRefresing(false) // конец обновления
     }
     catch (err) {
       console.warn(err);
     }
   }
 
-  const EmptyComponent = () => {
+  const EmptyComponent = () => { // рендеринг в случае пустого массива моек
     return (
       <View style={{ marginTop: '5%' }}>
         <Text style={[styles.stocks, { textAlign: 'center' }]}>В данном городе автомоек с такими фильтрами нет</Text>
@@ -262,7 +255,7 @@ function CarWashes({ navigation, route }) {
     )
   }
 
-  const renderWashes = ({ item }) => {
+  const renderWashes = ({ item }) => { // рендеринг мойки
     return (
       Platform.OS === 'ios' ? <TouchableOpacity onPress={() => selectWasher(item.id, item.sale)} activeOpacity={0.7} style={styles.mt_TouchOpac}>
         <LinearGradient
@@ -274,7 +267,7 @@ function CarWashes({ navigation, route }) {
             <View style={{ width: '43%' }}>
               <Text style={styles.stocks}>{item.address}</Text>
               <Text style={styles.text_in_item}>Скидка {item.sale}%</Text>
-              <Text style={styles.text_in_item}>{bLocation && "В " + getDistance(coords, { latitude: parseFloat(item.lat), longitude: parseFloat(item.lon) }) + " м от вас"}</Text>
+              <Text style={styles.text_in_item}>{coords != null && "В " + getDistance({ latitude: coords.coords.latitude, longitude: coords.coords.longitude }, { latitude: parseFloat(item.lat), longitude: parseFloat(item.lon) }) + " м от вас"}</Text>
             </View>
             <LinearGradient colors={['#FFF73780', '#FFF97480']} start={[1, 0]} style={styles.rating} >
               <Text style={styles.stocks}>{item.rate.count_rate == 0 ? "0.00" : (item.rate.mean_rate / item.rate.count_rate).toFixed(2)}</Text>
@@ -289,11 +282,11 @@ function CarWashes({ navigation, route }) {
             start={[0, 1]}
             style={styles.gradient_background} >
             <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start', height:100 }}>
-              <Image source={{ uri: domain_web + item.avatar }} style={{ width: '28%', height: '100%', borderRadius: 5 }} width={95} height={95} resizeMode='center'  />
+              <Image source={{ uri: domain_web + item.avatar }} style={{ width: '28%', height: '100%', borderRadius: 5 }} width={95} height={95} resizeMode='center' />
               <View style={{ width: '50%' }}>
                 <Text style={styles.stocks}>{item.address}</Text>
                 <Text style={styles.text_in_item}>Скидка {item.sale}%</Text>
-                <Text style={styles.text_in_item}>{bLocation && "В " + getDistance(coords, { latitude: parseFloat(item.lat), longitude: parseFloat(item.lon) }) + " м от вас"}</Text>
+                <Text style={styles.text_in_item}>{coords != null && "В " + getDistance({ latitude: coords.coords.latitude, longitude: coords.coords.longitude }, { latitude: parseFloat(item.lat), longitude: parseFloat(item.lon) }) + " м от вас"}</Text>
               </View>
               <LinearGradient colors={['#FFF73780', '#FFF97480']} start={[1, 0]} style={styles.rating} >
                 <Text style={styles.stocks}>{item.rate.count_rate == 0 ? "0.00" : (item.rate.mean_rate / item.rate.count_rate).toFixed(2)}</Text>
@@ -304,7 +297,7 @@ function CarWashes({ navigation, route }) {
     )
   }
 
-  const renderStock = ({ item }) => {
+  const renderStock = ({ item }) => { // рендеринг акций
     return (
       <TouchableOpacity activeOpacity={0.7} style={styles.mt_TouchOpac}>
         <LinearGradient colors={['#FFF737', '#7CD0D7']} start={[1, 0]} style={styles.gradient_btn} >
@@ -319,11 +312,10 @@ function CarWashes({ navigation, route }) {
     <SafeAreaView style={styles.container} >
       <StatusBar />
       <View style={styles.main}>
-
-        <View style={{ height: '50%' }}>
-          <View style={{ height: 90, zIndex: 1 }}>
-            <Text style={styles.subtext}>местоположение</Text>
-            {Platform.OS === 'ios' ? <View>
+        <View style={{ zIndex: 1, height: Platform.OS === 'ios' ? 70 : '15%' }}>
+          <Text style={styles.subtext}>местоположение</Text>
+          {Platform.OS === 'ios' ?
+            <View>
               <TouchableOpacity activeOpacity={0.7} onPress={() => setBVeiw(!bView)}>
                 <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingHorizontal: '0%' }}>
                   <Text style={styles.city}>{location}</Text>
@@ -332,7 +324,8 @@ function CarWashes({ navigation, route }) {
               </TouchableOpacity>
               {bView &&
                 <View style={{
-                  backgroundColor: '#6E7476', borderRadius: 5, zIndex: 1, shadowColor: "#000",
+                  zIndex: 11,
+                  backgroundColor: '#6E7476', borderRadius: 5, shadowColor: "#000",
                   shadowOffset: {
                     width: 0,
                     height: 10,
@@ -342,27 +335,30 @@ function CarWashes({ navigation, route }) {
                 }}>
                   <Picker
                     selectedValue={location}
-                    itemStyle={{ height: 120, }}
+                    itemStyle={{ height: 120 }}
                     onValueChange={(value, index) => newLocation(value)}>
                     {locations.map(obj => <Picker.Item color='#fff' key={obj} label={obj} value={obj} />)}
-                  </Picker></View>}</View> :
+                  </Picker>
+                </View>}
+            </View> :
 
-              <Picker
-                selectedValue={location}
-                itemStyle={{}}
-                style={{ marginHorizontal: '-5%', color: '#fff' }}
-                onValueChange={(value, index) => newLocation(value)}>
-                {locations.map(obj => <Picker.Item key={obj} label={obj} value={obj} />)}
-              </Picker>
-            }
+            <Picker
+              selectedValue={location}
+              itemStyle={{}}
+              style={{ marginHorizontal: '-5%', color: '#fff' }}
+              onValueChange={(value, index) => newLocation(value)}>
+              {locations.map(obj => <Picker.Item key={obj} label={obj} value={obj} />)}
+            </Picker>
+          }
 
-            {!bView && <LinearGradient colors={['#00266F', '#7BCFD6']} start={[1, 0]} style={styles.gradient_line} />}
-          </View>
+          {!bView && <LinearGradient colors={['#00266F', '#7BCFD6']} start={[1, 0]} style={styles.gradient_line} />}
+        </View>
 
+        <View style={{height: Platform.OS === 'ios' ? '95%' : '85%'}}>
           <LinearGradient
             colors={['#01010199', '#35343499']}
             start={[0, 1]}
-            style={[styles.gradient_background, { height: '65%' }]} >
+            style={[styles.gradient_background, {height:'40%', marginBottom:5}]} >
             <View style={{ alignItems: 'center' }}>
               <Text style={styles.stocks}>Акции</Text>
             </View>
@@ -374,12 +370,10 @@ function CarWashes({ navigation, route }) {
               renderItem={renderStock}
             />
           </LinearGradient>
-        </View>
 
-        <View style={{ height: '50%' }}>
           {!loading ?
             <FlatList
-              // style={{ height: "50%" }}
+              style={{}}
               showsVerticalScrollIndicator={false}
               data={washes}
               keyExtractor={item => item.id}
@@ -390,9 +384,7 @@ function CarWashes({ navigation, route }) {
             />
             : <ActivityIndicator />}
         </View>
-
       </View>
-
     </SafeAreaView>
 
   );
@@ -406,10 +398,8 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   main: {
+    flex: 1,
     paddingHorizontal: '5%',
-    // backgroundColor: '#f5f',
-    // flex: 1
-    height:'100%'
   },
   // конец главного контейнера
 

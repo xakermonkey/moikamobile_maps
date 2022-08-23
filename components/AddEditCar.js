@@ -132,9 +132,6 @@ function AddEditCar({ navigation, route }) {
 
             <View style={styles.mt}>
               <Text style={styles.subtext_android}>тип кузова</Text>
-              {/* <TouchableOpacity style={styles.row} onPress={() => setBCar(!bCar)}> */}
-              {/* <Text style={styles.text}>{body}</Text> */}
-              {/* <Ionicons name='chevron-forward' size={24} style={{ color: '#7CD0D7' }} /> */}
               <Picker
                 selectedValue={body}
                 onValueChange={(value, index) => setBody(value)}
@@ -143,13 +140,12 @@ function AddEditCar({ navigation, route }) {
               >
                 {carBody.map((obj, ind) => <Picker.Item key={ind} label={obj.name} value={obj.name} />)}
               </Picker>
-              {/* </TouchableOpacity> */}
               <LinearGradient colors={['#00266F', '#7BCFD6']} start={[1, 0]} style={styles.gradient_line_android} />
             </View>
 
             <View style={styles.mt}>
               <Text style={styles.subtext_android}>номер автомобиля</Text>
-              <MaskInput style={[styles.text, { width: '100%', color:'#fff' }]} placeholderTextColor='#fff' maxLength={9} autoCapitalize="characters" value={number} mask={mask} onChangeText={(masked, unmasked) => setNumber(masked)} />
+              <MaskInput style={[styles.text, { width: '100%', color:'#fff', marginLeft:'5%' }]} placeholderTextColor='#fff' maxLength={9} autoCapitalize="characters" value={number} mask={mask} onChangeText={(masked, unmasked) => setNumber(masked)} />
               <LinearGradient colors={['#00266F', '#7BCFD6']} start={[1, 0]} style={styles.gradient_line_android} />
             </View>
           </LinearGradient>
@@ -231,7 +227,7 @@ const styles = StyleSheet.create({
   },
 
   text: {
-    marginLeft:'5%',
+    // marginLeft:'5%',
     marginTop:'2%',
     fontSize: 14,
     color: '#fff',

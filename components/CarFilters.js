@@ -1,5 +1,5 @@
 import React, { useState, useLayoutEffect } from 'react';
-import { StyleSheet, View, Text, TouchableOpacity, ImageBackground, Image, Platform } from 'react-native';
+import { StyleSheet, View, Text, TouchableOpacity, ImageBackground, Image, Platform, Alert } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
 import { CheckBox, Icon } from 'react-native-elements';
@@ -43,7 +43,13 @@ function CarFilters({ navigation, route }) {
     });
     (async () => {
       let { status } = await Location.requestForegroundPermissionsAsync();
-      setPerm(status === "granted");
+      const locPerm = await Location.getLastKnownPositionAsync() != null;
+      setPerm(locPerm);
+      setSelectSort(1);
+      if (!locPerm) {
+        Alert.alert("Внимание",
+          "Для автоматического определения города и отображения расстояния до автомойки необходимо включить определение геопозиции");
+      }
       const res = await axios.get(domain_web + "/get_filter");
       setFilters([...res.data, { name: "Безналичный расчет" }, { name: "Наличный расчет" }])
     })();

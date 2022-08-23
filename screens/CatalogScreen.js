@@ -16,7 +16,7 @@ const Stack = createStackNavigator();
 function CatalogScreen({ navigation }) {
   return (
     <Stack.Navigator>
-      <Stack.Screen name="CarWashes" component={CarWashes} />
+      <Stack.Screen name="CarWashes" component={CarWashes} initialParams={{ sorted: 0, filters: [] }} />
       <Stack.Screen name="PointCarWash" component={PointCarWash} options={{
         
       }} />

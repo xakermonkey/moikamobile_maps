@@ -1,6 +1,6 @@
-import { View, Image, StyleSheet, TouchableOpacity, SafeAreaView, Platform } from 'react-native';
+import { View, Image, StyleSheet, TouchableOpacity, SafeAreaView, Platform, Alert } from 'react-native';
 import { DrawerActions, useFocusEffect } from '@react-navigation/native';
-import React, { useEffect, useLayoutEffect, useState } from 'react';
+import React, { useCallback, useEffect, useLayoutEffect, useState } from 'react';
 import { YaMap, Animation, Marker, Polyline } from 'react-native-yamap';
 import { Dimensions } from 'react-native'
 // import Geolocation from 'react-native-geolocation-service';
@@ -15,29 +15,32 @@ import { StatusBar } from 'expo-status-bar';
 function MapScreen({ navigation }) {
 
 
-  const [washes, setWashes] = useState(null);
+  const [washes, setWashes] = useState({});
   const [route, setRoute] = useState([]);
   const [washeses, setWasheses] = useState([]);
   // const [bLocation, setBLocation] = useState(false);
   const [isOpen, setDrawer] = useState(false);
 
 
-  useLayoutEffect(() => {
+  useFocusEffect(useCallback(() => { // функция при попадании экрана в фокус
     (async () => {
-      let { status } = await Location.requestForegroundPermissionsAsync();
+      let { status } = await Location.requestForegroundPermissionsAsync(); // запрос прав на определение геопозиции
       // setBLocation(status === 'granted')
       if (status !== 'granted') {
         Alert.alert("Ошибка", "Необходимо включить определение геопозиции");
       }
 
-      const phone = await AsyncStorage.getItem("phone");
-      const location = await AsyncStorage.getItem("location");
-      const ret = await axios.get(domain_web + "/get_all_washes", { params: { location: location, phone: phone } });
-      setWasheses(ret.data);
-      const res = await axios.get(domain_web + "/get_address_moika", { params: { phone: phone } });
-      setWashes(res.data);
+      const phone = await AsyncStorage.getItem("phone"); // получение телефона из хранилища
+      const location = await AsyncStorage.getItem("location"); // получение города из хранилища
+      if (location == null) {
+        location = "Краснодар";
+      }
+      const ret = await axios.get(domain_web + "/get_all_washes", { params: { location: location, phone: phone } }); // запрос всех моек в городе
+      setWasheses(ret.data); // сохранение всех моек в State
+      const res = await axios.get(domain_web + "/get_address_moika", { params: { phone: phone } }); // запрос на получение адреса мойки ближайшего заказа
+      setWashes(res.data); // сохранеине адреса в State
     })();
-  }, [navigation])
+  }, [navigation]))
 
   YaMap.init('b5f1cf2d-be55-4198-9e5d-66f0be967a30');
   YaMap.setLocale('ru_RU');
@@ -55,18 +58,22 @@ function MapScreen({ navigation }) {
   //   });
   // }
 
-  useEffect(() => {
+  useFocusEffect(useCallback(() => { // функция при попадании экрана в фокус
     (async () => {
       if (isOpen === true) {
         setDrawer(false)
       }
       if (map.current) {
-        const loc = await Location.getLastKnownPositionAsync();
+        let { status } = await Location.getForegroundPermissionsAsync(); // проверка прав на определение геопозиции
+        const loc = await Location.getCurrentPositionAsync(); // получение последних известных координат
+        if (status !== 'granted' || loc == null) { // если нет прав или не получилось получить координаты
+          return;
+        }
         // console.warn(loc.coords.latitude);
         map.current.setCenter({ lon: loc.coords.longitude, lat: loc.coords.latitude }, 15, 0, 0, 1, Animation.SMOOTH); //координаты, зум, поворотом по азимуту и наклоном карты, длительность анимации, анимация
       }
     })();
-  }, [map]);
+  }, [map]));
 
   getCurrentPosition = () => {
     return new Promise((resolve) => {
@@ -77,32 +84,44 @@ function MapScreen({ navigation }) {
       }
     });
   }
-  zoomUp = async () => {
+  zoomUp = async () => { // приближение
     const position = await getCurrentPosition();
     if (map.current) {
       // console.warn(Object.keys(map.current.props));
       map.current.setZoom(position.zoom * 1.1, 0.5);
     }
   };
-  zoomDown = async () => {
+  zoomDown = async () => { // отдаление
     const position = await getCurrentPosition();
     if (map.current) {
       map.current.setZoom(position.zoom * 0.9, 0.5); // зум, скорост анимации
     }
   };
-  zoomToMarker = async () => {
+  zoomToMarker = async () => { // приближение к себе
     if (map.current) {
       const loc = await Location.getLastKnownPositionAsync();
       map.current.setCenter({ lon: loc.coords.longitude, lat: loc.coords.latitude }, 15, 0, 0, 1, Animation.SMOOTH); //координаты, зум, поворотом по азимуту и наклоном карты, длительность анимации, анимация
     }
   };
 
-  findRoute = async () => {
+  findRoute = async () => { // поиск пути
     if (map.current) {
-      if (washes == null) {
-        const loc = await Location.getLastKnownPositionAsync();
+      let { status } = await Location.getForegroundPermissionsAsync(); // проверка на наличие прав
+      const loc = await Location.getCurrentPositionAsync(); // получение ТОЧНОЙ позиции
+      if (Object.keys(washes).length != 0) { // если есть адрес автомойки в которой открыт заказ
+        console.log(washes)
+
+        if (status !== 'granted' || loc == null) { // если нет прав иил не получена геопозиция
+          Alert.alert("Ошибка", "Для построения маршрута необходимо включить определение геопозиции");
+          return;
+        }
         // console.warn({ lon: loc.coords.longitude, lat: loc.coords.latitude });
         map.current.findDrivingRoutes([{ lon: loc.coords.longitude, lat: loc.coords.latitude }, { lon: parseFloat(washes.lon), lat: parseFloat(washes.lat) }], (event) => {
+          console.warn(event.nativeEvent.routes[0])
+          if (event.nativeEvent.routes.length == 0) {
+            map.current.setCenter({ lon: loc.coords.longitude, lat: loc.coords.latitude }, 12, 0, 0, 1, Animation.SMOOTH);
+            return;
+          }
           const len = event.nativeEvent.routes[0].sections.length
           let arr = new Array();
           for (let i = 0; i < len; i++) {
@@ -111,7 +130,10 @@ function MapScreen({ navigation }) {
           setRoute(arr);
         })
       } else {
-        const loc = await Location.getLastKnownPositionAsync();
+        if (status !== 'granted' || loc == null) {
+          Alert.alert("Ошибка", "Необходимо включить определение геопозиции");
+          return;
+        }
         map.current.setCenter({ lon: loc.coords.longitude, lat: loc.coords.latitude }, 12, 0, 0, 1, Animation.SMOOTH);
       }
 
@@ -144,8 +166,8 @@ function MapScreen({ navigation }) {
       {/* Dimensions.get('window').width */}
       {!isOpen &&
         <SafeAreaView style={{ position: 'absolute' }}>
-          <View style={{ height: Platform.OS === 'ios' ? Dimensions.get('window').height-100 : Dimensions.get('window').height - 20, justifyContent:'space-between'}}>
-            <View style={{ flexDirection: 'row', justifyContent: 'space-between', width: Dimensions.get('window').width, paddingVertical: 30, paddingHorizontal:20 }}>
+          <View style={{ width: 1, height: Platform.OS === 'ios' ? Dimensions.get('window').height - 100 : Dimensions.get('window').height - 20, justifyContent: 'space-between' }}>
+            <View style={{ flexDirection: 'row', justifyContent: 'space-between', width: Dimensions.get('window').width, paddingVertical: 30, paddingHorizontal: 20 }}>
               <View style={{ width: 60 }}>
                 <TouchableOpacity activeOpacity={0.8} onPress={() => { setDrawer(true); navigation.dispatch(DrawerActions.openDrawer()) }} style={{}} >
                   <Image source={require('../assets/images/map_main.png')} style={styles.bg_img} />
@@ -174,7 +196,7 @@ function MapScreen({ navigation }) {
 
 
               <View style={{}}>
-                <View style={{ width: 60, bottom:20 }}>
+                <View style={{ width: 60, bottom: 20 }}>
                   <TouchableOpacity activeOpacity={0.8} onPress={findRoute} style={{}} >
                     <Image source={require('../assets/images/map_route.png')} style={styles.bg_img} />
                   </TouchableOpacity>
