@@ -22,6 +22,15 @@ function VerificationCodeScreen({ navigation, route }) {
             const res = await axios.post(domain_mobile + "/api/set_code", {"number": route.params.number, "code": code});
             await AsyncStorage.setItem("token", res.data.token);
             await AsyncStorage.setItem("phone", route.params.number);
+            if (res.data.user.location.location != null){
+                await AsyncStorage.setItem("location", res.data.user.location.location);
+            }
+            if (res.data.user.first_name != null){
+                await AsyncStorage.setItem("name", res.data.user.first_name);
+            }
+            if (res.data.user.email != null){
+                await AsyncStorage.setItem("email", res.data.user.email);
+            }
             if (res.data.first_join == true){
                 navigation.dispatch(
                     CommonActions.reset({

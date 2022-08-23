@@ -1,5 +1,5 @@
 import React, { useState, useLayoutEffect } from 'react';
-import { StyleSheet, View, Text, TouchableOpacity, ImageBackground, Image } from 'react-native';
+import { StyleSheet, View, Text, TouchableOpacity, ImageBackground, Image, Platform } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
 import { CheckBox, Icon } from 'react-native-elements';
@@ -89,23 +89,39 @@ function CarFilters({ navigation, route }) {
         </View> */}
 
         {perm && <View>
-          <LinearGradient
-            colors={['#01010199', '#35343499']}
-            start={[0, 1]}
-            style={styles.gradient_background} >
-            <TouchableOpacity activeOpacity={0.7} onPress={() => { setBSort(!bSort) }} style={styles.mt_TouchOpac}>
-              <View >
-                <Text style={styles.subtext}>сортировка</Text>
-                <Text style={styles.text}>{sort[selectSort]}</Text>
-              </View>
-            </TouchableOpacity>
-            {bSort && <Picker
-              selectedValue={selectSort}
-              onValueChange={(value, index) => setSelectSort(value)}>
-              <Picker.Item color='#fff' label="Расстояние" value={0} />
-              <Picker.Item label="Рейтинг" color='#fff' value={1} />
-            </Picker>}
-          </LinearGradient>
+          {Platform.OS === 'ios' ?
+            <LinearGradient
+              colors={['#01010199', '#35343499']}
+              start={[0, 1]}
+              style={styles.gradient_background} >
+              <TouchableOpacity activeOpacity={0.7} onPress={() => { setBSort(!bSort) }} style={styles.mt_TouchOpac}>
+                <View >
+                  <Text style={styles.subtext}>сортировка</Text>
+                  <Text style={styles.text}>{sort[selectSort]}</Text>
+                </View>
+              </TouchableOpacity>
+              {bSort && <Picker
+                selectedValue={selectSort}
+                onValueChange={(value, index) => setSelectSort(value)}>
+                <Picker.Item color='#fff' label="Расстояние" value={0} />
+                <Picker.Item label="Рейтинг" color='#fff' value={1} />
+              </Picker>}
+            </LinearGradient> :
+
+            <LinearGradient
+              colors={['#01010199', '#35343499']}
+              start={[0, 1]}
+              style={styles.gradient_background} >
+              <Text style={styles.subtext}>сортировка</Text>
+              <Picker
+                style={{ color: '#fff', marginHorizontal: '-5%', marginBottom: '-5%' }}
+                selectedValue={selectSort}
+                onValueChange={(value, index) => setSelectSort(value)}>
+                <Picker.Item label="Расстояние" value={0} />
+                <Picker.Item label="Рейтинг" value={1} />
+              </Picker>
+            </LinearGradient>
+          }
         </View>}
 
 

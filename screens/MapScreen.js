@@ -1,4 +1,4 @@
-import { View, Image, StyleSheet, TouchableOpacity, SafeAreaView } from 'react-native';
+import { View, Image, StyleSheet, TouchableOpacity, SafeAreaView, Platform } from 'react-native';
 import { DrawerActions, useFocusEffect } from '@react-navigation/native';
 import React, { useEffect, useLayoutEffect, useState } from 'react';
 import { YaMap, Animation, Marker, Polyline } from 'react-native-yamap';
@@ -140,46 +140,54 @@ function MapScreen({ navigation }) {
         />)}
         {route != [] && <Polyline strokeWidth={7} strokeColor="#7CD0FF" points={route} />}
       </YaMap>
-      {!isOpen && 
-      <View style={{ width: 1, margin: 20, marginTop: '10%', position: 'absolute' }}>
-        <View style={{ width: 60 }}>
-          <TouchableOpacity activeOpacity={0.8} onPress={() => {setDrawer(true); navigation.dispatch(DrawerActions.openDrawer())}} style={{}} >
-            <Image source={require('../assets/images/map_main.png')} style={styles.bg_img} />
-          </TouchableOpacity>
-        </View>
-        <View style={{ width: 60, left: Dimensions.get('window').width - 100, bottom: 60 }}>
-          <TouchableOpacity activeOpacity={0.8} onPress={() => navigation.navigate('AnsQues')} style={{}} >
-            <Image source={require('../assets/images/map_faq.png')} style={styles.bg_img} />
-          </TouchableOpacity>
-        </View>
 
-        <View style={{ width: 1, top: Dimensions.get('window').height * 0.5 }}>
-          <View style={{ width: 60, bottom: 0 }}>
-            <TouchableOpacity activeOpacity={0.9} onPress={zoomUp} style={{}} >
-              <Image source={require('../assets/images/map_plus.png')} resizeMode='stretch' style={{ width: 60, height: 60 }} />
-            </TouchableOpacity>
-          </View>
-          <View style={{ width: 60 }}>
-            <TouchableOpacity activeOpacity={0.9} onPress={zoomDown} style={{}} >
-              <Image source={require('../assets/images/map_minus.png')} resizeMode='stretch' style={{ width: 60, height: 60 }} />
-            </TouchableOpacity>
-          </View>
-        </View>
+      {/* Dimensions.get('window').width */}
+      {!isOpen &&
+        <SafeAreaView style={{ position: 'absolute' }}>
+          <View style={{ height: Platform.OS === 'ios' ? Dimensions.get('window').height-100 : Dimensions.get('window').height - 20, justifyContent:'space-between'}}>
+            <View style={{ flexDirection: 'row', justifyContent: 'space-between', width: Dimensions.get('window').width, paddingVertical: 30, paddingHorizontal:20 }}>
+              <View style={{ width: 60 }}>
+                <TouchableOpacity activeOpacity={0.8} onPress={() => { setDrawer(true); navigation.dispatch(DrawerActions.openDrawer()) }} style={{}} >
+                  <Image source={require('../assets/images/map_main.png')} style={styles.bg_img} />
+                </TouchableOpacity>
+              </View>
+              <View style={{ width: 60 }}>
+                <TouchableOpacity activeOpacity={0.8} onPress={() => navigation.navigate('AnsQues')} style={{}} >
+                  <Image source={require('../assets/images/map_faq.png')} style={styles.bg_img} />
+                </TouchableOpacity>
+              </View>
+            </View>
+
+            <View style={{ flexDirection: 'row', justifyContent: 'space-between', width: Dimensions.get('window').width, bottom: 0, padding: 20 }}>
+              <View style={{}}>
+                <View style={{ width: 60 }}>
+                  <TouchableOpacity activeOpacity={0.9} onPress={zoomUp} style={{}} >
+                    <Image source={require('../assets/images/map_plus.png')} resizeMode='stretch' style={{ width: 60, height: 60 }} />
+                  </TouchableOpacity>
+                </View>
+                <View style={{ width: 60 }}>
+                  <TouchableOpacity activeOpacity={0.9} onPress={zoomDown} style={{}} >
+                    <Image source={require('../assets/images/map_minus.png')} resizeMode='stretch' style={{ width: 60, height: 60 }} />
+                  </TouchableOpacity>
+                </View>
+              </View>
 
 
-        <View style={{ width: 1, left: Dimensions.get('window').width - 100, top: Dimensions.get('window').height * 0.35 }}>
-          <View style={{ width: 60, bottom: 20 }}>
-            <TouchableOpacity activeOpacity={0.8} onPress={findRoute} style={{}} >
-              <Image source={require('../assets/images/map_route.png')} style={styles.bg_img} />
-            </TouchableOpacity>
+              <View style={{}}>
+                <View style={{ width: 60, bottom:20 }}>
+                  <TouchableOpacity activeOpacity={0.8} onPress={findRoute} style={{}} >
+                    <Image source={require('../assets/images/map_route.png')} style={styles.bg_img} />
+                  </TouchableOpacity>
+                </View>
+                <View style={{ width: 60 }}>
+                  <TouchableOpacity activeOpacity={0.8} onPress={zoomToMarker} style={{}} >
+                    <Image source={require('../assets/images/map_navigation.png')} style={styles.bg_img} />
+                  </TouchableOpacity>
+                </View>
+              </View>
+            </View>
           </View>
-          <View style={{ width: 60 }}>
-            <TouchableOpacity activeOpacity={0.8} onPress={zoomToMarker} style={{}} >
-              <Image source={require('../assets/images/map_navigation.png')} style={styles.bg_img} />
-            </TouchableOpacity>
-          </View>
-        </View>
-      </View>}
+        </SafeAreaView>}
     </View>
   );
 }

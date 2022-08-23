@@ -9,6 +9,7 @@ import * as Location from 'expo-location';
 import { getPermissionLocation } from "../permissions";
 import { Picker } from '@react-native-picker/picker';
 import { validate } from 'react-email-validator';
+import { StatusBar } from 'expo-status-bar';
 
 
 function DataScreen({ navigation }) {
@@ -78,8 +79,8 @@ function DataScreen({ navigation }) {
                         }
                     })
                 await AsyncStorage.setItem("location", location);
-                await AsyncStorage.setItem("name", name),
-                    await AsyncStorage.setItem("email", email)
+                await AsyncStorage.setItem("name", name);
+                await AsyncStorage.setItem("email", email);
                 navigation.navigate('MainMenu');
             }else{
                 Alert.alert("Ошибка", "Введен неверный формат почты");
@@ -94,6 +95,7 @@ function DataScreen({ navigation }) {
 
     return (
         <SafeAreaView style={styles.container} >
+            <StatusBar/>
             <View style={styles.main}>
 
                 <LinearGradient colors={['#7BCFD6', '#FFF737']} start={[1, 0]} style={styles.gradient_btn} >

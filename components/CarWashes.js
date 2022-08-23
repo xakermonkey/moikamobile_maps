@@ -93,12 +93,12 @@ function CarWashes({ navigation, route }) {
         fontFamily: 'Raleway_700Bold',
       },
       headerLeft: () => (
-        <TouchableOpacity style={{ left:10 }} onPress={() => navigation.dispatch(DrawerActions.openDrawer())} activeOpacity={0.7}>
+        <TouchableOpacity style={{ left: 10 }} onPress={() => navigation.dispatch(DrawerActions.openDrawer())} activeOpacity={0.7}>
           <Ionicons name='chevron-back' size={32} color={'#7CD0D7'} />
         </TouchableOpacity>
       ),
       headerRight: () => (
-        <TouchableOpacity style={{ right:20 }} onPress={() => navigation.navigate('CarFilters', { 'sorted': route.params == undefined ? 0 : route.params.sorted, "filters": route.params == undefined ? [] : route.params.filters })} activeOpacity={0.7}>
+        <TouchableOpacity style={{ right: 20 }} onPress={() => navigation.navigate('CarFilters', { 'sorted': route.params == undefined ? 0 : route.params.sorted, "filters": route.params == undefined ? [] : route.params.filters })} activeOpacity={0.7}>
           <FontAwesome name='filter' size={28} color={'#7CD0D7'} />
         </TouchableOpacity>
       )
@@ -110,10 +110,10 @@ function CarWashes({ navigation, route }) {
           filters: []
         });
       }
-      let { status } = await Location.requestForegroundPermissionsAsync();
+      let { status } = await Location.getForegroundPermissionsAsync();
       setBLocation(status === 'granted')
       if (status !== 'granted') {
-        Alert.alert("Ошибка", "Необходимо включить определение геопозиции");
+        Alert.alert("Внимание", "Для автоматического определения города и отображения расстояния до автомойки необходимо включить определение геопозиции");
       }
 
       try {
@@ -164,7 +164,7 @@ function CarWashes({ navigation, route }) {
 
   const selectWasher = async (id, sale) => {
     if (countCar === 0) {
-      Alert.alert("У вас еще нет машин!", "Для оформления заказа необходимо добавить машину у себя в профиле");
+      Alert.alert("У вас еще нет машин", "Для оформления заказа необходимо добавить машину у себя в профиле");
       return 0;
     }
     let keys = await AsyncStorage.getAllKeys()
@@ -186,7 +186,7 @@ function CarWashes({ navigation, route }) {
 
 
   const newLocation = async (value) => {
-    let { status } = await Location.requestForegroundPermissionsAsync();
+    let { status } = await Location.getForegroundPermissionsAsync();
     setLoading(true);
     setLocation(value);
     await AsyncStorage.setItem("location", value);
@@ -216,7 +216,7 @@ function CarWashes({ navigation, route }) {
   const refresh = async () => {
     setRefresing(true);
     try {
-      let { status } = await Location.requestForegroundPermissionsAsync();
+      let { status } = await Location.getForegroundPermissionsAsync();
       let location = await AsyncStorage.getItem("location");
       if (location != null) {
         setLocation(location)
@@ -264,43 +264,43 @@ function CarWashes({ navigation, route }) {
 
   const renderWashes = ({ item }) => {
     return (
-    Platform.OS === 'ios' ? <TouchableOpacity onPress={() => selectWasher(item.id, item.sale)} activeOpacity={0.7} style={styles.mt_TouchOpac}>
-      <LinearGradient
-        colors={['#01010199', '#35343499']}
-        start={[0, 1]}
-        style={styles.gradient_background} >
-        <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-          <Image source={{ uri: domain_web + item.avatar }} style={{ width: '100%', height: '100%', borderRadius:5}} width={'35%'} height={'100%'} resizeMode='center' />
-          <View style={{ width:'43%' }}>
-            <Text style={styles.stocks}>{item.address}</Text>
-            <Text style={styles.text_in_item}>Скидка {item.sale}%</Text>
-            <Text style={styles.text_in_item}>{bLocation && "В " + getDistance(coords, { latitude: parseFloat(item.lat), longitude: parseFloat(item.lon) }) + " м от вас"}</Text>
+      Platform.OS === 'ios' ? <TouchableOpacity onPress={() => selectWasher(item.id, item.sale)} activeOpacity={0.7} style={styles.mt_TouchOpac}>
+        <LinearGradient
+          colors={['#01010199', '#35343499']}
+          start={[0, 1]}
+          style={styles.gradient_background} >
+          <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start', height:100 }}>
+            <Image source={{ uri: domain_web + item.avatar }} style={{ width: '28%', height: '100%', borderRadius: 5 }} width={95} height={95} resizeMode='center' />
+            <View style={{ width: '43%' }}>
+              <Text style={styles.stocks}>{item.address}</Text>
+              <Text style={styles.text_in_item}>Скидка {item.sale}%</Text>
+              <Text style={styles.text_in_item}>{bLocation && "В " + getDistance(coords, { latitude: parseFloat(item.lat), longitude: parseFloat(item.lon) }) + " м от вас"}</Text>
+            </View>
+            <LinearGradient colors={['#FFF73780', '#FFF97480']} start={[1, 0]} style={styles.rating} >
+              <Text style={styles.stocks}>{item.rate.count_rate == 0 ? "0.00" : (item.rate.mean_rate / item.rate.count_rate).toFixed(2)}</Text>
+            </LinearGradient>
           </View>
-          <LinearGradient colors={['#FFF73780', '#FFF97480']} start={[1, 0]} style={styles.rating} >
-            <Text style={styles.stocks}>{item.rate.count_rate == 0 ? "0.00" : (item.rate.mean_rate / item.rate.count_rate).toFixed(2)}</Text>
-          </LinearGradient>
-        </View>
-      </LinearGradient>
-    </TouchableOpacity> :
-
-    <TouchableOpacity onPress={() => selectWasher(item.id, item.sale)} activeOpacity={0.7} style={styles.mt_TouchOpac}>
-    <LinearGradient
-      colors={['#01010199', '#35343499']}
-      start={[0, 1]}  
-      style={styles.gradient_background} >
-      <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-        <Image source={{ uri: domain_web + item.avatar }} style={{ width: '30%', height: '100%', borderRadius:5}} width={'100%'} height={'100%'} resizeMode='center' />
-        <View style={{ width:'50%' }}>
-          <Text style={styles.stocks}>{item.address}</Text>
-          <Text style={styles.text_in_item}>Скидка {item.sale}%</Text>
-          <Text style={styles.text_in_item}>{bLocation && "В " + getDistance(coords, { latitude: parseFloat(item.lat), longitude: parseFloat(item.lon) }) + " м от вас"}</Text>
-        </View>
-        <LinearGradient colors={['#FFF73780', '#FFF97480']} start={[1, 0]} style={styles.rating} >
-          <Text style={styles.stocks}>{item.rate.count_rate == 0 ? "0.00" : (item.rate.mean_rate / item.rate.count_rate).toFixed(2)}</Text>
         </LinearGradient>
-      </View>
-    </LinearGradient>
-  </TouchableOpacity>
+      </TouchableOpacity> :
+
+        <TouchableOpacity onPress={() => selectWasher(item.id, item.sale)} activeOpacity={0.7} style={styles.mt_TouchOpac}>
+          <LinearGradient
+            colors={['#01010199', '#35343499']}
+            start={[0, 1]}
+            style={styles.gradient_background} >
+            <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start', height:100 }}>
+              <Image source={{ uri: domain_web + item.avatar }} style={{ width: '28%', height: '100%', borderRadius: 5 }} width={95} height={95} resizeMode='center'  />
+              <View style={{ width: '50%' }}>
+                <Text style={styles.stocks}>{item.address}</Text>
+                <Text style={styles.text_in_item}>Скидка {item.sale}%</Text>
+                <Text style={styles.text_in_item}>{bLocation && "В " + getDistance(coords, { latitude: parseFloat(item.lat), longitude: parseFloat(item.lon) }) + " м от вас"}</Text>
+              </View>
+              <LinearGradient colors={['#FFF73780', '#FFF97480']} start={[1, 0]} style={styles.rating} >
+                <Text style={styles.stocks}>{item.rate.count_rate == 0 ? "0.00" : (item.rate.mean_rate / item.rate.count_rate).toFixed(2)}</Text>
+              </LinearGradient>
+            </View>
+          </LinearGradient>
+        </TouchableOpacity>
     )
   }
 
@@ -317,59 +317,70 @@ function CarWashes({ navigation, route }) {
 
   return (
     <SafeAreaView style={styles.container} >
-      <StatusBar/>
+      <StatusBar />
       <View style={styles.main}>
-        {/* <RefreshControl
-          refreshing={refreshing}
-          onRefresh={refresh}
-        /> */}
-        <Text style={styles.subtext}>местоположение</Text>
-        {Platform.OS === 'ios' ? <View>
-        <TouchableOpacity activeOpacity={0.7} onPress={() => setBVeiw(!bView)}>
-          <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingHorizontal: '0%' }}>
-            <Text style={styles.city}>{location}</Text>
-            <Ionicons name='chevron-forward' size={24} style={{ color: '#7CD0D7' }} />
+
+        <View style={{ height: '50%' }}>
+          <View style={{ height: 90, zIndex: 1 }}>
+            <Text style={styles.subtext}>местоположение</Text>
+            {Platform.OS === 'ios' ? <View>
+              <TouchableOpacity activeOpacity={0.7} onPress={() => setBVeiw(!bView)}>
+                <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingHorizontal: '0%' }}>
+                  <Text style={styles.city}>{location}</Text>
+                  <Ionicons name='chevron-forward' size={24} style={{ color: '#7CD0D7' }} />
+                </View>
+              </TouchableOpacity>
+              {bView &&
+                <View style={{
+                  backgroundColor: '#6E7476', borderRadius: 5, zIndex: 1, shadowColor: "#000",
+                  shadowOffset: {
+                    width: 0,
+                    height: 10,
+                  },
+                  shadowOpacity: 0.8,
+                  shadowRadius: 15,
+                }}>
+                  <Picker
+                    selectedValue={location}
+                    itemStyle={{ height: 120, }}
+                    onValueChange={(value, index) => newLocation(value)}>
+                    {locations.map(obj => <Picker.Item color='#fff' key={obj} label={obj} value={obj} />)}
+                  </Picker></View>}</View> :
+
+              <Picker
+                selectedValue={location}
+                itemStyle={{}}
+                style={{ marginHorizontal: '-5%', color: '#fff' }}
+                onValueChange={(value, index) => newLocation(value)}>
+                {locations.map(obj => <Picker.Item key={obj} label={obj} value={obj} />)}
+              </Picker>
+            }
+
+            {!bView && <LinearGradient colors={['#00266F', '#7BCFD6']} start={[1, 0]} style={styles.gradient_line} />}
           </View>
-        </TouchableOpacity>
-        {bView &&
-          <Picker
-            selectedValue={location}
-            itemStyle={{ height: 150 }}
-            onValueChange={(value, index) => newLocation(value)}>
-            {locations.map(obj => <Picker.Item color='#fff' key={obj} label={obj} value={obj} />)}
-          </Picker>}</View> :
 
-          <Picker
-          selectedValue={location}
-          itemStyle={{ }}
-          style={{marginHorizontal:'-5%', color:'#fff'}}
-          onValueChange={(value, index) => newLocation(value)}>
-          {locations.map(obj => <Picker.Item key={obj} label={obj} value={obj} />)}
-        </Picker>
-}
+          <LinearGradient
+            colors={['#01010199', '#35343499']}
+            start={[0, 1]}
+            style={[styles.gradient_background, { height: '65%' }]} >
+            <View style={{ alignItems: 'center' }}>
+              <Text style={styles.stocks}>Акции</Text>
+            </View>
+            <FlatList
+              style={{ marginTop: 5 }}
+              showsVerticalScrollIndicator={false}
+              data={stock}
+              keyExtractor={item => item.text}
+              renderItem={renderStock}
+            />
+          </LinearGradient>
+        </View>
 
-        <LinearGradient colors={['#00266F', '#7BCFD6']} start={[1, 0]} style={styles.gradient_line} />
-
-        <LinearGradient
-          colors={['#01010199', '#35343499']}
-          start={[0, 1]}
-          style={styles.gradient_background} >
-          <View style={{ alignItems: 'center' }}>
-            <Text style={styles.stocks}>Акции</Text>
-          </View>
-          <FlatList
-            style={{ height: "15%", marginTop:5 }}
-            showsVerticalScrollIndicator={false}
-            data={stock}
-            keyExtractor={item => item.text}
-            renderItem={renderStock}
-          />
-        </LinearGradient>
-
-        <View style={{ marginBottom: 50 }}>
+        <View style={{ height: '50%' }}>
           {!loading ?
             <FlatList
-              style={{ height: "100%" }}
+              // style={{ height: "50%" }}
+              showsVerticalScrollIndicator={false}
               data={washes}
               keyExtractor={item => item.id}
               refreshing={refreshing}
@@ -381,19 +392,7 @@ function CarWashes({ navigation, route }) {
         </View>
 
       </View>
-      {/* <View style={styles.container}>
-      <BottomSheet
-        ref={bottomSheetRef}
-        index={0}
-        enablePanDownToClose={false}
-        snapPoints={snapPoints}
-        // onChange={handleSheetChanges}
-      >
-        <View style={styles.contentContainer}>
-          <Text>Awesome 🎉</Text>
-        </View>
-      </BottomSheet>
-    </View> */}
+
     </SafeAreaView>
 
   );
@@ -407,7 +406,10 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   main: {
-    padding: '5%',
+    paddingHorizontal: '5%',
+    // backgroundColor: '#f5f',
+    // flex: 1
+    height:'100%'
   },
   // конец главного контейнера
 
@@ -423,7 +425,7 @@ const styles = StyleSheet.create({
 
 
   mt_TouchOpac: {
-    marginTop: '5%',
+    marginBottom: '5%',
   },
   gradient_background: {
     borderRadius: 5,
@@ -480,8 +482,8 @@ const styles = StyleSheet.create({
     fontFamily: 'Raleway_400Regular'
   },
   rating: {
-    alignItems:'center',
-    width:'17%',
+    alignItems: 'center',
+    width: '17%',
     borderRadius: 5,
     justifyContent: 'center',
     padding: '2%',

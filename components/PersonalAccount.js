@@ -48,8 +48,6 @@ function PersonalAccount({ navigation }) {
         }));
   }
 
-
-
   return (
     <SafeAreaView style={styles.container} >
       <StatusBar/>
@@ -75,6 +73,8 @@ function PersonalAccount({ navigation }) {
             {/* <TextInput style={styles.input_text} value={email} /> */}
             <Text style={styles.input_text}>{email}</Text>
             <LinearGradient colors={['#00266F', '#7BCFD6']} start={[1, 0]} style={styles.gradient_line} />
+            <Text style={styles.dc_text}>Личную информацию можно изменить через обратную связь</Text>
+          
           </View>
         </LinearGradient>
 
@@ -194,4 +194,12 @@ const styles = StyleSheet.create({
   },
   // мэрджн сверху у всех кнопок
 
+  dc_text: {
+    // marginTop: '4%',
+    // marginRight: '10%',
+    fontSize: 11,
+    color: '#B2B2B2',
+    fontFamily: 'Raleway_400Regular',
+    // textAlign: 'right',
+  },
 })
