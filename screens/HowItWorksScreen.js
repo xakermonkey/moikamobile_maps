@@ -11,9 +11,11 @@ function HowItWorksScreen({ navigation }) {
 
   const video = useRef(null);
   const [status, setStatus] = useState({});
-  const [videos, setVideos] = useState([["Авторизация", ""], ["Оформление заказа", ""], ["Добавление авто", ""]]);
-  const [selectSnap, setSelectSnap] = useState(0);
+  const [videos, setVideos] = useState([["Авторизация", require('../assets/videos/auth.mp4')],
+  ["Оформление заказа", require('../assets/videos/order.mp4')],
+  ["Добавление автомобиля", require('../assets/videos/add_car.mp4')]]);
 
+  const [selectSnap, setSelectSnap] = useState(0);
 
   useLayoutEffect(() => {
     navigation.setOptions({
@@ -45,9 +47,7 @@ function HowItWorksScreen({ navigation }) {
         <Video
           ref={video}
           style={{ height: "100%", width: "100%", borderRadius:5  }}
-          source={{
-            uri: 'https://d23dyxeqlo5psv.cloudfront.net/big_buck_bunny.mp4',
-          }}
+          source={videos[index][1]}
           useNativeControls
           resizeMode="contain"
           isLooping
