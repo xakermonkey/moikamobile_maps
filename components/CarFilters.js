@@ -2,7 +2,8 @@ import React, { useState, useLayoutEffect } from 'react';
 import { StyleSheet, View, Text, TouchableOpacity, ImageBackground, Image, Platform, Alert } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
-import { CheckBox, Icon } from 'react-native-elements';
+// import { CheckBox, Icon } from 'react-native-elements';
+import { CheckBox, Icon } from '@rneui/themed';
 import axios from 'axios';
 import { domain_web } from '../domain';
 import { Picker } from '@react-native-picker/picker';
@@ -140,7 +141,7 @@ function CarFilters({ navigation, route }) {
             {filters.map((obj, id) => {
               return (
                 <View key={id} style={styles.checkbox}>
-                  <CheckBox containerStyle={{ padding: 0, margin: 0, marginRight: 0, marginLeft: 0 }}
+                  <CheckBox containerStyle={{ padding: 0, margin: 0, marginRight: 0, marginLeft: 0, backgroundColor:null }}
                     checkedIcon={
                       <Icon name="radio-button-checked" type="material" color="#7BCFD6" size={25} />
                     }

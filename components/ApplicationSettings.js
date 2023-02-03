@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { StyleSheet, View, Text, SafeAreaView, TouchableOpacity, Switch } from 'react-native';
-import { ButtonGroup } from 'react-native-elements'
+// import { ButtonGroup } from 'react-native-elements'
+import { ButtonGroup } from '@rneui/themed';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
 

@@ -1,8 +1,8 @@
 import React, { useLayoutEffect, useState } from 'react';
-import { StyleSheet, View, Text, TouchableOpacity, Image } from 'react-native';
+import { StyleSheet, View, Text, TouchableOpacity, Image, ScrollView } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
-import { ScrollView } from 'react-native-gesture-handler';
+// import { ScrollView } from 'react-native-gesture-handler';
 import axios from 'axios';
 import { domain_mobile, domain_web } from '../domain';
 import AsyncStorage from '@react-native-async-storage/async-storage';

@@ -6,6 +6,7 @@ import { domain_web } from '../domain';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { CommonActions } from '@react-navigation/native';
 import Carousel, { Pagination } from 'react-native-snap-carousel';
+// import Carousel, { Pagination } from '@types/react-native-snap-carousel';
 
 function PointCarWash({ navigation, route }) {
 

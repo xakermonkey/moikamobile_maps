@@ -1,5 +1,5 @@
 import React, { useLayoutEffect, useState, useEffect } from 'react';
-import { StyleSheet, View, Text, TouchableOpacity, ImageBackground, Image, Alert, Platform } from 'react-native';
+import { StyleSheet, View, Text, TouchableOpacity, ImageBackground, Image, Alert, Platform, TouchableWithoutFeedback, Keyboard, KeyboardAvoidingView } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
 import axios from 'axios';
@@ -47,9 +47,18 @@ function SelectDate({ navigation }) {
     navigation.navigate('PriceListFor')
   }
 
+  const daySelector = async (value) => { 
+    setSelectDay(value); setSelectTime(data[value][0]);
+    setBDay(false)
+  }
+  const timeSelector = async (value) => { 
+    setSelectTime(value);
+    setBTime(false)
+  }
+
   if (selectDay == undefined) {
     return (
-      <View style={{backgroundColor: '#6E7476', flex: 1}}>
+      <View style={{ backgroundColor: '#6E7476', flex: 1 }}>
         <StatusBar />
         <View style={{ justifyContent: 'center', alignItems: 'center', flex: 1, padding: '5%' }}>
           <Image source={require('../assets/images/logo_succes.png')} />
@@ -61,13 +70,15 @@ function SelectDate({ navigation }) {
     <View style={styles.container}>
       <Image blurRadius={91} style={[StyleSheet.absoluteFill, styles.image]} source={require('../assets/images/blur_background.png')} resizeMode='cover' />
       <View style={styles.blurContainer}>
-        <View style={[styles.row, { alignItems: 'center', justifyContent: 'center', marginTop: '5%', width: "100%" }]}>
-          <TouchableOpacity style={{ flex: 1 }} onPress={goBack} activeOpacity={0.7} >
-            <Ionicons name='chevron-back' size={28} color={'#7CD0D7'} />
-          </TouchableOpacity>
-          <Text style={[styles.bold_text, { flex: 5 }]}>Выберите дату записи</Text>
-          <View style={{ flex: 1 }}></View>
-        </View>
+        <TouchableWithoutFeedback onPress={() => { setBDay(false); setBTime(false) }} accessible={false} >
+          <View style={[styles.row, { alignItems: 'center', justifyContent: 'center', marginTop: '5%', width: "100%" }]}>
+            <TouchableOpacity style={{ flex: 1 }} onPress={goBack} activeOpacity={0.7} >
+              <Ionicons name='chevron-back' size={28} color={'#7CD0D7'} />
+            </TouchableOpacity>
+            <Text style={[styles.bold_text, { flex: 5 }]}>Выберите дату записи</Text>
+            <View style={{ flex: 1 }}></View>
+          </View>
+        </TouchableWithoutFeedback>
 
 
         {Platform.OS === 'ios' ?
@@ -75,7 +86,7 @@ function SelectDate({ navigation }) {
             colors={['#01010199', '#35343499']}
             start={[0, 1]}
             style={styles.gradient_background} >
-            <TouchableOpacity activeOpacity={0.8} onPress={() => setBDay(!bDay)} >
+            <TouchableOpacity activeOpacity={0.8} onPress={() => { setBDay(!bDay); setBTime(false) }} >
               <View >
                 <Text style={styles.subtext}>дата</Text>
                 <Text style={styles.text}>{selectDay}</Text>
@@ -83,7 +94,7 @@ function SelectDate({ navigation }) {
             </TouchableOpacity>
             {bDay && <Picker
               selectedValue={selectDay}
-              onValueChange={(value, index) => { setSelectDay(value); setSelectTime(data[value][0]) }}>
+              onValueChange={(value, index) => daySelector(value)}>
               {Object.keys(data).map((obj, ind) => <Picker.Item color='#fff' key={ind} label={obj} value={obj} />)}
             </Picker>}
           </LinearGradient> :
@@ -108,7 +119,7 @@ function SelectDate({ navigation }) {
             colors={['#01010199', '#35343499']}
             start={[0, 1]}
             style={styles.gradient_background} >
-            <TouchableOpacity activeOpacity={0.8} onPress={() => setBTime(!bTime)} >
+            <TouchableOpacity activeOpacity={0.8} onPress={() => { setBTime(!bTime); setBDay(false) }} >
               <View >
                 <Text style={styles.subtext}>время</Text>
                 <Text style={styles.text}>{selectTime}</Text>
@@ -116,7 +127,7 @@ function SelectDate({ navigation }) {
             </TouchableOpacity>
             {bTime && <Picker
               selectedValue={selectTime}
-              onValueChange={(value, index) => { setSelectTime(value) }}>
+              onValueChange={(value, index) => timeSelector(value)}>
               {data[selectDay].map((obj, ind) => <Picker.Item color='#fff' key={ind} label={obj} value={obj} />)}
             </Picker>}
           </LinearGradient> :
@@ -141,6 +152,11 @@ function SelectDate({ navigation }) {
             <Text style={styles.text_btn} >Далее</Text>
           </ImageBackground>
         </TouchableOpacity>
+
+        <TouchableWithoutFeedback style={{ flex: 1 }} onPress={() => { setBDay(false); setBTime(false) }} accessible={false} >
+          <View style={{ height: '100%' }}></View>
+        </TouchableWithoutFeedback>
+
       </View>
     </View>
   );

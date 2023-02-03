@@ -1,5 +1,5 @@
 import React, { useState, useLayoutEffect, useCallback } from 'react';
-import { StyleSheet, View, Text, SafeAreaView, TouchableOpacity, ActivityIndicator, Image, Alert, FlatList } from 'react-native';
+import { StyleSheet, View, Text, SafeAreaView, TouchableOpacity, ActivityIndicator, Image, Alert, FlatList, TouchableWithoutFeedback } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons, FontAwesome } from '@expo/vector-icons';
 import axios from 'axios';
@@ -103,7 +103,7 @@ function CarWashes({ navigation, route }) {
         </TouchableOpacity>
       )
     });
-    console.log(route.params);
+    // console.log(route.params);
   }, [navigation]);
 
 
@@ -211,6 +211,7 @@ function CarWashes({ navigation, route }) {
     setWashes(WashesSorted(res.data.washer, col)); // сортировка моек и занесение их в State
     setStock(res.data.stock); // сохранение акций в State
     setLoading(false) // конец загрузки установка load в false
+    setBVeiw(false)
   }
 
 
@@ -323,6 +324,7 @@ function CarWashes({ navigation, route }) {
                 </View>
               </TouchableOpacity>
               {bView &&
+
                 <View style={{
                   zIndex: 11,
                   backgroundColor: '#6E7476', borderRadius: 5, shadowColor: "#000",
@@ -337,9 +339,12 @@ function CarWashes({ navigation, route }) {
                     selectedValue={location}
                     itemStyle={{ height: 120 }}
                     onValueChange={(value, index) => newLocation(value)}>
-                    {locations.map(obj => <Picker.Item color='#fff' key={obj} label={obj} value={obj} />)}
+                    {locations.map(obj => 
+                    <Picker.Item color='#fff' key={obj} label={obj} value={obj} /> 
+                    )}
                   </Picker>
-                </View>}
+                </View>
+                }
             </View> :
 
             <Picker
@@ -354,6 +359,7 @@ function CarWashes({ navigation, route }) {
           {!bView && <LinearGradient colors={['#00266F', '#7BCFD6']} start={[1, 0]} style={styles.gradient_line} />}
         </View>
 
+        <TouchableWithoutFeedback onPress={() => setBVeiw(false)} accessible={false} >
         <View style={{height: Platform.OS === 'ios' ? '95%' : '85%'}}>
           <LinearGradient
             colors={['#01010199', '#35343499']}
@@ -384,6 +390,7 @@ function CarWashes({ navigation, route }) {
             />
             : <ActivityIndicator />}
         </View>
+      </TouchableWithoutFeedback>
       </View>
     </SafeAreaView>
 

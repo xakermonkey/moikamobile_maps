@@ -2,7 +2,8 @@ import React, { useLayoutEffect, useState } from 'react';
 import { StyleSheet, View, Text, TouchableOpacity, ImageBackground, Image } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
-import { CheckBox, Icon } from 'react-native-elements';
+// import { CheckBox, Icon } from 'react-native-elements';
+import { CheckBox, Icon } from '@rneui/themed';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 
@@ -52,7 +53,7 @@ function SelectPaymentMethod({ navigation }) {
           <View>
             {uncache &&
               <View style={styles.checkbox}>
-                <CheckBox containerStyle={{ padding: 0, margin: 0, marginRight: 0, marginLeft: 0 }}
+                <CheckBox containerStyle={{ padding: 0, margin: 0, marginRight: 0, marginLeft: 0, backgroundColor:null }}
                   checkedIcon={
                     <Icon name="radio-button-checked" type="material" color="#7BCFD6" size={25} />
                   }
@@ -66,7 +67,7 @@ function SelectPaymentMethod({ navigation }) {
               </View>
             }
             <View style={styles.checkbox}>
-              <CheckBox containerStyle={{ padding: 0, margin: 0, marginRight: 0, marginLeft: 0 }}
+              <CheckBox containerStyle={{ padding: 0, margin: 0, marginRight: 0, marginLeft: 0, backgroundColor:null }}
                 checkedIcon={
                   <Icon name="radio-button-checked" type="material" color="#7BCFD6" size={25} />
                 }
@@ -79,7 +80,7 @@ function SelectPaymentMethod({ navigation }) {
               <Text style={styles.text_check}>Наличный расчёт</Text>
             </View>
             <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 0, }}>
-              <CheckBox containerStyle={{ padding: 0, margin: 0, marginRight: 0, marginLeft: 0 }}
+              <CheckBox containerStyle={{ padding: 0, margin: 0, marginRight: 0, marginLeft: 0, backgroundColor:null }}
                 checkedIcon={
                   <Icon name="radio-button-checked" type="material" color="#7BCFD6" size={25} />
                 }

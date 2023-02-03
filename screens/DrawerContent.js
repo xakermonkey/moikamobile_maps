@@ -37,6 +37,15 @@ export function DrawerContent(props) {
 
                 <DrawerItem
                     icon={({ color, size }) => (
+                        <MaterialIcons name='subscriptions' size={24} color={'#7CD0D7'} />
+                    )}
+                    style={styles.mt}
+                    label="Хочу помыть"
+                    labelStyle={{ color: '#fff', fontSize: 14, fontFamily: 'Raleway_400Regular', textTransform: 'uppercase' }}
+                    onPress={() => { props.navigation.navigate('Catalog') }}
+                />
+                <DrawerItem
+                    icon={({ color, size }) => (
                         <FontAwesome5 name='map-marker-alt' size={24} color={'#7CD0D7'} />
                     )}
                     style={styles.mt}
@@ -65,18 +74,9 @@ export function DrawerContent(props) {
                         <Feather name='message-square' size={24} color={'#7CD0D7'} />
                     )}
                     style={styles.mt}
-                    label="FAQ"
+                    label="Помощь"
                     labelStyle={{ color: '#fff', fontSize: 14, fontFamily: 'Raleway_400Regular', textTransform: 'uppercase' }}
                     onPress={() => { props.navigation.navigate('AnsQues') }}
-                />
-                <DrawerItem
-                    icon={({ color, size }) => (
-                        <MaterialIcons name='subscriptions' size={24} color={'#7CD0D7'} />
-                    )}
-                    style={styles.mt}
-                    label="Каталог"
-                    labelStyle={{ color: '#fff', fontSize: 14, fontFamily: 'Raleway_400Regular', textTransform: 'uppercase' }}
-                    onPress={() => { props.navigation.navigate('Catalog') }}
                 />
                 <DrawerItem
                     icon={({ color, size }) => (
@@ -112,8 +112,8 @@ export function DrawerContent(props) {
                         <FontAwesome5 name='envelope-open' size={24} color={'#7CD0D7'} />
                     )}
                     style={styles.mt}
-                    label="Обратная связь"
-                    labelStyle={{ color: '#fff', fontSize: 14, fontFamily: 'Raleway_400Regular', textTransform: 'uppercase' }}
+                    label={"Обратная связь"}
+                    labelStyle={{ color: '#fff', fontSize: 14, fontFamily: 'Raleway_400Regular', textTransform: 'uppercase'}}
                     onPress={() => {
                         if (isAuthenticated) { props.navigation.navigate('Feedback') } else {
                             Alert.alert('Внимаение', 'Вы не авторизованы', [{ 'text': 'Ок' }, {

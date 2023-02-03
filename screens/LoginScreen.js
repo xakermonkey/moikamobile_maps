@@ -1,5 +1,5 @@
 import React, { useEffect, useLayoutEffect, useState } from 'react'
-import { Image, ImageBackground, SafeAreaView, StyleSheet, Text, TouchableOpacity, View, ScrollView, Alert, Platform } from 'react-native'
+import { Image, ImageBackground, SafeAreaView, StyleSheet, Text, TouchableOpacity, View, ScrollView, Alert, Platform, Linking } from 'react-native'
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
 import axios from 'axios';
@@ -8,8 +8,9 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import MaskInput from 'react-native-mask-input';
 import { Picker } from '@react-native-picker/picker';
 import * as SplashScreen from "expo-splash-screen";
-import AppLoading from 'expo-app-loading';
+// import AppLoading from 'expo-app-loading';
 import { StatusBar } from 'expo-status-bar';
+// import { disabled } from 'deprecated-react-native-prop-types/DeprecatedTextPropTypes';
 
 function LoginScreen({ navigation }) {
     // const LoginScreen = ({ navigation }) => {
@@ -18,6 +19,8 @@ function LoginScreen({ navigation }) {
 
     const [selectReg, setSelectReg] = useState(0)
     const [num, setNum] = useState("");
+
+    const [disable, setDisable] = useState(false);
 
     const [bReg, setBReg] = useState(false);
 
@@ -44,7 +47,7 @@ function LoginScreen({ navigation }) {
                 return;
             }
             const res = await axios.get(domain_web + "/get_code_region");
-            console.log(res);
+            // console.log(res);
             setRegions(res.data);
             setSelectReg(0)
 
@@ -70,11 +73,14 @@ function LoginScreen({ navigation }) {
 
 
     const setCode = async () => {
+        setDisable(true);
         if (num.length < 14) {
-            Alert.alert('Внимание', 'Неверный формат номера телефона')
+            Alert.alert('Внимание', 'Неверный формат номера телефона');
+            setDisable(false);
         } else {
             const res = await axios.post(domain_mobile + "/api/login", { "number": regions[selectReg].code + num });
-            navigation.navigate('VerificationCode', { "number": regions[selectReg].code + num })
+            navigation.navigate('VerificationCode', { "number": regions[selectReg].code + num });
+            setDisable(false);
         }
     }
 
@@ -83,7 +89,7 @@ function LoginScreen({ navigation }) {
         return (
             <View style={styles.container}>
                 <StatusBar />
-                <View style={{ justifyContent: 'center', alignItems: 'center', flex: 1, padding:'5%' }}>
+                <View style={{ justifyContent: 'center', alignItems: 'center', flex: 1, padding: '5%' }}>
                     <Image source={require('../assets/images/logo_succes.png')} />
                     <Text style={[styles.bold_text, { textAlign: 'center' }]}>Пытаемся установить соединение с сервером</Text>
                 </View>
@@ -128,7 +134,7 @@ function LoginScreen({ navigation }) {
                                 <Picker
                                     // mode='dropdown'
                                     selectedValue={selectReg}
-                                    itemStyle={{ }}
+                                    itemStyle={{}}
                                     style={{ color: '#fff', }}
                                     onValueChange={(value, index) => setSelectReg(index)}>
                                     {regions.map((obj, ind) => <Picker.Item key={obj.code} label={obj.country} value={ind} />)}
@@ -136,13 +142,13 @@ function LoginScreen({ navigation }) {
 
                             </View>
                         </LinearGradient>
-                        }
+                    }
                 </View>
 
 
                 <LinearGradient colors={['#FFF737', '#7BCFD6']} start={[1, 0]} style={styles.gradient_btn} >
                     <View style={styles.phone_background}>
-                        <Text style={styles.subtext}>твой номер телефона</Text>
+                        <Text style={styles.subtext}>ваш номер телефона</Text>
                         <View style={{ flexDirection: 'row' }} >
                             <View style={{ marginTop: "2%" }} ><Text style={styles.input}>{regions[selectReg].code}</Text></View>
                             <MaskInput mask={mask} style={styles.input} value={num} keyboardType="numeric" onChangeText={((masked, unmasked) => setNum(masked))} />
@@ -151,7 +157,7 @@ function LoginScreen({ navigation }) {
                 </LinearGradient>
 
 
-                <TouchableOpacity activeOpacity={0.8} onPress={setCode} style={styles.mt} >
+                <TouchableOpacity activeOpacity={0.8} onPress={setCode} disabled={disable} style={styles.mt} >
                     <ImageBackground source={require('../assets/images/button.png')} resizeMode='stretch' style={styles.bg_img} >
                         <Text style={styles.text_btn} >Ок</Text>
                     </ImageBackground>
@@ -164,8 +170,10 @@ function LoginScreen({ navigation }) {
                     style={styles.gradient_background} >
                     <View style={{ alignItems: 'center' }}>
                         <View style={{ alignItems: 'center' }}>
-                            <Text style={styles.text_gray}>Нажимая «ОК», ты соглашаешься</Text>
-                            <Text style={styles.text_gray}>с Политикой и условиями</Text>
+                            <Text style={styles.text_gray}>Нажимая «ОК», Вы соглашаетесь</Text>
+                            <TouchableOpacity activeOpacity={0.9} onPress={() => Linking.openURL('https://t4yc.pythonanywhere.com/ru/contract')}>
+                                <Text style={[styles.text_gray, {fontFamily:'Raleway_700Bold'}]}>с Политикой и условиями</Text>
+                            </TouchableOpacity>
                             <Text style={styles.text_gray}>использования сервиса</Text>
                         </View>
                         <TouchableOpacity activeOpacity={0.8} onPress={() => navigation.navigate('MainMenu')} style={styles.mt} >

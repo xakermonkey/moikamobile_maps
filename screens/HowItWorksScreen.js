@@ -4,6 +4,7 @@ import { Video } from 'expo-av';
 import { AntDesign } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import Carousel, { Pagination } from 'react-native-snap-carousel';
+// import Carousel, { Pagination } from '@types/react-native-snap-carousel';
 import { StatusBar } from 'expo-status-bar';
 
 

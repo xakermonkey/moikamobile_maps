@@ -20,6 +20,7 @@ function OrderСompletion({ navigation }) {
   const [total, setTotal] = useState(0);
   const [body, setBody] = useState();
   const [washer, setWasher] = useState();
+  const [disable, setDisable] = useState(false);
 
   useLayoutEffect(() => {
     (async () => {
@@ -50,9 +51,8 @@ function OrderСompletion({ navigation }) {
 
 
   const createOrder = async () => {
-    
+    setDisable(true);
     try {
-
       const phone = await AsyncStorage.getItem("phone");
       const res = await axios.post(domain_web + "/create_order",
         {
@@ -89,6 +89,7 @@ function OrderСompletion({ navigation }) {
           index: 0,
           routes: [{ name: "GeneralPriceList" },{ name: "PriceListFor" },{ name: "SelectDate" }]
         }));
+      setDisable(false);
       // navigation.navigate("SelectDate")
       return;
     }
@@ -133,7 +134,7 @@ function OrderСompletion({ navigation }) {
               {servise.map(obj => {
                 return (
                   <View style={styles.view_row} key={obj.id}>
-                    <Text style={styles.text}>{obj.name}</Text>
+                    <Text style={[styles.text, {width:'70%'}]}>{obj.name}</Text>
                     <Text style={styles.text}>{obj.price}</Text>
                   </View>
                 )
@@ -186,7 +187,7 @@ function OrderСompletion({ navigation }) {
             </View>
           </LinearGradient> */}
 
-          <TouchableOpacity activeOpacity={0.8} onPress={createOrder} style={styles.mt_TouchOpac} >
+          <TouchableOpacity activeOpacity={0.8} onPress={createOrder} disabled={disable} style={styles.mt_TouchOpac} >
             <ImageBackground source={require('../assets/images/button.png')} resizeMode='stretch' style={styles.bg_img} >
               <Text style={styles.text_btn}>Оформить заказ</Text>
             </ImageBackground>

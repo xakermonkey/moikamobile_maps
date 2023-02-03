@@ -6,10 +6,13 @@ import OrderDetails from '../components/OrderDetails';
 import AddEditCar from '../components/AddEditCar';
 import EvaluateService from '../components/EvaluateService';
 
-import { createStackNavigator } from '@react-navigation/stack';
+// import { createStackNavigator } from '@react-navigation/stack';
+import { createNativeStackNavigator } from '@react-navigation/native-stack';
 
 
-const Stack = createStackNavigator();
+// const Stack = createStackNavigator();
+const Stack = createNativeStackNavigator();
+
 
 function PersonalAccountScreen({ navigation }) {
   return (

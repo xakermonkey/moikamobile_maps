@@ -1,5 +1,5 @@
 import React, { useState, useLayoutEffect, useEffect } from 'react';
-import { StyleSheet, View, Text, SafeAreaView, TextInput, TouchableOpacity, ImageBackground } from 'react-native';
+import { StyleSheet, View, Text, SafeAreaView, Alert, TouchableOpacity, ImageBackground, Dimensions } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { CommonActions } from '@react-navigation/native'; 
@@ -38,7 +38,6 @@ function PersonalAccount({ navigation }) {
       })();
   }, [navigation])
 
-
   const Logout = async () => {
       await AsyncStorage.multiRemove(await (await AsyncStorage.getAllKeys()).filter(obj => obj != "first_join_app"));
       navigation.dispatch(
@@ -46,6 +45,11 @@ function PersonalAccount({ navigation }) {
             index: 0,
             routes: [{ name: "Login" }]
         }));
+  }
+
+  const DestroyAccount = () => {
+    Alert.alert('Информация', 'Заявка на удаление учетной записи отправлена. В течении 24 часов Вы можете отменить данное действие повторной авторизацией')
+    Logout()
   }
 
   return (
@@ -104,6 +108,15 @@ function PersonalAccount({ navigation }) {
           <ImageBackground source={require('../assets/images/button.png')} resizeMode='stretch' style={styles.bg_img} >
             <Text style={styles.text_btn} >Выйти</Text>
           </ImageBackground>
+        </TouchableOpacity>
+
+        <TouchableOpacity activeOpacity={0.8} onPress={ () => {
+          Alert.alert('Внимаение', 'Вы действительно желаете удалить свою учетную запись? Все данные будут безвозвратно удалены!', [{ 'text': 'Нет' }, {
+            'text': 'Да', onPress: DestroyAccount,
+            style: 'destructive'
+          }])
+        }} style={{alignSelf:'center', position:'absolute', marginTop: Dimensions.get("window").height * 0.85}} >
+            <Text style={styles.dc_text}>Удалить аккаунт</Text>
         </TouchableOpacity>
       </View>
     </SafeAreaView>

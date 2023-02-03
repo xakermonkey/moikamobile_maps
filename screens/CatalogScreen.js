@@ -5,13 +5,14 @@ import PointCarWash from '../components/PointCarWash';
 
 import MakingOrderScreen from '../components/MakingOrderScreen';
 
-import { createStackNavigator } from '@react-navigation/stack';
+// import { createStackNavigator } from '@react-navigation/stack';
+import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { TouchableOpacity } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 
 
-
-const Stack = createStackNavigator();
+// const Stack = createStackNavigator();
+const Stack = createNativeStackNavigator();
 
 function CatalogScreen({ navigation }) {
   return (

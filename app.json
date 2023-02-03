@@ -2,9 +2,10 @@
   "expo": {
     "name": "T4YC",
     "slug": "t4yc",
-    "version": "0.1",
+    "version": "0.10",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
+    "userInterfaceStyle": "light",
     "splash": {
       "image": "./assets/splash.png",
       "resizeMode": "contain",
@@ -18,17 +19,41 @@
     ],
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.xakermonkey.moikamobile"
+      "bundleIdentifier": "ru.t4yc.moikamobile",
+      "infoPlist": {
+        "NSCameraUsageDescription": "This app uses the camera to scan barcodes on event tickets.",
+        "NSFaceIDUsageDescription": "Enabling Face ID allows you quick and secure access to your account.",
+        "NSLocationWhenInUseUsageDescription": "The Beep App uses your location to pick origins, destinations, and predict ride times",
+        "NSLocationAlwaysUsageDescription": "The Beep App will use your location to provide ETA's to yourself and others",
+        "NSAppTransportSecurity": {
+          "NSAllowsArbitraryLoads": true,
+          "usesIcloudStorage": true,
+          "NSAllowsArbitraryLoadsForMedia": true,
+          "NSAllowsLocalNetworking": true,
+          "UIBackgroundModes": [
+            "audio"
+          ]
+        },
+        "UIBackgroundModes": [
+          "location",
+          "fetch"
+        ]
+      }
     },
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#FFFFFF"
       },
-      "package": "com.xakermonkey.moikamobile"
+      "package": "ru.t4yc.moikamobile"
     },
     "web": {
       "favicon": "./assets/favicon.png"
+    },
+    "extra": {
+      "eas": {
+        "projectId": "e66874c2-ab19-42ae-9fb1-0dea160f55c0"
+      }
     }
   }
 }

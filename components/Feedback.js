@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { StyleSheet, View, Text, TextInput, TouchableOpacity, ImageBackground } from 'react-native';
+import { StyleSheet, View, Text, TextInput, TouchableOpacity, ImageBackground, TouchableWithoutFeedback, Keyboard, KeyboardAvoidingView  } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import * as ImagePicker from 'expo-image-picker';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -15,10 +15,10 @@ function Feedback({ navigation }) {
   const [permission, setPermission] = useState();
 
   const Documents = async () => {
-    console.log(permission);
+    // console.log(permission);
     if (permission) {
       let result = await ImagePicker.launchImageLibraryAsync();
-      if (!result.cancelled) {
+      if (!result.canceled) {
         let shir = result.uri.split(".")
         shir = shir[shir.length - 1]
         setFile({
@@ -62,6 +62,9 @@ function Feedback({ navigation }) {
 
 
   return (
+    <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false} >
+                <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : "height"} style={{ flex:1 }}> 
+                        
     <View style={styles.container}>
       {/* <Image blurRadius={100} style={[StyleSheet.absoluteFill, styles.image]} source={require('../assets/images/blur_background.png')} resizeMode='cover' /> */}
       {/* <BlurView intensity={100} style={styles.blurContainer}> */}
@@ -99,7 +102,7 @@ function Feedback({ navigation }) {
         start={[1, 0]}
         style={styles.gradient_background_comment} >
         <View style={styles.text}>
-          <TextInput style={{ top: 5, left: 5, fontSize: 14, fontFamily: 'Montserrat_400Regular', color: '#fff', }} value={text} onChangeText={text => setText(text)} multiline={true} textAlignVertical={'top'} placeholder='Описание проблемы' placeholderTextColor={'#B2B2B2'} />
+          <TextInput style={{ width:'97%', paddingVertical:10, fontSize: 14, height:100, fontFamily: 'Montserrat_400Regular', color: '#fff', }} value={text} onChangeText={text => setText(text)} multiline={true} textAlignVertical={'top'} placeholder='Описание проблемы' placeholderTextColor={'#B2B2B2'} />
         </View>
       </LinearGradient>
 
@@ -111,7 +114,8 @@ function Feedback({ navigation }) {
 
       {/* </BlurView> */}
     </View>
-    // </View>
+    </KeyboardAvoidingView>
+    </TouchableWithoutFeedback>
   );
 }
 
@@ -201,8 +205,9 @@ const styles = StyleSheet.create({
     // marginTop: '2%',
     backgroundColor: '#6E7476',
     borderRadius: 5,
+    alignItems:'center'
     // minHeight: '10%',
-    paddingBottom: '40%',
+    // paddingBottom: '40%',
   },
 
   text_btn: {

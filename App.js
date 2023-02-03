@@ -1,35 +1,40 @@
 import 'react-native-gesture-handler';
 import React, { useEffect, useLayoutEffect, useState } from 'react';
 
+// import { NavigationContainer } from '@react-navigation/native';
+// import { createStackNavigator } from '@react-navigation/stack';
+
 import { NavigationContainer } from '@react-navigation/native';
-import { createStackNavigator } from '@react-navigation/stack';
+import { createNativeStackNavigator } from '@react-navigation/native-stack';
 
 import { Raleway_400Regular, Raleway_700Bold, useFonts } from '@expo-google-fonts/raleway';
 import { Montserrat_400Regular, Montserrat_700Bold } from '@expo-google-fonts/montserrat';
 
-import AppLoading from 'expo-app-loading';
+// import AppLoading from 'expo-splash-screen';
 
 import LoginScreen from './screens/LoginScreen';
 import DataScreen from './screens/DataScreen';
 import VerificationCodeScreen from './screens/VerificationCodeScreen';
 import MainMenuScreen from './screens/MainMenuScreen';
 import HowItWorksScreen from './screens/HowItWorksScreen';
-
-const Stack = createStackNavigator();
+import { Notifications } from 'react-native-notifications';
+// const Stack = createStackNavigator();
+const Stack = createNativeStackNavigator();
 
 export default function App() {
 
+  Notifications.registerRemoteNotifications(); // Запрашивает разрешения на удаленное уведомление, вызывая диалоговое окно пользователя на iOS и запрашивая токен на Android. Для определения опций см. специальный раздел registerRemoteNotifications для iOS. Если пользователь принимает разрешения на удаленные уведомления, событие registerRemoteNotificationsRegistered будет вызываться с токеном устройства.
+  
   let [fontsLoaded] = useFonts({
     Raleway_400Regular, Raleway_700Bold, Montserrat_400Regular, Montserrat_700Bold,
   });
   if (!fontsLoaded) {
-    return <AppLoading />;
+    return null;
   }
   // if (!fontsLoaded) {
   //   SplashScreen.preventAutoHideAsync();
   //   return <View />
   // }
-
 
   return (
     <NavigationContainer>
@@ -85,4 +90,3 @@ export default function App() {
     </NavigationContainer>
   );
 }
-
