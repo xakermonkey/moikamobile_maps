@@ -2,12 +2,14 @@ import React from 'react';
 import { StyleSheet, View, Text, Image, TouchableOpacity, ImageBackground, ScrollView, Alert } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons, FontAwesome5, Fontisto } from '@expo/vector-icons';
-import { useLayoutEffect, useState } from 'react';
+import { useLayoutEffect, useState, useCallback } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { domain_mobile, domain_web } from '../domain';
 import axios from 'axios';
 import { CommonActions } from '@react-navigation/native';
-
+import * as WebBrowser from 'expo-web-browser';
+import * as Linking from "expo-linking";
+import { res } from 'react-email-validator';
 function OrderСompletion({ navigation }) {
 
 
@@ -21,16 +23,23 @@ function OrderСompletion({ navigation }) {
   const [body, setBody] = useState();
   const [washer, setWasher] = useState();
   const [disable, setDisable] = useState(false);
+  const [uuid, setUuid] = useState(null);
+  const [token, setToken] = useState(null);
+  const [linkListener, setLinkListener] = useState(null);
+  const [payUri, setPayUri] = useState(null);
 
   useLayoutEffect(() => {
     (async () => {
+      const token = await AsyncStorage.getItem("token")
+      setToken(token);
       setCar(await AsyncStorage.getItem("car_name"));
       setTime(await AsyncStorage.getItem("order_time"));
       setDate(await AsyncStorage.getItem("order_day"));
       setWasher(await AsyncStorage.getItem("washer"));
       const sale = await AsyncStorage.getItem("sale")
       setSale(sale);
-      setPayment(await AsyncStorage.getItem("payment"));
+      const payment = await AsyncStorage.getItem("payment");
+      setPayment(payment);
       let params = new Object();
       params["servise"] = new Array();
       const keys = await (await AsyncStorage.getAllKeys()).filter(key => key.startsWith("servise"));
@@ -46,8 +55,55 @@ function OrderСompletion({ navigation }) {
       let totalPrice = 0;
       res.data.map(obj => { if (obj.price != "Д/ц") { totalPrice += parseInt(obj.price) } });
       setTotal(sale == 0 ? totalPrice : totalPrice * (1 - sale / 100));
+      if (payment == "Безналичный расчёт") {
+        Linking.createURL("payment", { queryParams: { "status": true } });
+        const total = await AsyncStorage.getItem("total_price");
+        const res = await axios.post(domain_mobile + "/api/create_payment",
+          { "price": parseFloat(total) }, { headers: { "Authorization": "Token " + token } });
+        const { hostname, path, queryParams } = Linking.parse(res.data.uri);
+        setUuid(queryParams.orderId);
+        setPayUri(res.data.uri);
+      }
     })();
   }, [navigation])
+
+
+  const checkPayment = useCallback(async () => {
+    const res = await axios.post(domain_mobile + "/api/check_payment", { "uuid": uuid }, { headers: { "Authorization": "Token " + token } });
+    if (res.data.status) {
+      createOrder();
+    } else {
+      Alert.alert("Внимание!", "Оплата была незавершена или отменена");
+    }
+  }, [token, uuid])
+
+
+  const handler = useCallback(async (event) => {
+    WebBrowser.dismissBrowser();
+    try {
+      await checkPayment();
+    } catch (err) {
+      console.log(err);
+    }
+  }, [uuid, token])
+
+
+
+  const PayOrder = useCallback(async () => {
+    if (payment == "Безналичный расчёт") {    
+      if (linkListener == null){
+        const listener = Linking.addEventListener("url", handler);
+        setLinkListener(listener);
+      }
+      const results = await WebBrowser.openBrowserAsync(payUri);
+      if (results.type != "dismiss") {
+        await checkPayment();
+      }
+      return;
+    } else {
+      createOrder();
+    }
+  }, [payUri, linkListener])
 
 
   const createOrder = async () => {
@@ -87,7 +143,7 @@ function OrderСompletion({ navigation }) {
       navigation.dispatch(
         CommonActions.reset({
           index: 0,
-          routes: [{ name: "GeneralPriceList" },{ name: "PriceListFor" },{ name: "SelectDate" }]
+          routes: [{ name: "GeneralPriceList" }, { name: "PriceListFor" }, { name: "SelectDate" }]
         }));
       setDisable(false);
       // navigation.navigate("SelectDate")
@@ -102,11 +158,11 @@ function OrderСompletion({ navigation }) {
       <Image blurRadius={91} style={[StyleSheet.absoluteFill, styles.image]} source={require('../assets/images/blur_background.png')} resizeMode='cover' />
       <View style={styles.blurContainer}>
         <View style={[styles.row, { justifyContent: 'center', alignItems: "center", width: "100%", marginTop: '5%' }]}>
-          <TouchableOpacity style={{ flex:1 }} onPress={() => navigation.navigate('SelectPaymentMethod')} activeOpacity={0.7} >
+          <TouchableOpacity style={{ flex: 1 }} onPress={() => navigation.navigate('SelectPaymentMethod')} activeOpacity={0.7} >
             <Ionicons name='chevron-back' size={28} color={'#7CD0D7'} />
           </TouchableOpacity>
-          <Text style={[styles.bold_text, {flex:4}]}>Завершение заказа</Text>
-          <View style={{flex:1}}></View>
+          <Text style={[styles.bold_text, { flex: 4 }]}>Завершение заказа</Text>
+          <View style={{ flex: 1 }}></View>
         </View>
 
         <ScrollView showsVerticalScrollIndicator={false}>
@@ -134,7 +190,7 @@ function OrderСompletion({ navigation }) {
               {servise.map(obj => {
                 return (
                   <View style={styles.view_row} key={obj.id}>
-                    <Text style={[styles.text, {width:'70%'}]}>{obj.name}</Text>
+                    <Text style={[styles.text, { width: '70%' }]}>{obj.name}</Text>
                     <Text style={styles.text}>{obj.price}</Text>
                   </View>
                 )
@@ -187,7 +243,7 @@ function OrderСompletion({ navigation }) {
             </View>
           </LinearGradient> */}
 
-          <TouchableOpacity activeOpacity={0.8} onPress={createOrder} disabled={disable} style={styles.mt_TouchOpac} >
+          <TouchableOpacity activeOpacity={0.8} onPress={PayOrder} disabled={disable} style={styles.mt_TouchOpac} >
             <ImageBackground source={require('../assets/images/button.png')} resizeMode='stretch' style={styles.bg_img} >
               <Text style={styles.text_btn}>Оформить заказ</Text>
             </ImageBackground>

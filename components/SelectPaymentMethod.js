@@ -1,20 +1,28 @@
-import React, { useLayoutEffect, useState } from 'react';
-import { StyleSheet, View, Text, TouchableOpacity, ImageBackground, Image } from 'react-native';
+import React, { useEffect, useLayoutEffect, useState } from 'react';
+import { StyleSheet, View, Text, TouchableOpacity, ImageBackground, Image, Platform, Alert } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
 // import { CheckBox, Icon } from 'react-native-elements';
 import { CheckBox, Icon } from '@rneui/themed';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import axios from 'axios';
+import { domain_mobile } from '../domain';
+
 
 
 
 function SelectPaymentMethod({ navigation }) {
   const [payment, setPayment] = useState();
   const [uncache, setUncache] = useState(true);
+  const [token, setToken] = useState(null);
+
+  
 
 
   useLayoutEffect(() => {
     (async () => {
+      const token = await AsyncStorage.getItem("token");
+      setToken(token);
       const ch = await AsyncStorage.getItem("uncache");
       if (ch == "false") {
         setUncache(false);
@@ -22,16 +30,15 @@ function SelectPaymentMethod({ navigation }) {
         setUncache(true);
       }
     })();
-  }, [navigation])
-
+  }, [])
 
 
   const clickNext = async () => {
-    if (payment != null){
+    if (payment != null) {
       await AsyncStorage.setItem("payment", payment);
       navigation.navigate('OrderСompletion');
     }
-    
+
   }
 
   return (
@@ -39,11 +46,11 @@ function SelectPaymentMethod({ navigation }) {
       <Image blurRadius={91} style={[StyleSheet.absoluteFill, styles.image]} source={require('../assets/images/blur_background.png')} resizeMode='cover' />
       <View style={styles.blurContainer}>
         <View style={[styles.row, { justifyContent: 'center', alignItems: "center", width: "100%", marginTop: '5%' }]}>
-          <TouchableOpacity style={{ flex:1 }} onPress={() => navigation.navigate('SelectCar')} activeOpacity={0.7} >
+          <TouchableOpacity style={{ flex: 1 }} onPress={() => navigation.navigate('SelectCar')} activeOpacity={0.7} >
             <Ionicons name='chevron-back' size={28} color={'#7CD0D7'} />
           </TouchableOpacity>
-          <Text style={[styles.bold_text,{flex:4}]}>Способ оплаты</Text>
-          <View style={{flex:1}}></View>
+          <Text style={[styles.bold_text, { flex: 4 }]}>Способ оплаты</Text>
+          <View style={{ flex: 1 }}></View>
         </View>
 
         <LinearGradient
@@ -53,7 +60,7 @@ function SelectPaymentMethod({ navigation }) {
           <View>
             {uncache &&
               <View style={styles.checkbox}>
-                <CheckBox containerStyle={{ padding: 0, margin: 0, marginRight: 0, marginLeft: 0, backgroundColor:null }}
+                <CheckBox containerStyle={{ padding: 0, margin: 0, marginRight: 0, marginLeft: 0, backgroundColor: null }}
                   checkedIcon={
                     <Icon name="radio-button-checked" type="material" color="#7BCFD6" size={25} />
                   }
@@ -67,7 +74,7 @@ function SelectPaymentMethod({ navigation }) {
               </View>
             }
             <View style={styles.checkbox}>
-              <CheckBox containerStyle={{ padding: 0, margin: 0, marginRight: 0, marginLeft: 0, backgroundColor:null }}
+              <CheckBox containerStyle={{ padding: 0, margin: 0, marginRight: 0, marginLeft: 0, backgroundColor: null }}
                 checkedIcon={
                   <Icon name="radio-button-checked" type="material" color="#7BCFD6" size={25} />
                 }
@@ -80,7 +87,7 @@ function SelectPaymentMethod({ navigation }) {
               <Text style={styles.text_check}>Наличный расчёт</Text>
             </View>
             <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 0, }}>
-              <CheckBox containerStyle={{ padding: 0, margin: 0, marginRight: 0, marginLeft: 0, backgroundColor:null }}
+              <CheckBox containerStyle={{ padding: 0, margin: 0, marginRight: 0, marginLeft: 0, backgroundColor: null }}
                 checkedIcon={
                   <Icon name="radio-button-checked" type="material" color="#7BCFD6" size={25} />
                 }

@@ -18,6 +18,7 @@ function PriceListFor({ navigation, route }) {
   const [servise, setServise] = useState();
   const [selectServise, setSelectServise] = useState([]);
   const [dcPrice, setDcPrice] = useState([]);
+  const [total, setTotal] = useState(0);
 
   useLayoutEffect(() => {
     (async () => {
@@ -43,9 +44,16 @@ function PriceListFor({ navigation, route }) {
   const clickServise = (obj) => {
     if (selectServise.indexOf(obj.id) == -1) {
       setSelectServise([...selectServise, obj.id]);
+      if (obj.price != "Д/ц"){
+        setTotal(total + parseInt(obj.price))
+      }
     } else {
-      setSelectServise([...selectServise.slice(0, selectServise.indexOf(obj.id)), ...selectServise.slice(selectServise.indexOf(obj.id) + 1,)]);
+      setSelectServise(selectServise.filter(item => item != obj.id));
+      if (obj.price != "Д/ц"){
+        setTotal(total - parseInt(obj.price))
+      }
     }
+    // console.log(total);
   }
 
 
@@ -74,6 +82,7 @@ function PriceListFor({ navigation, route }) {
           await AsyncStorage.setItem("uncache", "false");
         }
       }
+      await AsyncStorage.setItem("total_price", total.toString());
       navigation.navigate('SelectDate');
     }
   }
