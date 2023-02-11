@@ -135,11 +135,17 @@ function OrderСompletion({ navigation }) {
         });
       let keys = await AsyncStorage.getAllKeys()
       await AsyncStorage.multiRemove(keys.filter(key => key.startsWith("stock") || key.startsWith("servise_")))
+      if (payment == "Безналичный расчёт") {    
+        await axios.post(domain_mobile + "/api/accept_payment", { "uuid": uuid }, { headers: { "Authorization": "Token " + token } });
+      }
       navigation.navigate("CarWashes");
       setTimeout(() => navigation.navigate("Successful"), 1000)
     } catch (err) {
       console.log(err);
       Alert.alert("Упс", "Даннное время уже забронировано");
+      if (payment == "Безналичный расчёт") {    
+        await axios.post(domain_mobile + "/api/cancel_payment", { "uuid": uuid }, { headers: { "Authorization": "Token " + token } });
+      }
       navigation.dispatch(
         CommonActions.reset({
           index: 0,
