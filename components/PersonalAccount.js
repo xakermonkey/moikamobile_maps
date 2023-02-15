@@ -2,10 +2,12 @@ import React, { useState, useLayoutEffect, useEffect } from 'react';
 import { StyleSheet, View, Text, SafeAreaView, Alert, TouchableOpacity, ImageBackground, Dimensions } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { CommonActions } from '@react-navigation/native'; 
+import { CommonActions } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
 import { DrawerActions } from '@react-navigation/native';
 import { StatusBar } from 'expo-status-bar';
+import axios from 'axios';
+import { domain_mobile } from '../domain';
 
 function PersonalAccount({ navigation }) {
 
@@ -16,35 +18,43 @@ function PersonalAccount({ navigation }) {
   useLayoutEffect(() => {
     navigation.setOptions({
       title: 'ЛИЧНЫЙ КАБИНЕТ',
-        // headerShown: false,
-        headerShadowVisible: false,
-        headerStyle: {
-          backgroundColor: '#6E7476',
-        },
-        headerTintColor: '#fff',
-        headerTitleStyle: {
-          fontFamily: 'Raleway_700Bold',
-        },
-        headerLeft: () => (
-          <TouchableOpacity style={{left:10}} onPress={() => navigation.dispatch(DrawerActions.openDrawer())} activeOpacity={0.7}>
-            <Ionicons name='chevron-back' size={32} color={'#7CD0D7'} />
-            </TouchableOpacity>
-        ),
+      // headerShown: false,
+      headerShadowVisible: false,
+      headerStyle: {
+        backgroundColor: '#6E7476',
+      },
+      headerTintColor: '#fff',
+      headerTitleStyle: {
+        fontFamily: 'Raleway_700Bold',
+      },
+      headerLeft: () => (
+        <TouchableOpacity style={{ left: 10 }} onPress={() => navigation.dispatch(DrawerActions.openDrawer())} activeOpacity={0.7}>
+          <Ionicons name='chevron-back' size={32} color={'#7CD0D7'} />
+        </TouchableOpacity>
+      ),
     });
     (async () => {
-        setName(await AsyncStorage.getItem("name") == null ? "" : await AsyncStorage.getItem("name"));
-        setPhone(await AsyncStorage.getItem("phone") == null ? "" : await AsyncStorage.getItem("phone"));
-        setEmail(await AsyncStorage.getItem("email") == null ? "" : await AsyncStorage.getItem("email"));
-      })();
+      setName(await AsyncStorage.getItem("name") == null ? "" : await AsyncStorage.getItem("name"));
+      setPhone(await AsyncStorage.getItem("phone") == null ? "" : await AsyncStorage.getItem("phone"));
+      setEmail(await AsyncStorage.getItem("email") == null ? "" : await AsyncStorage.getItem("email"));
+    })();
   }, [navigation])
 
   const Logout = async () => {
+    const token = await AsyncStorage.getItem("token");
+    const pushToken = await AsyncStorage.getItem("pushToken");
+    try {
+      const res = await axios.delete(domain_mobile + '/api/set_push_token', { headers: { "Authorization": "Token " + token }, params: { "push_token": pushToken } })
+    }
+    catch(err){
+      console.log(err);
+    }
       await AsyncStorage.multiRemove(await (await AsyncStorage.getAllKeys()).filter(obj => obj != "first_join_app"));
-      navigation.dispatch(
-        CommonActions.reset({
-            index: 0,
-            routes: [{ name: "Login" }]
-        }));
+    navigation.dispatch(
+      CommonActions.reset({
+        index: 0,
+        routes: [{ name: "Login" }]
+      }));
   }
 
   const DestroyAccount = () => {
@@ -54,7 +64,7 @@ function PersonalAccount({ navigation }) {
 
   return (
     <SafeAreaView style={styles.container} >
-      <StatusBar/>
+      <StatusBar />
       <View style={styles.main}>
 
         <LinearGradient
@@ -78,7 +88,7 @@ function PersonalAccount({ navigation }) {
             <Text style={styles.input_text}>{email}</Text>
             <LinearGradient colors={['#00266F', '#7BCFD6']} start={[1, 0]} style={styles.gradient_line} />
             <Text style={styles.dc_text}>Личную информацию можно изменить через обратную связь</Text>
-          
+
           </View>
         </LinearGradient>
 
@@ -110,13 +120,13 @@ function PersonalAccount({ navigation }) {
           </ImageBackground>
         </TouchableOpacity>
 
-        <TouchableOpacity activeOpacity={0.8} onPress={ () => {
+        <TouchableOpacity activeOpacity={0.8} onPress={() => {
           Alert.alert('Внимаение', 'Вы действительно желаете удалить свою учетную запись? Все данные будут безвозвратно удалены!', [{ 'text': 'Нет' }, {
             'text': 'Да', onPress: DestroyAccount,
             style: 'destructive'
           }])
-        }} style={{alignSelf:'center', position:'absolute', marginTop: Dimensions.get("window").height * 0.85}} >
-            <Text style={styles.dc_text}>Удалить аккаунт</Text>
+        }} style={{ alignSelf: 'center', position: 'absolute', marginTop: Dimensions.get("window").height * 0.85 }} >
+          <Text style={styles.dc_text}>Удалить аккаунт</Text>
         </TouchableOpacity>
       </View>
     </SafeAreaView>

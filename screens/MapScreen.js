@@ -1,22 +1,33 @@
 import { View, Image, StyleSheet, TouchableOpacity, SafeAreaView, Platform, Alert, StatusBar } from 'react-native';
 import { DrawerActions, useFocusEffect } from '@react-navigation/native';
-import React, { useCallback, useEffect, useLayoutEffect, useState } from 'react';
+import React, { useCallback, useEffect, useLayoutEffect, useState, useRef } from 'react';
 import { YaMap, Animation, Marker, Polyline } from 'react-native-yamap';
 import { Dimensions } from 'react-native'
 import * as Location from 'expo-location';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios from 'axios';
-import { domain_web } from '../domain';
+import { domain_mobile, domain_web } from '../domain';
 import * as Device from 'expo-device';
 import * as Notifications from 'expo-notifications';
 
+Notifications.setNotificationHandler({
+  handleNotification: async () => ({
+    shouldShowAlert: true,
+    shouldPlaySound: false,
+    shouldSetBadge: false,
+  }),
+});
+
 function MapScreen({ navigation }) {
-  
+
   const [washes, setWashes] = useState({});
   const [route, setRoute] = useState([]);
   const [washeses, setWasheses] = useState([]);
   // const [bLocation, setBLocation] = useState(false);
   const [isOpen, setDrawer] = useState(false);
+  const notificationListener = useRef();
+  const responseListener = useRef();
+
 
   YaMap.init('b5f1cf2d-be55-4198-9e5d-66f0be967a30');
   YaMap.setLocale('ru_RU');
@@ -44,70 +55,86 @@ function MapScreen({ navigation }) {
         setWasheses(ret.data); // сохранение всех моек в State
         const res = await axios.get(domain_web + "/get_address_moika", { params: { phone: phone } }); // запрос на получение адреса мойки ближайшего заказа
         setWashes(res.data); // сохранеине адреса в State
-        
+
         if (loc == null) { // если нет прав или не получилось получить координаты
           return;
         }
         // console.warn(loc.coords.latitude);
         map.current.setCenter({ lon: loc.coords.longitude, lat: loc.coords.latitude }, 15, 0, 0, 1, Animation.SMOOTH); //координаты, зум, поворотом по азимуту и наклоном карты, длительность анимации, анимация
       }
-      
+
     })();
   }, []));
 
   useEffect(() => {
-    registerForPushNotificationsAsync().then(devicePushToken => setExpoPushToken(devicePushToken));
+    registerForPushNotificationsAsync();
 
     notificationListener.current = Notifications.addNotificationReceivedListener(notification => {
-      setNotification(notification);
+        return;
     });
 
     responseListener.current = Notifications.addNotificationResponseReceivedListener(response => {
-      console.log(response);
+      console.log(response.notification.request.content);
+      if (response.notification.request.content.categoryIdentifier == "successful"){
+        navigation.navigate("PersonalAccount");
+        navigation.navigate("MyOrders");
+        navigation.navigate('OrderDetails', {orderId: response.notification.request.content.data.order})
+        return;
+      }
     });
 
-    return () => {
-      Notifications.removeNotificationSubscription(notificationListener.current);
-      Notifications.removeNotificationSubscription(responseListener.current);
-    };
+    // return () => {
+    //   Notifications.removeNotificationSubscription(notificationListener.current);
+    //   Notifications.removeNotificationSubscription(responseListener.current);
+    // };
   }, []);
 
   const registerForPushNotificationsAsync = async () => {
     // const pushtoken = await AsyncStorage.getItem("pushToken");
     if (Device.isDevice) {
-        const devicePushToken = (await Notifications.getDevicePushTokenAsync()).data
-        if (pushtoken == null) {
-            // const token = await AsyncStorage.getItem("token");
-            // const device = Platform.OS == "ios";
-            // await axios.post(domain + "/set_push_token", { token: devicePushToken, device: device }, { headers: { "Authorization": "Token " + token } });
-            // await AsyncStorage.setItem("pushToken", devicePushToken);
+      const devicePushToken = (await Notifications.getDevicePushTokenAsync()).data
+      console.log(devicePushToken);
+      // if (pushtoken == null) {
+        try{
+          const token = await AsyncStorage.getItem("token");
+          const device = Platform.OS == "ios";
+          if (token != null) {
+            await axios.post(domain_mobile + "/api/set_push_token", { token: devicePushToken, device: device }, { headers: { "Authorization": "Token " + token } });
+          }else{
+            await axios.post(domain_mobile + "/api/set_push_token", { token: devicePushToken, device: device });
+          }
+          await AsyncStorage.setItem("pushToken", devicePushToken);
+        }catch(err){
+          console.log(err);
         }
+        
+      // }
 
-        const { status: existingStatus } = await Notifications.getPermissionsAsync();
-        let finalStatus = existingStatus;
-        if (existingStatus !== 'granted') {
-            const { status } = await Notifications.requestPermissionsAsync();
-            finalStatus = status;
-        }
-        if (finalStatus !== 'granted') {
-            alert('Failed to get push token for push notification!');
-            return;
-        }
-        return devicePushToken;
+      const { status: existingStatus } = await Notifications.getPermissionsAsync();
+      let finalStatus = existingStatus;
+      if (existingStatus !== 'granted') {
+        const { status } = await Notifications.requestPermissionsAsync();
+        finalStatus = status;
+      }
+      if (finalStatus !== 'granted') {
+        alert('Failed to get push token for push notification!');
+        return;
+      }
+      return devicePushToken;
     } else {
-        alert('Must use physical device for Push Notifications');
+      alert('Must use physical device for Push Notifications');
     }
 
     if (Platform.OS === 'android') {
-        await Notifications.setNotificationChannelAsync('default', {
-            name: 'default',
-            importance: Notifications.AndroidImportance.MAX,
-            vibrationPattern: [0, 250, 250, 250],
-            lightColor: '#FF231F7C',
-        });
+      await Notifications.setNotificationChannelAsync('default', {
+        name: 'default',
+        importance: Notifications.AndroidImportance.MAX,
+        vibrationPattern: [0, 250, 250, 250],
+        lightColor: '#FF231F7C',
+      });
     }
 
-}
+  }
 
   getCurrentPosition = () => {
     return new Promise((resolve) => {
