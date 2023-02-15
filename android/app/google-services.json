@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "502222873614",
+    "project_id": "t4yc-eb9ac",
+    "storage_bucket": "t4yc-eb9ac.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:502222873614:android:a50a5137b4cec4bff8885f",
+        "android_client_info": {
+          "package_name": "ru.t4yc.moikamobile"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "502222873614-v2n9iouucdks7mjh9hqsip39uhr8n9gv.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyC9xlSeRWXzeMUVCnnt58IuYQVGscpm9bI"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "502222873614-v2n9iouucdks7mjh9hqsip39uhr8n9gv.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

@@ -3,20 +3,14 @@ import { DrawerActions, useFocusEffect } from '@react-navigation/native';
 import React, { useCallback, useEffect, useLayoutEffect, useState } from 'react';
 import { YaMap, Animation, Marker, Polyline } from 'react-native-yamap';
 import { Dimensions } from 'react-native'
-// import Geolocation from 'react-native-geolocation-service';
-// import Geolocation from '@react-native-community/geolocation';
 import * as Location from 'expo-location';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios from 'axios';
 import { domain_web } from '../domain';
-// import { StatusBar } from 'expo-status-bar';
-
-import { Notifications } from 'react-native-notifications';
-
+import * as Device from 'expo-device';
+import * as Notifications from 'expo-notifications';
 
 function MapScreen({ navigation }) {
-
-  
   
   const [washes, setWashes] = useState({});
   const [route, setRoute] = useState([]);
@@ -28,33 +22,6 @@ function MapScreen({ navigation }) {
   YaMap.setLocale('ru_RU');
 
   map = React.createRef()
-
-  useLayoutEffect(() => {
-    Notifications.events().registerNotificationReceivedForeground((notification, completion) => {
-      console.log(`Notification received in foreground: ${notification.title} : ${notification.body}`);
-      completion({ alert: true, sound: false, badge: true });
-    });
-  
-    Notifications.events().registerNotificationOpened((notification, completion) => {
-      console.log(`Notification opened: ${notification.payload}`);
-      completion();
-      if (notification.payload.category == "stock"){
-        console.log("Stock");
-        navigation.navigate('Catalog');
-        
-      }else if (notification.payload.category == "order"){
-        console.log("Order");
-      }
-    });
-  
-    Notifications.events().registerRemoteNotificationsRegistered((event) => {
-      // TODO: отправить токен на мой сервер, чтобы он мог отправлять обратно push-уведомления...
-      console.log("Device Token Received", event.deviceToken);
-    });
-    Notifications.events().registerRemoteNotificationsRegistrationFailed((event) => {
-      console.error(event);
-    });
-  }, [])
 
   useFocusEffect(useCallback(() => { // функция при попадании экрана в фокус
     (async () => {
@@ -88,6 +55,60 @@ function MapScreen({ navigation }) {
     })();
   }, []));
 
+  useEffect(() => {
+    registerForPushNotificationsAsync().then(devicePushToken => setExpoPushToken(devicePushToken));
+
+    notificationListener.current = Notifications.addNotificationReceivedListener(notification => {
+      setNotification(notification);
+    });
+
+    responseListener.current = Notifications.addNotificationResponseReceivedListener(response => {
+      console.log(response);
+    });
+
+    return () => {
+      Notifications.removeNotificationSubscription(notificationListener.current);
+      Notifications.removeNotificationSubscription(responseListener.current);
+    };
+  }, []);
+
+  const registerForPushNotificationsAsync = async () => {
+    // const pushtoken = await AsyncStorage.getItem("pushToken");
+    if (Device.isDevice) {
+        const devicePushToken = (await Notifications.getDevicePushTokenAsync()).data
+        if (pushtoken == null) {
+            // const token = await AsyncStorage.getItem("token");
+            // const device = Platform.OS == "ios";
+            // await axios.post(domain + "/set_push_token", { token: devicePushToken, device: device }, { headers: { "Authorization": "Token " + token } });
+            // await AsyncStorage.setItem("pushToken", devicePushToken);
+        }
+
+        const { status: existingStatus } = await Notifications.getPermissionsAsync();
+        let finalStatus = existingStatus;
+        if (existingStatus !== 'granted') {
+            const { status } = await Notifications.requestPermissionsAsync();
+            finalStatus = status;
+        }
+        if (finalStatus !== 'granted') {
+            alert('Failed to get push token for push notification!');
+            return;
+        }
+        return devicePushToken;
+    } else {
+        alert('Must use physical device for Push Notifications');
+    }
+
+    if (Platform.OS === 'android') {
+        await Notifications.setNotificationChannelAsync('default', {
+            name: 'default',
+            importance: Notifications.AndroidImportance.MAX,
+            vibrationPattern: [0, 250, 250, 250],
+            lightColor: '#FF231F7C',
+        });
+    }
+
+}
+
   getCurrentPosition = () => {
     return new Promise((resolve) => {
       if (map.current) {
@@ -98,10 +119,6 @@ function MapScreen({ navigation }) {
     });
   }
   zoomUp = async () => { // приближение
-    // Notifications.postLocalNotification({
-    //   body: "Local Notification",
-    //   title: "Title local"
-    // });
     const position = await getCurrentPosition();
     if (map.current) {
       // console.warn(Object.keys(map.current.props));

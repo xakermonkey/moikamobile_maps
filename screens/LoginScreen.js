@@ -8,9 +8,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import MaskInput from 'react-native-mask-input';
 import { Picker } from '@react-native-picker/picker';
 import * as SplashScreen from "expo-splash-screen";
-// import AppLoading from 'expo-app-loading';
 import { StatusBar } from 'expo-status-bar';
-// import { disabled } from 'deprecated-react-native-prop-types/DeprecatedTextPropTypes';
 
 function LoginScreen({ navigation }) {
     // const LoginScreen = ({ navigation }) => {
@@ -172,7 +170,7 @@ function LoginScreen({ navigation }) {
                         <View style={{ alignItems: 'center' }}>
                             <Text style={styles.text_gray}>Нажимая «ОК», Вы соглашаетесь</Text>
                             <TouchableOpacity activeOpacity={0.9} onPress={() => Linking.openURL('https://t4yc.pythonanywhere.com/ru/contract')}>
-                                <Text style={[styles.text_gray, {fontFamily:'Raleway_700Bold'}]}>с Политикой и условиями</Text>
+                                <Text style={[styles.text_gray, { fontFamily: 'Raleway_700Bold' }]}>с Политикой и условиями</Text>
                             </TouchableOpacity>
                             <Text style={styles.text_gray}>использования сервиса</Text>
                         </View>

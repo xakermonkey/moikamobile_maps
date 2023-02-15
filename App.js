@@ -17,13 +17,10 @@ import DataScreen from './screens/DataScreen';
 import VerificationCodeScreen from './screens/VerificationCodeScreen';
 import MainMenuScreen from './screens/MainMenuScreen';
 import HowItWorksScreen from './screens/HowItWorksScreen';
-import { Notifications } from 'react-native-notifications';
 // const Stack = createStackNavigator();
 const Stack = createNativeStackNavigator();
 
 export default function App() {
-
-  Notifications.registerRemoteNotifications(); // Запрашивает разрешения на удаленное уведомление, вызывая диалоговое окно пользователя на iOS и запрашивая токен на Android. Для определения опций см. специальный раздел registerRemoteNotifications для iOS. Если пользователь принимает разрешения на удаленные уведомления, событие registerRemoteNotificationsRegistered будет вызываться с токеном устройства.
   
   let [fontsLoaded] = useFonts({
     Raleway_400Regular, Raleway_700Bold, Montserrat_400Regular, Montserrat_700Bold,
