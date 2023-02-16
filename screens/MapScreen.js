@@ -74,11 +74,15 @@ function MapScreen({ navigation }) {
     });
 
     responseListener.current = Notifications.addNotificationResponseReceivedListener(response => {
-      console.log(response.notification.request.content);
       if (response.notification.request.content.categoryIdentifier == "successful"){
         navigation.navigate("PersonalAccount");
         navigation.navigate("MyOrders");
-        navigation.navigate('OrderDetails', {orderId: response.notification.request.content.data.order})
+        navigation.navigate('OrderDetails', {orderId: response.notification.request.trigger.payload.order});
+        navigation.navigate('EvaluateService', {orderId: response.notification.request.trigger.payload.order});
+        return;
+      }
+      if(response.notification.request.content.categoryIdentifier == "new_stock"){
+        navigation.navigate("Catalog");
         return;
       }
     });
