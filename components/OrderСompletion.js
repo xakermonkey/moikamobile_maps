@@ -10,6 +10,8 @@ import { CommonActions } from '@react-navigation/native';
 import * as WebBrowser from 'expo-web-browser';
 import * as Linking from "expo-linking";
 import { res } from 'react-email-validator';
+import { StatusBar } from 'expo-status-bar';
+
 function OrderСompletion({ navigation }) {
 
 
@@ -161,6 +163,7 @@ function OrderСompletion({ navigation }) {
 
   return (
     <View style={styles.container}>
+      <StatusBar/>
       <Image blurRadius={91} style={[StyleSheet.absoluteFill, styles.image]} source={require('../assets/images/blur_background.png')} resizeMode='cover' />
       <View style={styles.blurContainer}>
         <View style={[styles.row, { justifyContent: 'center', alignItems: "center", width: "100%", marginTop: '5%' }]}>

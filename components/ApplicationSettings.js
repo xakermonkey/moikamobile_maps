@@ -4,6 +4,7 @@ import { StyleSheet, View, Text, SafeAreaView, TouchableOpacity, Switch } from '
 import { ButtonGroup } from '@rneui/themed';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
+import { StatusBar } from 'expo-status-bar';
 
 
 function ApplicationSettings({ navigation }) {
@@ -15,6 +16,7 @@ function ApplicationSettings({ navigation }) {
 
   return (
     <SafeAreaView style={styles.container} >
+      <StatusBar/>
       <View showsVerticalScrollIndicator='false' style={styles.main}>
 
 

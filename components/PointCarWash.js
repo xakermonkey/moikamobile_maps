@@ -7,6 +7,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { CommonActions } from '@react-navigation/native';
 import Carousel, { Pagination } from 'react-native-snap-carousel';
 // import Carousel, { Pagination } from '@types/react-native-snap-carousel';
+import { StatusBar } from 'expo-status-bar';
 
 function PointCarWash({ navigation, route }) {
 
@@ -116,6 +117,7 @@ function PointCarWash({ navigation, route }) {
 
   return ( // Внешняя
     <View style={styles.container}>
+        <StatusBar/>
       <Pagination
         activeDotIndex={selectFilt}
         dotsLength={filt.length}

@@ -5,7 +5,7 @@ import { Ionicons, FontAwesome, AntDesign, FontAwesome5, MaterialIcons, Feather 
 import { DrawerActions } from '@react-navigation/native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { CommonActions } from '@react-navigation/native';
-// import { StatusBar } from 'expo-status-bar';
+import { StatusBar } from 'expo-status-bar';
 
 
 const Drawer = createDrawerNavigator();
@@ -25,7 +25,7 @@ export function DrawerContent(props) {
 
     return (
         <SafeAreaView style={{ flex: 1 }}>
-            {/* <StatusBar/> */}
+            <StatusBar/>
             <DrawerContentScrollView {...props}>
 
                 <View style={styles.row}>

@@ -18,6 +18,24 @@ import VerificationCodeScreen from './screens/VerificationCodeScreen';
 import MainMenuScreen from './screens/MainMenuScreen';
 import HowItWorksScreen from './screens/HowItWorksScreen';
 // const Stack = createStackNavigator();
+import * as Notifications from "expo-notifications";
+import * as TaskManager from "expo-task-manager";
+
+const BACKGROUND_NOTIFICATION_TASK = "BACKGROUND-NOTIFICATION-TASK";
+
+TaskManager.defineTask(
+  BACKGROUND_NOTIFICATION_TASK,
+  ({ data, error, executionInfo }) => {
+    console.log(data);
+    if (error) {
+      console.log("error occurred");
+    }
+    if (data) {
+      console.log("data-----", data);
+    }
+  }
+);
+
 const Stack = createNativeStackNavigator();
 
 export default function App() {
@@ -32,6 +50,7 @@ export default function App() {
   //   SplashScreen.preventAutoHideAsync();
   //   return <View />
   // }
+  Notifications.registerTaskAsync(BACKGROUND_NOTIFICATION_TASK);
 
   return (
     <NavigationContainer>

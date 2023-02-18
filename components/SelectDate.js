@@ -8,8 +8,6 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Picker } from '@react-native-picker/picker';
 import { StatusBar } from 'expo-status-bar';
 
-
-
 function SelectDate({ navigation }) {
   // const [check4, setCheck4] = useState(false);
   const [selectDay, setSelectDay] = useState();
@@ -68,6 +66,7 @@ function SelectDate({ navigation }) {
   }
   return (
     <View style={styles.container}>
+        <StatusBar />
       <Image blurRadius={91} style={[StyleSheet.absoluteFill, styles.image]} source={require('../assets/images/blur_background.png')} resizeMode='cover' />
       <View style={styles.blurContainer}>
         <TouchableWithoutFeedback onPress={() => { setBDay(false); setBTime(false) }} accessible={false} >

@@ -6,8 +6,7 @@ import { Ionicons } from '@expo/vector-icons';
 import axios from 'axios';
 import { domain_mobile, domain_web } from '../domain';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-
-
+import { StatusBar } from 'expo-status-bar';
 
 
 function GeneralPriceList({ navigation }) {
@@ -40,6 +39,7 @@ function GeneralPriceList({ navigation }) {
 
   return (
     <View style={styles.container}>
+      <StatusBar/>
       <Image blurRadius={91} style={[StyleSheet.absoluteFill, styles.image]} source={require('../assets/images/blur_background.png')} resizeMode='cover' />
       {/* <BlurView intensity={100} style={styles.blurContainer}> */}
       <View style={styles.blurContainer}>

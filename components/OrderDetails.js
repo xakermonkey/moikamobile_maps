@@ -6,6 +6,7 @@ import axios from 'axios';
 import { domain_web } from '../domain';
 import { CommonActions } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
+import { StatusBar } from 'expo-status-bar';
 
 
 function OrderDetails({ navigation, route }) {
@@ -60,6 +61,7 @@ function OrderDetails({ navigation, route }) {
 
   return (
     <SafeAreaView style={styles.container} >
+      <StatusBar/>
       <ScrollView style={styles.main}>
 
         <LinearGradient

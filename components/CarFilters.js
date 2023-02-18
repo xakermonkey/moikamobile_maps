@@ -9,7 +9,7 @@ import { domain_web } from '../domain';
 import { Picker } from '@react-native-picker/picker';
 import { CommonActions } from '@react-navigation/native';
 import * as Location from "expo-location";
-
+import { StatusBar } from 'expo-status-bar';
 
 
 function CarFilters({ navigation, route }) {
@@ -85,6 +85,7 @@ function CarFilters({ navigation, route }) {
 
   return (
     <View style={styles.container}>
+      <StatusBar/>
       <Image blurRadius={91} style={[StyleSheet.absoluteFill, styles.image]} source={require('../assets/images/blur_background.png')} resizeMode='cover' />
       {/* <BlurView intensity={100} style={styles.blurContainer}> */}
       <View style={styles.blurContainer}>

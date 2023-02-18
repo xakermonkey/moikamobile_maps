@@ -5,8 +5,7 @@ import { Ionicons, FontAwesome5 } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios from 'axios';
 import { domain_mobile } from '../domain';
-
-
+import { StatusBar } from 'expo-status-bar';
 
 function SelectCar({ navigation }) {
   const [selectCar, setSelectCar] = useState();
@@ -41,6 +40,7 @@ function SelectCar({ navigation }) {
 
   return (
     <View style={styles.container}>
+      <StatusBar/>
       <Image blurRadius={91} style={[StyleSheet.absoluteFill, styles.image]} source={require('../assets/images/blur_background.png')} resizeMode='cover' />
       <View style={styles.blurContainer}>
         <View style={[styles.row, { justifyContent: 'center', alignItems: "center", width: "100%", marginTop: '5%' }]}>

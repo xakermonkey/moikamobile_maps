@@ -1,5 +1,8 @@
-apply plugin: "com.android.application"
-apply plugin: "com.google.gms.google-services"
+plugins {
+    id 'com.android.application'
+    id 'com.google.gms.google-services'
+}
+//apply plugin: "com.android.application"
 
 import com.android.build.OutputFile
 
@@ -143,11 +146,11 @@ android {
     compileSdkVersion rootProject.ext.compileSdkVersion
 
     defaultConfig {
-        applicationId 'com.xakermonkey.moikamobile'
+        applicationId 'ru.t4yc.moikamobile'
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
-        versionCode 2
-        versionName "0.10"
+        versionCode 1
+        versionName "0.11"
         buildConfigField "boolean", "IS_NEW_ARCHITECTURE_ENABLED", isNewArchitectureEnabled().toString()
 
         if (isNewArchitectureEnabled()) {
@@ -363,3 +366,5 @@ def isNewArchitectureEnabled() {
     // - Set an environment variable `ORG_GRADLE_PROJECT_newArchEnabled=true`
     return project.hasProperty("newArchEnabled") && project.newArchEnabled == "true"
 }
+
+//apply plugin: "com.google.gms.google-services"

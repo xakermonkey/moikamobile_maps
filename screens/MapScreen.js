@@ -1,4 +1,4 @@
-import { View, Image, StyleSheet, TouchableOpacity, SafeAreaView, Platform, Alert, StatusBar } from 'react-native';
+import { View, Image, StyleSheet, TouchableOpacity, SafeAreaView, Platform, Alert, StatusBar as RNStatusBar } from 'react-native';
 import { DrawerActions, useFocusEffect } from '@react-navigation/native';
 import React, { useCallback, useEffect, useLayoutEffect, useState, useRef } from 'react';
 import { YaMap, Animation, Marker, Polyline } from 'react-native-yamap';
@@ -9,12 +9,13 @@ import axios from 'axios';
 import { domain_mobile, domain_web } from '../domain';
 import * as Device from 'expo-device';
 import * as Notifications from 'expo-notifications';
+import { StatusBar } from 'expo-status-bar';
 
 Notifications.setNotificationHandler({
   handleNotification: async () => ({
     shouldShowAlert: true,
-    shouldPlaySound: false,
-    shouldSetBadge: false,
+    shouldPlaySound: true,
+    shouldSetBadge: true,
   }),
 });
 
@@ -25,6 +26,7 @@ function MapScreen({ navigation }) {
   const [washeses, setWasheses] = useState([]);
   // const [bLocation, setBLocation] = useState(false);
   const [isOpen, setDrawer] = useState(false);
+  const [notification, setNotification] = useState(false);
   const notificationListener = useRef();
   const responseListener = useRef();
 
@@ -70,27 +72,44 @@ function MapScreen({ navigation }) {
     registerForPushNotificationsAsync();
 
     notificationListener.current = Notifications.addNotificationReceivedListener(notification => {
-        return;
+      console.log(notification);
+      setNotification(notification);
     });
 
     responseListener.current = Notifications.addNotificationResponseReceivedListener(response => {
-      if (response.notification.request.content.categoryIdentifier == "successful"){
-        navigation.navigate("PersonalAccount");
-        navigation.navigate("MyOrders");
-        navigation.navigate('OrderDetails', {orderId: response.notification.request.trigger.payload.order});
-        navigation.navigate('EvaluateService', {orderId: response.notification.request.trigger.payload.order});
-        return;
+      if (Platform.OS == "ios"){
+        if (response.notification.request.content.categoryIdentifier == "successful"){
+          navigation.navigate("PersonalAccount");
+          navigation.navigate("MyOrders");
+          navigation.navigate('OrderDetails', {orderId: response.notification.request.trigger.payload.order});
+          navigation.navigate('EvaluateService', {orderId: response.notification.request.trigger.payload.order});
+          return;
+        }
+        else if(response.notification.request.content.categoryIdentifier == "new_stock"){
+          navigation.navigate("Catalog");
+          return;
+        }
       }
-      if(response.notification.request.content.categoryIdentifier == "new_stock"){
-        navigation.navigate("Catalog");
-        return;
+      else if (Platform.OS == "android"){
+        if (response.notification.request.trigger.remoteMessage.notification.tag == "successful"){
+          navigation.navigate("PersonalAccount");
+          navigation.navigate("MyOrders");
+          navigation.navigate('OrderDetails', {orderId: response.notification.request.trigger.remoteMessage.data.order});
+          navigation.navigate('EvaluateService', {orderId: response.notification.request.trigger.remoteMessage.data.order});
+          return;
+        }
+        else if(response.notification.request.trigger.remoteMessage.notification.tag == "new_stock"){
+          navigation.navigate("Catalog");
+          return;
+        }
       }
+      
     });
 
-    // return () => {
-    //   Notifications.removeNotificationSubscription(notificationListener.current);
-    //   Notifications.removeNotificationSubscription(responseListener.current);
-    // };
+    return () => {
+      Notifications.removeNotificationSubscription(notificationListener.current);
+      Notifications.removeNotificationSubscription(responseListener.current);
+    };
   }, []);
 
   const registerForPushNotificationsAsync = async () => {
@@ -218,7 +237,7 @@ function MapScreen({ navigation }) {
   // YaMap.resetLocale(); // язык системы
   return (
     <View style={styles.container}>
-      {/* <StatusBar style='auto' /> */}
+      <StatusBar />
       <YaMap
         ref={map}
         // userLocationIcon={{ uri: 'https://www.clipartmax.com/png/middle/180-1801760_pin-png.png' }}
@@ -240,11 +259,11 @@ function MapScreen({ navigation }) {
 
       {/* Dimensions.get('window').width */}
       {!isOpen &&
-        <SafeAreaView style={{ position: 'absolute', paddingTop: Platform.OS === "android" ? StatusBar.currentHeight : 0 }}>
+        <SafeAreaView style={{ position: 'absolute', paddingTop: Platform.OS === "android" ? RNStatusBar.currentHeight : 0 }}>
           <View style={{ width: 1, height: Platform.OS === 'ios' ? Dimensions.get('window').height - 100 : Dimensions.get('window').height - 20, justifyContent: 'space-between' }}>
             <View style={{ height: 1, flexDirection: 'row', justifyContent: 'space-between', width: Dimensions.get('window').width, paddingVertical: 30, paddingHorizontal: 20 }}>
               <View style={{ width: 60 }}>
-                <TouchableOpacity activeOpacity={0.8} onPress={() => { setDrawer(true); navigation.dispatch(DrawerActions.openDrawer()); setDrawer(false); }} style={{}} >
+                <TouchableOpacity activeOpacity={0.8} onPress={() => { navigation.dispatch(DrawerActions.openDrawer()); }} style={{}} >
                   <Image source={require('../assets/images/map_main.png')} style={styles.bg_img} />
                 </TouchableOpacity>
               </View>

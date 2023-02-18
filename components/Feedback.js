@@ -6,6 +6,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios from 'axios';
 import { domain_mobile } from '../domain';
 import { getPermissionImage } from '../permissions';
+import { StatusBar } from 'expo-status-bar';
 
 function Feedback({ navigation }) {
 
@@ -64,7 +65,7 @@ function Feedback({ navigation }) {
   return (
     <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false} >
                 <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : "height"} style={{ flex:1 }}> 
-                        
+                        <StatusBar/>
     <View style={styles.container}>
       {/* <Image blurRadius={100} style={[StyleSheet.absoluteFill, styles.image]} source={require('../assets/images/blur_background.png')} resizeMode='cover' /> */}
       {/* <BlurView intensity={100} style={styles.blurContainer}> */}

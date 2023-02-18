@@ -3,6 +3,7 @@ import { Image, ImageBackground, SafeAreaView, StyleSheet, Text, TouchableOpacit
 import { LinearGradient } from 'expo-linear-gradient';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { CommonActions } from '@react-navigation/native';
+import { StatusBar } from 'expo-status-bar';
 
 
 function SuccessfulOrder({ navigation }) {
@@ -23,6 +24,7 @@ function SuccessfulOrder({ navigation }) {
 
   return (
     <SafeAreaView style={styles.container} >
+      <StatusBar/>
       <View style={styles.main}>
 
         <View style={{ alignItems: 'center' }}>

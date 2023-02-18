@@ -5,6 +5,7 @@ import { Ionicons, FontAwesome } from '@expo/vector-icons';
 import axios from 'axios';
 import { domain_web } from '../domain';
 import { CommonActions } from '@react-navigation/native';
+import { StatusBar } from 'expo-status-bar';
 
 function EvaluateService({ navigation, route }) {
   const [check4, setCheck4] = useState(false);
@@ -30,6 +31,7 @@ function EvaluateService({ navigation, route }) {
 
   return (
     <View style={styles.container}>
+      <StatusBar/>
       <Image blurRadius={91} style={[StyleSheet.absoluteFill, styles.image]} source={require('../assets/images/blur_background.png')} resizeMode='cover' />
       {/* <BlurView intensity={100} style={styles.blurContainer}> */}
       <View style={styles.blurContainer}>

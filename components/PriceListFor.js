@@ -6,9 +6,7 @@ import { useLayoutEffect, useState } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios from 'axios';
 import { domain_web } from '../domain';
-
-
-
+import { StatusBar } from 'expo-status-bar';
 
 function PriceListFor({ navigation, route }) {
 
@@ -161,6 +159,7 @@ function PriceListFor({ navigation, route }) {
 
   return (
     <View style={styles.container}>
+      <StatusBar/>
       <Image blurRadius={91} style={[StyleSheet.absoluteFill, styles.image]} source={require('../assets/images/blur_background.png')} resizeMode='cover' />
       <View style={styles.blurContainer}>
 
@@ -220,6 +219,7 @@ const styles = StyleSheet.create({
     color: '#fff',
     fontFamily: 'Raleway_400Regular',
     width: '70%',
+    height: '100%',
   },
   bold_text: {
     fontSize: 18,

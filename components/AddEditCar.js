@@ -8,6 +8,7 @@ import { domain_mobile, domain_web } from '../domain';
 import { Picker } from '@react-native-picker/picker';
 import MaskInput from 'react-native-mask-input'
 import { CommonActions } from '@react-navigation/native';
+import { StatusBar } from 'expo-status-bar';
 
 
 function AddEditCar({ navigation, route }) {
@@ -86,6 +87,7 @@ function AddEditCar({ navigation, route }) {
 
   return (
     <View style={styles.container}>
+      <StatusBar/>
       <Image blurRadius={91} style={[StyleSheet.absoluteFill, styles.image]} source={require('../assets/images/blur_background.png')} resizeMode='cover' />
       {/* <BlurView intensity={100} style={styles.blurContainer}> */}
       <View style={styles.blurContainer}>

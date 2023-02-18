@@ -3,6 +3,7 @@
     "name": "T4YC",
     "slug": "t4yc",
     "version": "0.10",
+    "scheme": "ru.t4yc.moikamobile",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
