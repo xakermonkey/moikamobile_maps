@@ -34,9 +34,12 @@ function PersonalAccount({ navigation }) {
       ),
     });
     (async () => {
-      setName(await AsyncStorage.getItem("name") == null ? "" : await AsyncStorage.getItem("name"));
-      setPhone(await AsyncStorage.getItem("phone") == null ? "" : await AsyncStorage.getItem("phone"));
-      setEmail(await AsyncStorage.getItem("email") == null ? "" : await AsyncStorage.getItem("email"));
+      const name = await AsyncStorage.getItem("name");
+      const phone = await AsyncStorage.getItem("phone");
+      const email = await AsyncStorage.getItem("email");
+      setName(name  == null ? "" : name);
+      setPhone(phone == null ? "" : phone);
+      setEmail(email == null ? "" : email);
     })();
   }, [navigation])
 
@@ -49,7 +52,7 @@ function PersonalAccount({ navigation }) {
     catch(err){
       console.log(err);
     }
-      await AsyncStorage.multiRemove(await (await AsyncStorage.getAllKeys()).filter(obj => obj != "first_join_app"));
+      await AsyncStorage.multiRemove((await AsyncStorage.getAllKeys()).filter(obj => obj != "first_join_app"));
     navigation.dispatch(
       CommonActions.reset({
         index: 0,
@@ -59,7 +62,7 @@ function PersonalAccount({ navigation }) {
 
   const DestroyAccount = () => {
     Alert.alert('Информация', 'Заявка на удаление учетной записи отправлена. В течении 24 часов Вы можете отменить данное действие повторной авторизацией')
-    Logout()
+    Logout();
   }
 
   return (

@@ -169,7 +169,7 @@ function LoginScreen({ navigation }) {
                     <View style={{ alignItems: 'center' }}>
                         <View style={{ alignItems: 'center' }}>
                             <Text style={styles.text_gray}>Нажимая «ОК», Вы соглашаетесь</Text>
-                            <TouchableOpacity activeOpacity={0.9} onPress={() => Linking.openURL('https://t4yc.pythonanywhere.com/ru/contract')}>
+                            <TouchableOpacity activeOpacity={0.9} onPress={() => Linking.openURL('https://time4ycar.ru/ru/contract')}>
                                 <Text style={[styles.text_gray, { fontFamily: 'Raleway_700Bold' }]}>с Политикой и условиями</Text>
                             </TouchableOpacity>
                             <Text style={styles.text_gray}>использования сервиса</Text>

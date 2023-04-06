@@ -1,5 +1,5 @@
 import React from 'react';
-import { StyleSheet, View, Text, Image, TouchableOpacity, ImageBackground, ScrollView, Alert } from 'react-native';
+import { StyleSheet, View, Text, Image, TouchableOpacity, ImageBackground, ScrollView, Alert, Platform, ActivityIndicator } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons, FontAwesome5, Fontisto } from '@expo/vector-icons';
 import { useLayoutEffect, useState, useCallback } from 'react';
@@ -29,15 +29,21 @@ function OrderСompletion({ navigation }) {
   const [token, setToken] = useState(null);
   const [linkListener, setLinkListener] = useState(null);
   const [payUri, setPayUri] = useState(null);
+  const [loading, setLoading] = useState(false)
 
   useLayoutEffect(() => {
     (async () => {
+      setLoading(true);
       const token = await AsyncStorage.getItem("token")
       setToken(token);
-      setCar(await AsyncStorage.getItem("car_name"));
-      setTime(await AsyncStorage.getItem("order_time"));
-      setDate(await AsyncStorage.getItem("order_day"));
-      setWasher(await AsyncStorage.getItem("washer"));
+      const car = await AsyncStorage.getItem("car_name")
+      setCar(car);
+      const order_time = await AsyncStorage.getItem("order_time")
+      setTime(order_time);
+      const order_day = await AsyncStorage.getItem("order_day")
+      setDate(order_day);
+      const washer = await AsyncStorage.getItem("washer")
+      setWasher(washer);
       const sale = await AsyncStorage.getItem("sale")
       setSale(sale);
       const payment = await AsyncStorage.getItem("payment");
@@ -48,8 +54,9 @@ function OrderСompletion({ navigation }) {
       for (let i = 0; i < keys.length; i++) {
         params.servise = [...params.servise, await AsyncStorage.getItem(keys[i])];
       }
-      setBody(await AsyncStorage.getItem("car"))
-      params["body"] = await AsyncStorage.getItem("car");
+      const body = await AsyncStorage.getItem("car")
+      setBody(body)
+      params["body"] = body;
       const res = await axios.get(domain_web + "/get_servise_order", {
         params: params
       });
@@ -65,51 +72,65 @@ function OrderСompletion({ navigation }) {
         const { hostname, path, queryParams } = Linking.parse(res.data.uri);
         setUuid(queryParams.orderId);
         setPayUri(res.data.uri);
+        
       }
+      setLoading(false);
     })();
   }, [navigation])
 
 
-  const checkPayment = useCallback(async () => {
-    const res = await axios.post(domain_mobile + "/api/check_payment", { "uuid": uuid }, { headers: { "Authorization": "Token " + token } });
-    if (res.data.status) {
-      createOrder();
-    } else {
-      Alert.alert("Внимание!", "Оплата была незавершена или отменена");
-    }
-  }, [token, uuid])
+  const checkPayment = useCallback(() => {
+  (async () => {
+      const res = await axios.post(domain_mobile + "/api/check_payment", { "uuid": uuid }, { headers: { "Authorization": "Token " + token } });
+      if (res.data.status) {
+        await createOrder(washer, time, date, body, sale, servise, payment, uuid);
+      } else {
+        Alert.alert("Внимание!", "Оплата была незавершена или отменена");
+      }
+      setLoading(false);
+    })();
+}, [token, uuid, washer, time, date, body, sale, servise, payment, loading])
 
 
   const handler = useCallback(async (event) => {
-    WebBrowser.dismissBrowser();
+    setLoading(true);
+    if (Platform.OS == 'ios'){
+      WebBrowser.dismissBrowser();
+    }
     try {
-      await checkPayment();
+      checkPayment();
     } catch (err) {
       console.log(err);
     }
-  }, [uuid, token])
+  }, [uuid, token, loading])
 
 
 
-  const PayOrder = useCallback(async () => {
-    if (payment == "Безналичный расчёт") {    
-      if (linkListener == null){
-        const listener = Linking.addEventListener("url", handler);
-        setLinkListener(listener);
-      }
-      const results = await WebBrowser.openBrowserAsync(payUri);
-      if (results.type != "dismiss") {
-        await checkPayment();
-      }
-      return;
-    } else {
-      createOrder();
-    }
-  }, [payUri, linkListener])
+  const PayOrder = useCallback(() => {
+    setLoading(true);
+    (async () => {
+        if (payment == "Безналичный расчёт") {    
+          if (linkListener == null){
+            const listener = Linking.addEventListener("url", handler);
+            setLinkListener(listener);
+          }
+          const results = await WebBrowser.openBrowserAsync(payUri);
+          if (results.type != "dismiss") {
+          checkPayment();
+          }
+          return;
+        } else {
+          // setLoading(true);
+          await createOrder(washer, time, date, body, sale, servise, payment, uuid);
+          // setLoading(false);
+        }
+      })();
+    }, [payUri, linkListener, washer, time, date, body, sale, servise, payment, uuid, loading])
 
 
-  const createOrder = async () => {
+  const createOrder = async (washer, time, date, body, sale, servise, payment, uuid) => {
     setDisable(true);
+    setLoading(true);
     try {
       const phone = await AsyncStorage.getItem("phone");
       const res = await axios.post(domain_web + "/create_order",
@@ -122,7 +143,8 @@ function OrderСompletion({ navigation }) {
           servise: servise.map(obj => obj.id),
           payment: payment == "Юридическое лицо" ? "Юр. лицо" : payment,
           phone: phone,
-          number: await AsyncStorage.getItem("car_number")
+          number: await AsyncStorage.getItem("car_number"),
+          payment_id: uuid
         });
       await AsyncStorage.setItem("order_id", res.data.id.toString());
       const token = await AsyncStorage.getItem("token");
@@ -140,6 +162,7 @@ function OrderСompletion({ navigation }) {
       if (payment == "Безналичный расчёт") {    
         await axios.post(domain_mobile + "/api/accept_payment", { "uuid": uuid }, { headers: { "Authorization": "Token " + token } });
       }
+      setLoading(false);
       navigation.navigate("CarWashes");
       setTimeout(() => navigation.navigate("Successful"), 1000)
     } catch (err) {
@@ -158,7 +181,14 @@ function OrderСompletion({ navigation }) {
       return;
     }
 
+  };
+
+  if(loading){
+    return(<View>
+      <ActivityIndicator size='large' />
+    </View>)
   }
+
 
 
   return (
@@ -252,7 +282,7 @@ function OrderСompletion({ navigation }) {
             </View>
           </LinearGradient> */}
 
-          <TouchableOpacity activeOpacity={0.8} onPress={PayOrder} disabled={disable} style={styles.mt_TouchOpac} >
+          <TouchableOpacity activeOpacity={0.8} onPress={PayOrder} disabled={loading} style={styles.mt_TouchOpac} >
             <ImageBackground source={require('../assets/images/button.png')} resizeMode='stretch' style={styles.bg_img} >
               <Text style={styles.text_btn}>Оформить заказ</Text>
             </ImageBackground>

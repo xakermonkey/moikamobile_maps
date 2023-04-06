@@ -318,10 +318,11 @@
 					"FB_SONARKIT_ENABLED=1",
 				);
 				INFOPLIST_FILE = T4YC/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = T4YC;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.navigation";
 				IPHONEOS_DEPLOYMENT_TARGET = 13.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
-				MARKETING_VERSION = 0.10.1;
+				MARKETING_VERSION = 0.12;
 				OTHER_LDFLAGS = (
 					"$(inherited)",
 					"-ObjC",
@@ -352,10 +353,11 @@
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = U7FAJ8NVFV;
 				INFOPLIST_FILE = T4YC/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = T4YC;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.navigation";
 				IPHONEOS_DEPLOYMENT_TARGET = 13.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
-				MARKETING_VERSION = 0.10.1;
+				MARKETING_VERSION = 0.12;
 				OTHER_LDFLAGS = (
 					"$(inherited)",
 					"-ObjC",

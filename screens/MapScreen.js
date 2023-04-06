@@ -10,6 +10,7 @@ import { domain_mobile, domain_web } from '../domain';
 import * as Device from 'expo-device';
 import * as Notifications from 'expo-notifications';
 import { StatusBar } from 'expo-status-bar';
+import * as TaskManager from "expo-task-manager";
 
 Notifications.setNotificationHandler({
   handleNotification: async () => ({
@@ -18,6 +19,21 @@ Notifications.setNotificationHandler({
     shouldSetBadge: true,
   }),
 });
+
+const BACKGROUND_NOTIFICATION_TASK = "BACKGROUND-NOTIFICATION-TASK";
+
+TaskManager.defineTask(
+  BACKGROUND_NOTIFICATION_TASK,
+  ({ data, error, executionInfo }) => {
+    console.log(data);
+    if (error) {
+      console.log("error occurred");
+    }
+    if (data) {
+      console.log("data-----", data);
+    }
+  }
+);
 
 function MapScreen({ navigation }) {
 
@@ -77,6 +93,7 @@ function MapScreen({ navigation }) {
     });
 
     responseListener.current = Notifications.addNotificationResponseReceivedListener(response => {
+      console.log(response);
       if (Platform.OS == "ios"){
         if (response.notification.request.content.categoryIdentifier == "successful"){
           navigation.navigate("PersonalAccount");

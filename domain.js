@@ -5,5 +5,5 @@
 // export const domain_web = "https://t4yc.pythonanywhere.com"
 // export const domain_mobile = "https://blukky.pythonanywhere.com"
 
-export const domain_web = "http://192.168.0.101:8000"
-export const domain_mobile = "http://192.168.0.101:8001"
+export const domain_web = "https://time4ycar.ru"
+export const domain_mobile = "https://time4ycar.pythonanywhere.com"

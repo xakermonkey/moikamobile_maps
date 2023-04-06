@@ -60,8 +60,9 @@
 	<string>Предоставьте T4YC доступ к фотографиям, чтобы Вы могли прикрепить к своему запросу ранее сделанный скриншот</string>
 	<key>UIBackgroundModes</key>
 	<array>
-		<string>location</string>
 		<string>fetch</string>
+		<string>location</string>
+		<string>remote-notification</string>
 	</array>
 	<key>UILaunchStoryboardName</key>
 	<string>SplashScreen</string>

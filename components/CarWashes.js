@@ -364,7 +364,7 @@ function CarWashes({ navigation, route }) {
           <LinearGradient
             colors={['#01010199', '#35343499']}
             start={[0, 1]}
-            style={[styles.gradient_background, {height:'40%', marginBottom:5}]} >
+            style={[styles.gradient_background, {maxHeight:'40%', marginBottom:5}]} >
             <View style={{ alignItems: 'center' }}>
               <Text style={styles.stocks}>Акции</Text>
             </View>

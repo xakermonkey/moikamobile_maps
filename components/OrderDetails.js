@@ -14,6 +14,7 @@ function OrderDetails({ navigation, route }) {
 
   const [order, setOrder] = useState(null);
   const [servise, setServise] = useState([]);
+  const [loading, setLoading] = useState(false);
 
   useLayoutEffect(() => {
     navigation.setOptions({
@@ -34,15 +35,16 @@ function OrderDetails({ navigation, route }) {
     });
     (async () => {
       const res = await axios.get(domain_web + "/get_detail_order_" + route.params.orderId)
-      console.log(res.data.order);
+      
       setOrder(res.data.order);
       setServise(res.data.servise);
     })();
   }, [navigation])
 
-
   const deleteOrder = async () => {
+    setLoading(true);
     const res = await axios.get(domain_web + "/delete_order_" + route.params.orderId)
+    setLoading(false);
     navigation.dispatch(
       CommonActions.reset({
           index: 0,
@@ -51,7 +53,7 @@ function OrderDetails({ navigation, route }) {
   }
 
 
-  if (order == null) {
+  if (order == null | loading) {
     return (
       <View style={{ flex: 1 }} >
         <ActivityIndicator />

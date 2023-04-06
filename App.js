@@ -1,5 +1,5 @@
 import 'react-native-gesture-handler';
-import React, { useEffect, useLayoutEffect, useState } from 'react';
+import React, { useEffect, useRef } from 'react';
 
 // import { NavigationContainer } from '@react-navigation/native';
 // import { createStackNavigator } from '@react-navigation/stack';
@@ -10,32 +10,11 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { Raleway_400Regular, Raleway_700Bold, useFonts } from '@expo-google-fonts/raleway';
 import { Montserrat_400Regular, Montserrat_700Bold } from '@expo-google-fonts/montserrat';
 
-// import AppLoading from 'expo-splash-screen';
-
 import LoginScreen from './screens/LoginScreen';
 import DataScreen from './screens/DataScreen';
 import VerificationCodeScreen from './screens/VerificationCodeScreen';
 import MainMenuScreen from './screens/MainMenuScreen';
 import HowItWorksScreen from './screens/HowItWorksScreen';
-// const Stack = createStackNavigator();
-import * as Notifications from "expo-notifications";
-import * as TaskManager from "expo-task-manager";
-
-const BACKGROUND_NOTIFICATION_TASK = "BACKGROUND-NOTIFICATION-TASK";
-
-TaskManager.defineTask(
-  BACKGROUND_NOTIFICATION_TASK,
-  ({ data, error, executionInfo }) => {
-    console.log(data);
-    if (error) {
-      console.log("error occurred");
-    }
-    if (data) {
-      console.log("data-----", data);
-    }
-  }
-);
-
 const Stack = createNativeStackNavigator();
 
 export default function App() {
@@ -46,11 +25,6 @@ export default function App() {
   if (!fontsLoaded) {
     return null;
   }
-  // if (!fontsLoaded) {
-  //   SplashScreen.preventAutoHideAsync();
-  //   return <View />
-  // }
-  Notifications.registerTaskAsync(BACKGROUND_NOTIFICATION_TASK);
 
   return (
     <NavigationContainer>
@@ -105,4 +79,16 @@ export default function App() {
       </Stack.Navigator>
     </NavigationContainer>
   );
+
+  async function registerForPushNotificationsAsync() {
+    if (Platform.OS === 'android') {
+      await Notifications.setNotificationChannelAsync('Уведомления', {
+        name: 'Уведомления',
+        importance: Notifications.AndroidImportance.MAX,
+        vibrationPattern: [0, 250, 250, 250],
+        lightColor: '#FF231F7C',
+      });
+    }
+  }
+  
 }
