@@ -1,7 +1,7 @@
-import { View, Image, StyleSheet, TouchableOpacity, SafeAreaView, Platform, Alert, StatusBar as RNStatusBar } from 'react-native';
+import { View, Image, StyleSheet, TouchableOpacity, SafeAreaView, Platform, Alert, StatusBar as RNStatusBar, ActivityIndicator } from 'react-native';
 import { DrawerActions, useFocusEffect } from '@react-navigation/native';
 import React, { useCallback, useEffect, useLayoutEffect, useState, useRef } from 'react';
-import { YaMap, Animation, Marker, Polyline } from 'react-native-yamap';
+import { YaMap, Animation, Marker, Polyline, ClusteredYamap } from 'react-native-yamap';
 import { Dimensions } from 'react-native'
 import * as Location from 'expo-location';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -40,6 +40,7 @@ function MapScreen({ navigation }) {
   const [washes, setWashes] = useState({});
   const [route, setRoute] = useState([]);
   const [washeses, setWasheses] = useState([]);
+  const [loading, setLoading] = useState(false);
   // const [bLocation, setBLocation] = useState(false);
   const [isOpen, setDrawer] = useState(false);
   const [notification, setNotification] = useState(false);
@@ -57,6 +58,7 @@ function MapScreen({ navigation }) {
       if (isOpen === true) {
         setDrawer(false)
       }
+      setLoading(true);
       if (map.current) {
         let { status } = await Location.requestForegroundPermissionsAsync(); // запрос прав на определение геопозиции
         const loc = await Location.getCurrentPositionAsync(); // получение последних известных координат
@@ -77,10 +79,11 @@ function MapScreen({ navigation }) {
         if (loc == null) { // если нет прав или не получилось получить координаты
           return;
         }
+        setLoading(false);
         // console.warn(loc.coords.latitude);
         map.current.setCenter({ lon: loc.coords.longitude, lat: loc.coords.latitude }, 15, 0, 0, 1, Animation.SMOOTH); //координаты, зум, поворотом по азимуту и наклоном карты, длительность анимации, анимация
       }
-
+      
     })();
   }, []));
 
@@ -250,6 +253,14 @@ function MapScreen({ navigation }) {
       return;
     }
   }
+
+  if (loading){
+    return (
+      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center'}} >
+        <ActivityIndicator color='black' size={'large'}/>
+      </View>
+    )
+  }
   //ПЕРЕСМОТРЕТЬ КАРТУУУУ!!!!!
   // YaMap.resetLocale(); // язык системы
   return (
@@ -260,17 +271,38 @@ function MapScreen({ navigation }) {
         // userLocationIcon={{ uri: 'https://www.clipartmax.com/png/middle/180-1801760_pin-png.png' }}
         style={styles.container}
       >
-        {washeses.map(obj => <Marker scale={0.05} key={obj.id} point={{ lat: parseFloat(obj.lat), lon: parseFloat(obj.lon) }}
-          source={{ uri: domain_web + obj.avatar }}
+        <ClusteredYamap
+      clusterColor="blue"
+      clusteredMarkers={
+        washeses.map(obj => {
+          return({
+            point: {
+              lat: parseFloat(obj.lat),
+              lon: parseFloat(obj.lon),
+            },
+            data: {
+              avatar: obj.avatar,
+              id: obj.id,
+              sale: obj.sale,
+            }
+        })})
+      }
+      renderMarker={(info, index) => (
+        <Marker scale={0.05} key={index} point={info.point}
+          source={{ uri: domain_web + info.data.avatar }}
           onPress={() => {
             (async () => {
-              await AsyncStorage.setItem("washer", obj.id.toString());
-              await AsyncStorage.setItem("sale", obj.sale.toString());
-              navigation.navigate('Catalog')
-              navigation.navigate('PointCarWash')
+              await AsyncStorage.setItem("washer", info.data.id.toString());
+              await AsyncStorage.setItem("sale", info.data.sale.toString());
+              navigation.navigate('Catalog');
+              navigation.navigate('PointCarWash');
             })();
           }}
-        />)}
+        />
+      )}
+      style={{flex: 1}}
+    />
+        
         {route != [] && <Polyline strokeWidth={7} strokeColor="#7CD0FF" points={route} />}
       </YaMap>
 
