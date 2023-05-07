@@ -1,5 +1,5 @@
 import React, { useState, useLayoutEffect, useCallback } from 'react';
-import { StyleSheet, View, Text, SafeAreaView, TouchableOpacity, ActivityIndicator, Image, Alert, FlatList, TouchableWithoutFeedback } from 'react-native';
+import { StyleSheet, View, Text, SafeAreaView, TouchableOpacity, ActivityIndicator, Image, Alert, FlatList, TouchableWithoutFeedback, Linking } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons, FontAwesome } from '@expo/vector-icons';
 import axios from 'axios';
@@ -263,10 +263,11 @@ function CarWashes({ navigation, route }) {
           colors={['#01010199', '#35343499']}
           start={[0, 1]}
           style={styles.gradient_background} >
-          <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start', height:100 }}>
+          <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start' }}>
             <Image source={{ uri: domain_web + item.avatar }} style={{ width: '28%', height: '100%', borderRadius: 5 }} width={95} height={95} resizeMode='center' />
             <View style={{ width: '43%' }}>
               <Text style={styles.stocks}>{item.address}</Text>
+              <Text onPress={()=>{Linking.openURL('tel:'+item.phone);}} style={styles.text_in_item}>{item.phone}</Text>
               <Text style={styles.text_in_item}>Скидка {item.sale}%</Text>
               <Text style={styles.text_in_item}>{coords != null && "В " + getDistance({ latitude: coords.coords.latitude, longitude: coords.coords.longitude }, { latitude: parseFloat(item.lat), longitude: parseFloat(item.lon) }) + " м от вас"}</Text>
             </View>
@@ -282,10 +283,11 @@ function CarWashes({ navigation, route }) {
             colors={['#01010199', '#35343499']}
             start={[0, 1]}
             style={styles.gradient_background} >
-            <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start', height:100 }}>
+            <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start' }}>
               <Image source={{ uri: domain_web + item.avatar }} style={{ width: '28%', height: '100%', borderRadius: 5 }} width={95} height={95} resizeMode='center' />
               <View style={{ width: '50%' }}>
                 <Text style={styles.stocks}>{item.address}</Text>
+                <Text onPress={()=>{Linking.openURL('tel:'+item.phone);}} style={styles.text_in_item}>{item.phone}</Text>
                 <Text style={styles.text_in_item}>Скидка {item.sale}%</Text>
                 <Text style={styles.text_in_item}>{coords != null && "В " + getDistance({ latitude: coords.coords.latitude, longitude: coords.coords.longitude }, { latitude: parseFloat(item.lat), longitude: parseFloat(item.lon) }) + " м от вас"}</Text>
               </View>

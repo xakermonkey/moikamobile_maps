@@ -1,5 +1,5 @@
 import React, { useLayoutEffect, useState, useRef } from 'react';
-import { View, StyleSheet, TouchableOpacity, Dimensions, Text } from 'react-native';
+import { View, StyleSheet, TouchableOpacity, Dimensions, Text, Platform } from 'react-native';
 import { Video } from 'expo-av';
 import { AntDesign } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -12,9 +12,14 @@ function HowItWorksScreen({ navigation }) {
 
   const video = useRef(null);
   const [status, setStatus] = useState({});
-  const [videos, setVideos] = useState([["Авторизация", require('../assets/videos/auth.mp4')],
-  ["Оформление заказа", require('../assets/videos/order.mp4')],
-  ["Добавление автомобиля", require('../assets/videos/add_car.mp4')]]);
+  const [videos, setVideos] = useState([
+    ["Авторизация", require('../assets/videos/auth.mp4')],
+    ["Оформление заказа", require('../assets/videos/order.mp4')],
+    ["Добавление автомобиля", require('../assets/videos/add_car.mp4')]]);
+  const [ios_videos, setIOSVideos] = useState([
+    ["Авторизация", require('../assets/videos/ios/auth.mp4')],
+    ["Оформление заказа", require('../assets/videos/ios/order.mp4')],
+    ["Добавление автомобиля", require('../assets/videos/ios/add_car.mp4')]]);
 
   const [selectSnap, setSelectSnap] = useState(0);
 
@@ -48,7 +53,7 @@ function HowItWorksScreen({ navigation }) {
         <Video
           ref={video}
           style={{ height: "100%", width: "100%", borderRadius:5  }}
-          source={videos[index][1]}
+          source={Platform.OS == 'ios' ? ios_videos[index][1] : videos[index][1]}
           useNativeControls
           resizeMode="contain"
           isLooping
@@ -62,7 +67,7 @@ function HowItWorksScreen({ navigation }) {
     <View style={styles.container}>
       <StatusBar/>
         <Carousel
-          data={videos}
+          data={Platform.OS == 'ios' ? ios_videos : videos}
           style={{ flex: 1 }}
           renderItem={horizontalCarousel}
           sliderWidth={Dimensions.get("window").width}
@@ -73,7 +78,7 @@ function HowItWorksScreen({ navigation }) {
         <Text style={{fontFamily:'Raleway_700Bold', textTransform:'uppercase', color:'#fff', fontSize:18, marginTop:'5%'}}>{videos[selectSnap][0]}</Text>
         <Pagination
           activeDotIndex={selectSnap}
-          dotsLength={videos.length}
+          dotsLength={Platform.OS == 'ios' ? ios_videos.length : videos.length}
           containerStyle={{ height: '100%' }}
           // dotColor='#7BCFD6'
           dotStyle={{ backgroundColor: '#7BCFD6', width: 15, height: 15, borderRadius: 50 }}

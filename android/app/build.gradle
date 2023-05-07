@@ -149,8 +149,8 @@ android {
         applicationId 'ru.t4yc.moikamobile'
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
-        versionCode 2
-        versionName "0.12"
+        versionCode 4
+        versionName "0.14"
         buildConfigField "boolean", "IS_NEW_ARCHITECTURE_ENABLED", isNewArchitectureEnabled().toString()
 
         if (isNewArchitectureEnabled()) {
@@ -331,6 +331,9 @@ dependencies {
     } else {
         implementation jscFlavor
     }
+}
+configurations.all {
+    exclude group: 'com.google.android.gms', module: 'play-services-safetynet'
 }
 
 if (isNewArchitectureEnabled()) {
