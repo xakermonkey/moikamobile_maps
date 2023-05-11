@@ -15,7 +15,6 @@ import { Platform } from 'react-native';
 
 
 
-
 function CarWashes({ navigation, route }) {
 
   const [washes, setWashes] = useState([]); // Массив автомоек
@@ -60,7 +59,7 @@ function CarWashes({ navigation, route }) {
 
   }
 
-  const WashesSorted = (washes, coord) => { // сортировка моек
+  const washesSorted = (washes, coord) => { // сортировка моек
     if (route.params == undefined) { // если не переданы никакие параметры то сортируется по расстоянию
       if (coord == null) { // если не переданы координаты, значит локация выключена
         return washes;
@@ -150,7 +149,7 @@ function CarWashes({ navigation, route }) {
           }
         );
         setCoords(col); // сохранение полученных координат в State
-        setWashes(WashesSorted(res.data.washer, col)); // сортировка моек и сохранение в State
+        setWashes(washesSorted(res.data.washer, col)); // сортировка моек и сохранение в State
         setStock(res.data.stock); // сохранение акций в State
         const token = await AsyncStorage.getItem("token"); // получение токена из хранилища
         if (token != null) { // если токен не равен null
@@ -208,7 +207,7 @@ function CarWashes({ navigation, route }) {
     );
     const col = await Location.getLastKnownPositionAsync(); // получение координат последнего местоположения
     setCoords(col); // сохранение полученных координат в State
-    setWashes(WashesSorted(res.data.washer, col)); // сортировка моек и занесение их в State
+    setWashes(washesSorted(res.data.washer, col)); // сортировка моек и занесение их в State
     setStock(res.data.stock); // сохранение акций в State
     setLoading(false) // конец загрузки установка load в false
     setBVeiw(false)
@@ -231,7 +230,7 @@ function CarWashes({ navigation, route }) {
       );
       const col = await Location.getLastKnownPositionAsync(); // получние последнего местоположения
       setCoords(col); // сохранение полученных координат в State
-      setWashes(WashesSorted(res.data.washer, col)); // сортировка моек и сохранение в State
+      setWashes(washesSorted(res.data.washer, col)); // сортировка моек и сохранение в State
       setStock(res.data.stock); // сохранение в State акций
       const token = await AsyncStorage.getItem("token"); // получение токена авторизации 
       if (token != null) { // если пользователь авторизирован
@@ -256,6 +255,14 @@ function CarWashes({ navigation, route }) {
     )
   }
 
+  const ConvertDistance = (item) => {
+    var dist = getDistance({ latitude: coords.coords.latitude, longitude: coords.coords.longitude }, { latitude: parseFloat(item.lat), longitude: parseFloat(item.lon) });
+    if (dist < 1000){
+      return dist + " м"
+    }
+    return (dist /1000).toFixed(2) + " км"
+  }
+
   const renderWashes = ({ item }) => { // рендеринг мойки
     return (
       Platform.OS === 'ios' ? <TouchableOpacity onPress={() => selectWasher(item.id, item.sale)} activeOpacity={0.7} style={styles.mt_TouchOpac}>
@@ -264,12 +271,12 @@ function CarWashes({ navigation, route }) {
           start={[0, 1]}
           style={styles.gradient_background} >
           <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-            <Image source={{ uri: domain_web + item.avatar }} style={{ width: '28%', height: '100%', borderRadius: 5 }} width={95} height={95} resizeMode='center' />
+            <Image cacheKey={item.avatar} source={{ uri: domain_web + item.avatar }} style={{ width: '28%', height: '100%', borderRadius: 5 }} width={95} height={95} resizeMode='center' />
             <View style={{ width: '43%' }}>
               <Text style={styles.stocks}>{item.address}</Text>
               <Text onPress={()=>{Linking.openURL('tel:'+item.phone);}} style={styles.text_in_item}>{item.phone}</Text>
               <Text style={styles.text_in_item}>Скидка {item.sale}%</Text>
-              <Text style={styles.text_in_item}>{coords != null && "В " + getDistance({ latitude: coords.coords.latitude, longitude: coords.coords.longitude }, { latitude: parseFloat(item.lat), longitude: parseFloat(item.lon) }) + " м от вас"}</Text>
+              <Text style={styles.text_in_item}>{coords != null && "В " + ConvertDistance(item) + " от вас"}</Text>
             </View>
             <LinearGradient colors={['#FFF73780', '#FFF97480']} start={[1, 0]} style={styles.rating} >
               <Text style={styles.stocks}>{item.rate.count_rate == 0 ? "0.00" : (item.rate.mean_rate / item.rate.count_rate).toFixed(2)}</Text>
@@ -289,7 +296,7 @@ function CarWashes({ navigation, route }) {
                 <Text style={styles.stocks}>{item.address}</Text>
                 <Text onPress={()=>{Linking.openURL('tel:'+item.phone);}} style={styles.text_in_item}>{item.phone}</Text>
                 <Text style={styles.text_in_item}>Скидка {item.sale}%</Text>
-                <Text style={styles.text_in_item}>{coords != null && "В " + getDistance({ latitude: coords.coords.latitude, longitude: coords.coords.longitude }, { latitude: parseFloat(item.lat), longitude: parseFloat(item.lon) }) + " м от вас"}</Text>
+                <Text style={styles.text_in_item}>{coords != null && "В " + ConvertDistance(item) + " от вас"}</Text>
               </View>
               <LinearGradient colors={['#FFF73780', '#FFF97480']} start={[1, 0]} style={styles.rating} >
                 <Text style={styles.stocks}>{item.rate.count_rate == 0 ? "0.00" : (item.rate.mean_rate / item.rate.count_rate).toFixed(2)}</Text>

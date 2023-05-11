@@ -11,6 +11,7 @@ import * as Device from 'expo-device';
 import * as Notifications from 'expo-notifications';
 import { StatusBar } from 'expo-status-bar';
 import * as TaskManager from "expo-task-manager";
+import { log } from 'react-native-reanimated';
 
 Notifications.setNotificationHandler({
   handleNotification: async () => ({
@@ -40,10 +41,12 @@ function MapScreen({ navigation }) {
   const [washes, setWashes] = useState({});
   const [route, setRoute] = useState([]);
   const [washeses, setWasheses] = useState([]);
+  const [showWasheses, setShowWasheses] = useState([]);
   const [loading, setLoading] = useState(false);
   const [isOpen, setDrawer] = useState(false);
   const [notification, setNotification] = useState(false);
   const notificationListener = useRef();
+  const [interval, setMyInterval] = useState(null);
   const responseListener = useRef();
 
 
@@ -51,6 +54,22 @@ function MapScreen({ navigation }) {
   YaMap.setLocale('ru_RU');
 
   map = React.createRef()
+
+  const getOrderWashes = async () => {
+    const phone = await AsyncStorage.getItem("phone"); // получение телефона из хранилища
+    const res = await axios.get(domain_web + "/get_address_moika", { params: { phone: phone } }); // запрос на получение адреса мойки ближайшего заказа
+    setWashes(res.data); // сохранеине адреса в State
+  }
+
+  const getWasheses = async () => {
+    let loc = await AsyncStorage.getItem("location");
+    if (loc == null) {
+      loc = "Краснодар";
+    }
+    let phone = await AsyncStorage.getItem("phone")
+    const ret = await axios.get(domain_web + "/get_all_washes", { params: { location: loc, phone: phone } })
+    setWasheses(ret.data);
+  }
 
   useFocusEffect(useCallback(() => { // функция при попадании экрана в фокус
     (async () => {
@@ -64,33 +83,29 @@ function MapScreen({ navigation }) {
         if (status !== 'granted') {
           Alert.alert("Ошибка", "Необходимо включить определение геопозиции");
         }
-        const phone = await AsyncStorage.getItem("phone"); // получение телефона из хранилища
-        const res = await axios.get(domain_web + "/get_address_moika", { params: { phone: phone } }); // запрос на получение адреса мойки ближайшего заказа
-        setWashes(res.data); // сохранеине адреса в State
         if (loc == null) { // если нет прав или не получилось получить координаты
           return;
         }
-
-        // console.warn(loc.coords.latitude);
-        map.current.setCenter({ lon: loc.coords.longitude, lat: loc.coords.latitude }, 15, 0, 0, 1, Animation.SMOOTH); //координаты, зум, поворотом по азимуту и наклоном карты, длительность анимации, анимация
+        map.current.setCenter({ lon: loc.coords.longitude, lat: loc.coords.latitude }, 16, 0, 0, 1, Animation.SMOOTH); //координаты, зум, поворотом по азимуту и наклоном карты, длительность анимации, анимация
       }
 
     })();
-    setLoading(true);
-    AsyncStorage.getItem("location").then(loc => {
-      if (loc == null) {
-        loc = "Краснодар";
-      }
-      AsyncStorage.getItem("phone").then(phone => {
-        axios.get(domain_web + "/get_all_washes", { params: { location: loc, phone: phone } })
-          .then(ret => {
-            setWasheses(ret.data);
-            setLoading(false);
-            // сохранение всех моек в State // запрос всех моек в городе
-          })
-      })
-    })
+    getOrderWashes();
+    getWasheses();
+
   }, []));
+
+
+
+  const showWashes = useCallback(async () => {
+    console.log(washeses);
+    const start = showWasheses.length
+    const end = showWasheses.length + 10 > washeses.length ? showWasheses.length + (washeses.length - showWasheses.length) : showWasheses.length + 10
+    setShowWasheses([...showWasheses, ...washeses.slice(start, end)])
+    if (end == washeses.length && end != 0) {
+      clearInterval(interval);
+    }
+  }, [washeses, showWasheses])
 
   useEffect(() => {
     registerForPushNotificationsAsync();
@@ -193,6 +208,15 @@ function MapScreen({ navigation }) {
       }
     });
   }
+  const getVisibleRegion = () => {
+    return new Promise((resolve) => {
+      if (map.current) {
+        map.current.getVisibleRegion((region) => {
+          resolve(region);
+        });
+      }
+    });
+  }
   zoomUp = async () => { // приближение
     const position = await getCurrentPosition();
     // console.log(position);
@@ -207,12 +231,32 @@ function MapScreen({ navigation }) {
       map.current.setZoom(position.zoom * 0.9, 0.5); // зум, скорост анимации
     }
   };
-  zoomToMarker = async () => { // приближение к себе
+  zoomToMe = async () => { // приближение к себе
     if (map.current) {
       const loc = await Location.getLastKnownPositionAsync();
       map.current.setCenter({ lon: loc.coords.longitude, lat: loc.coords.latitude }, 15, 0, 0, 1, Animation.SMOOTH); //координаты, зум, поворотом по азимуту и наклоном карты, длительность анимации, анимация
     }
   };
+
+  const checkVisible = (marker, region) => {
+    if (marker.lat < region.bottomRight.lat || marker.lat > region.topLeft.lat ||
+      marker.lon > region.bottomRight.lon || marker.lon < region.topLeft.lon) {
+      return false;
+    }
+    return true;
+  }
+
+  const onCameraPositionChangeEnd = async () => {
+    if (showWasheses.length < washeses.length) {
+      const region = await getVisibleRegion();
+      let shWasheses = washeses.filter(obj => checkVisible(obj, region));
+      // if (shWasheses > 100) {
+      //   shWasheses = shWasheses.slice(0, 100);
+      // }
+      setShowWasheses(shWasheses);
+    }
+
+  }
 
 
 
@@ -283,8 +327,9 @@ function MapScreen({ navigation }) {
         // userLocationIcon={{ uri: 'https://www.clipartmax.com/png/middle/180-1801760_pin-png.png' }}
         style={styles.container}
         clusterColor="blue"
+        onCameraPositionChange={onCameraPositionChangeEnd}
         clusteredMarkers={
-          washeses.map(obj => {
+          showWasheses.map(obj => {
             return ({
               point: {
                 lat: parseFloat(obj.lat),
@@ -354,7 +399,7 @@ function MapScreen({ navigation }) {
                   </TouchableOpacity>
                 </View>
                 <View style={{ width: 60 }}>
-                  <TouchableOpacity activeOpacity={0.8} onPress={zoomToMarker} style={{}} >
+                  <TouchableOpacity activeOpacity={0.8} onPress={zoomToMe} style={{}} >
                     <Image source={require('../assets/images/map_navigation.png')} style={styles.bg_img} />
                   </TouchableOpacity>
                 </View>

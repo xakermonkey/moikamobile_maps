@@ -6,8 +6,8 @@ import { domain_web } from '../domain';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { CommonActions } from '@react-navigation/native';
 import Carousel, { Pagination } from 'react-native-snap-carousel';
-// import Carousel, { Pagination } from '@types/react-native-snap-carousel';
 import { StatusBar } from 'expo-status-bar';
+import FastImage from 'react-native-fast-image';
 
 function PointCarWash({ navigation, route }) {
 
@@ -17,45 +17,47 @@ function PointCarWash({ navigation, route }) {
   const [selectFilt, setSelectFilt] = useState(0);
   const [currentIndex, setCurrentIndex] = useState([]);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [washer, setWasher] = useState(null);
 
   const carouselRef = useRef()
 
   useLayoutEffect(() => {
     navigation.setOptions({
       title: 'ЗАГРУЗКА...',
-        headerShadowVisible: false,
-        headerStyle: {
-          backgroundColor: '#6E7476',
+      headerShadowVisible: false,
+      headerStyle: {
+        backgroundColor: '#6E7476',
 
-        },
-        headerTintColor: '#fff',
-        headerTitleStyle: {
-          textTransform: 'uppercase',
-          fontFamily: 'Raleway_700Bold',
-        },
-        headerLeft: () => (
-          <TouchableOpacity style={{left:10}} onPress={() => navigation.navigate('CarWashes')} activeOpacity={0.7}>
-            <Ionicons name='chevron-back' size={32} color={'#7CD0D7'} />
-          </TouchableOpacity>
-        )
+      },
+      headerTintColor: '#fff',
+      headerTitleStyle: {
+        textTransform: 'uppercase',
+        fontFamily: 'Raleway_700Bold',
+      },
+      headerLeft: () => (
+        <TouchableOpacity style={{ left: 10 }} onPress={() => navigation.navigate('CarWashes')} activeOpacity={0.7}>
+          <Ionicons name='chevron-back' size={32} color={'#7CD0D7'} />
+        </TouchableOpacity>
+      )
     });
     (async () => {
       const token = await AsyncStorage.getItem("token");
       const washer = await AsyncStorage.getItem("washer");
-      const res = await axios.get(domain_web + `/get_washer/${washer}`,)
+      setWasher(washer);
+      const res = await axios.get(domain_web + `/get_washer/${washer}`)
       setFilt(Object.keys(res.data.photo));
       setCurrentIndex(new Array(Object.keys(res.data.photo).length).fill(0));
       setPhoto(res.data.photo);
       navigation.setOptions({
         title: res.data.washer.name_washer,
         headerRight: () => (
-          <TouchableOpacity style={{ right:20 }} onPress={ async () => {
+          <TouchableOpacity style={{ right: 20 }} onPress={async () => {
             if (token != null) {
               const washer = await AsyncStorage.getItem("washer")
               const res = await axios.get(domain_web + "/" + washer + "/get_work_time");
               if (Object.keys(res.data).length != 0) {
                 navigation.navigate('MakingOrderScreen');
-              }else{
+              } else {
                 Alert.alert("Ошибка", "В данную автомойку нельзя записаться");
               }
             } else {
@@ -88,7 +90,14 @@ function PointCarWash({ navigation, route }) {
   const renderPhoto = ({ item, index }) => {
     return (
       <View style={{ alignItems: 'center' }}>
-        <Image style={{width:"97%", height:"100%"}} width="97%" height="100%" source={{ uri: domain_web + item.photo }} />
+        <FastImage
+          style={{ width: "97%", height: "100%" }}
+          width="97%"
+          height="100%"
+          source={{
+            uri: domain_web + item.photo,
+            priority: index == 0 ? FastImage.priority.high : index == 1 ? FastImage.priority.normal : FastImage.priority.low 
+          }} />
         {/* resizeMethod='auto' resizeMode='contain' */}
       </View>
     );
@@ -117,7 +126,7 @@ function PointCarWash({ navigation, route }) {
 
   return ( // Внешняя
     <View style={styles.container}>
-        <StatusBar/>
+      <StatusBar />
       <Pagination
         activeDotIndex={selectFilt}
         dotsLength={filt.length}
