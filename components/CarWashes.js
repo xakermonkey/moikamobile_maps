@@ -135,8 +135,10 @@ function CarWashes({ navigation, route }) {
         }
       }
       try {
-        let countries = await AsyncStorage.getItem("countries");
-        if (countries) {
+        console.log("Start Layout");
+        let countries = JSON.parse(await AsyncStorage.getItem("countries"));
+        console.log(countries);
+        if (countries == null) {
           const ret = await axios.get(domain_web + "/get_country") // получение всех городов
           countries = ret.data.country
           AsyncStorage.setItem("countries", JSON.stringify(ret.data.country))
@@ -147,10 +149,11 @@ function CarWashes({ navigation, route }) {
           setLocation(location)
         }
         else { // иначе берем первый город из ответа на запрос 
-          setLocation(ret.data.country[0]);
+          setLocation(countries[0]);
         }
-        let stocks = await AsyncStorage.getItem("stocks");
-        let washes = await AsyncStorage.getItem("washeses");
+        let stocks = JSON.parse(await AsyncStorage.getItem("_stocks"));
+        let washes = JSON.parse(await AsyncStorage.getItem("washeses"));
+        console.log(stocks, washes);
         if (stocks == null || washes == null) {
           const phone = await AsyncStorage.getItem("phone"); // получение телефона из хранилища
           const res = await axios.get(domain_web + "/get_catalog", // получение моек с фильтрами
@@ -158,19 +161,20 @@ function CarWashes({ navigation, route }) {
               params: {
                 filter: route.params == undefined ? [] : route.params.filters,
                 sorted: route.params == undefined ? 0 : route.params.sorted,
-                location: location == null ? ret.data.country[0] : location,
+                location: location == null ? countries[0] : location,
                 phone: phone
               }
             }
           );
           stocks = res.data.stock
           washes = res.data.washer
-          AsyncStorage.setItem("stocks", JSON.stringify(res.data.stock));
-          AsyncStorage.setItem("washeses", JSON.stringify(res.data.washer));
+          AsyncStorage.setItem("_stocks", JSON.stringify(stocks));
+          AsyncStorage.setItem("washeses", JSON.stringify(washes));
         }
         setCoords(col); // сохранение полученных координат в State
         setWashes(washesSorted(washes, col)); // сортировка моек и сохранение в State
         setStock(stocks); // сохранение акций в State
+        console.log("finish Layout");
         checkCar();
       }
       catch (err) {
@@ -182,6 +186,7 @@ function CarWashes({ navigation, route }) {
 
 
   const checkUpdate = async () => {
+    console.log("Start CheckUpdate");
     const col = await Location.getLastKnownPositionAsync();
     const countries = JSON.parse(await AsyncStorage.getItem("countries"));
     const location = await AsyncStorage.getItem("location"); // получение города из хранилища
@@ -197,15 +202,16 @@ function CarWashes({ navigation, route }) {
         params: {
           filter: route.params == undefined ? [] : route.params.filters,
           sorted: route.params == undefined ? 0 : route.params.sorted,
-          location: location == null ? ret.data.country[0] : location,
+          location: location == null ? countries[0] : location,
           phone: phone
         }
       }
     );
     setWashes(washesSorted(res.data.washer, col)); // сортировка моек и сохранение в State
     setStock(res.data.stock); // сохранение акций в State
-    AsyncStorage.setItem("stocks", JSON.stringify(res.data.stock));
+    AsyncStorage.setItem("_stocks", JSON.stringify(res.data.stock));
     AsyncStorage.setItem("washeses", JSON.stringify(res.data.washer));
+    console.log("End CheckUpdate");
 
   }
 
@@ -278,7 +284,7 @@ function CarWashes({ navigation, route }) {
     setWashes(washesSorted(res.data.washer, col)); // сортировка моек и занесение их в State
     setStock(res.data.stock); // сохранение акций в State
     setLoading(false) // конец загрузки установка load в false
-    AsyncStorage.setItem("stocks", JSON.stringify(res.data.stock));
+    AsyncStorage.setItem("_stocks", JSON.stringify(res.data.stock));
     AsyncStorage.setItem("washeses", JSON.stringify(res.data.washer));
     setBVeiw(false)
   }
@@ -302,16 +308,9 @@ function CarWashes({ navigation, route }) {
       setCoords(col); // сохранение полученных координат в State
       setWashes(washesSorted(res.data.washer, col)); // сортировка моек и сохранение в State
       setStock(res.data.stock); // сохранение в State акций
-      AsyncStorage.setItem("stocks", JSON.stringify(res.data.stock));
+      AsyncStorage.setItem("_stocks", JSON.stringify(res.data.stock));
       AsyncStorage.setItem("washeses", JSON.stringify(res.data.washer));
-      const token = await AsyncStorage.getItem("token"); // получение токена авторизации 
-      if (token != null) { // если пользователь авторизирован
-        const cars = await axios.get(domain_mobile + "/api/get_cars", { headers: { "Authorization": "Token " + token } }); // отправка запроса на список машин пользователя
-        setCountCar(cars.data.length); // сохранение количества машин
-
-      } else {
-        setCountCar(1); // если пользователь не авторизирован, то задаем количества машин равное 1, чтобы мог просматривать автомойки
-      }
+      checkCar();
       setRefresing(false) // конец обновления
     }
     catch (err) {
