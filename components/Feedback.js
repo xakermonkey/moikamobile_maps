@@ -20,10 +20,10 @@ function Feedback({ navigation }) {
     if (permission) {
       let result = await ImagePicker.launchImageLibraryAsync();
       if (!result.canceled) {
-        let shir = result.uri.split(".")
+        let shir = result.assets[0].uri.split(".");
         shir = shir[shir.length - 1]
         setFile({
-          uri: result.uri,
+          uri: result.assets[0].uri,
           type: 'image/' + shir,
           name: `img.${shir}`
         });
@@ -50,7 +50,8 @@ function Feedback({ navigation }) {
         {
           headers: {
             "Authorization": "Token " + token,
-            'Accept': 'application/json',
+            'Accept': 'application/json'
+            // "Content-Type": 'multipart/form-data'
           }
         })
       navigation.replace("MainMenu")
