@@ -323,11 +323,11 @@ function MapScreen({ navigation }) {
   return (
     <View style={styles.container}>
       <StatusBar />
-      {loading &&
+      {/* {loading &&
         <View style={{ justifyContent: 'center', alignItems: 'center', position: 'absolute', width: '100%', height: '100%', zIndex: 1 }} >
           <ActivityIndicator color='black' size={'large'} />
           <Text>Идет загрузка карты</Text>
-        </View>}
+        </View>} */}
       <YaMap
         ref={map}
         // userLocationIcon={{ uri: 'https://www.clipartmax.com/png/middle/180-1801760_pin-png.png' }}
@@ -336,7 +336,7 @@ function MapScreen({ navigation }) {
 
       >
         {showWasheses.map((obj, index) => {
-          return (<Marker scale={0.6} key={index} point={{ lat: parseFloat(obj.lat), lon: parseFloat(obj.lon) }}
+          return (<Marker scale={Platform.OS == 'ios' ? 0.6 : 0.3} key={index} point={{ lat: parseFloat(obj.lat), lon: parseFloat(obj.lon) }}
             source={require('../assets/images/location.png')} // {{ uri: domain_web + obj.avatar }}
             onPress={() => { 
               (async () => {

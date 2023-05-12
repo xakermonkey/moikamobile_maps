@@ -106,12 +106,12 @@ function CarWashes({ navigation, route }) {
         fontFamily: 'Raleway_700Bold',
       },
       headerLeft: () => ( // левый компонент заголовка
-        <TouchableOpacity style={{ left: 10 }} onPress={() => navigation.dispatch(DrawerActions.openDrawer())} activeOpacity={0.7}>
+        <TouchableOpacity style={{ left: Platform.OS == 'ios' ? 10 : 0 }} onPress={() => navigation.dispatch(DrawerActions.openDrawer())} activeOpacity={0.7}>
           <Ionicons name='chevron-back' size={32} color={'#7CD0D7'} />
         </TouchableOpacity>
       ),
       headerRight: () => ( // правый компонент заголовка
-        <TouchableOpacity style={{ right: 20 }} onPress={() => navigation.navigate('CarFilters', { 'sorted': route.params == undefined ? 0 : route.params.sorted, "filters": route.params == undefined ? [] : route.params.filters })} activeOpacity={0.7}>
+        <TouchableOpacity style={{ right: Platform.OS == 'ios' ? 20 : 0 }} onPress={() => navigation.navigate('CarFilters', { 'sorted': route.params == undefined ? 0 : route.params.sorted, "filters": route.params == undefined ? [] : route.params.filters })} activeOpacity={0.7}>
           <FontAwesome name='filter' size={28} color={'#7CD0D7'} />
         </TouchableOpacity>
       )
