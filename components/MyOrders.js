@@ -10,6 +10,7 @@ import { FlatList } from 'react-native';
 import { Montserrat_700Bold } from '@expo-google-fonts/montserrat';
 import { DrawerActions } from '@react-navigation/native';
 import { StatusBar } from 'expo-status-bar';
+import { Skeleton, SkeletonGroup } from 'react-native-skeleton-loaders'
 
 
 function MyOrders({ navigation }) {
@@ -54,8 +55,13 @@ function MyOrders({ navigation }) {
 
   const EmptyComponent = () => {
     return (
-      <View style={{ marginTop:'10%' }}>
-        <Text style={{ textAlign: 'center', textTransform:'uppercase', color:'#fff', fontFamily:'Montserrat_700Bold' }}>У вас еще нет заказов</Text>
+      // <View style={{ marginTop:'10%' }}>
+      //   <Text style={{ textAlign: 'center', textTransform:'uppercase', color:'#fff', fontFamily:'Montserrat_700Bold' }}>У вас еще нет заказов</Text>
+      // </View>
+      <View style={{}}>
+      <SkeletonGroup numberOfItems={5} direction="column" stagger={{ delay: 1 }}>
+            <Skeleton color='#7C8183' w={'100%'} h={150} />
+      </SkeletonGroup>
       </View>
     )
   }

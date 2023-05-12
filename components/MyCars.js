@@ -6,11 +6,10 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios from 'axios';
 import { domain_mobile } from '../domain';
 import { StatusBar } from 'expo-status-bar';
-
+import { Skeleton, SkeletonGroup } from 'react-native-skeleton-loaders'
 
 
 function MyCars({ navigation }) {
-
 
   const [cars, setCars] = useState([]);
 
@@ -88,8 +87,13 @@ function MyCars({ navigation }) {
 
   const EmptyComponent = () => {
     return (
-      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-        <Text style={{fontFamily:'Montserrat_700Bold', textTransform:'uppercase', fontSize:18, padding:'5%', color:'#fff'}}>Нет машин</Text>
+      // <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+      //   <Text style={{fontFamily:'Montserrat_700Bold', textTransform:'uppercase', fontSize:18, padding:'5%', color:'#fff'}}>Нет машин</Text>
+      // </View>
+      <View style={styles.gradient_background_padding}>
+      <SkeletonGroup numberOfItems={3} direction="column" stagger={{ delay: 1 }}>
+            <Skeleton color='#7C8183' w={'100%'} h={80} />
+      </SkeletonGroup>
       </View>
     )
   }

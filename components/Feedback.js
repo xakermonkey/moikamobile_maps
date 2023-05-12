@@ -14,6 +14,7 @@ function Feedback({ navigation }) {
   const [file, setFile] = useState(null);
   const [text, setText] = useState("");
   const [permission, setPermission] = useState();
+  const [loading, setLoading] = useState(true);
 
   const Documents = async () => {
     // console.log(permission);
@@ -40,6 +41,7 @@ function Feedback({ navigation }) {
   }), [navigation])
 
   const Send = async () => {
+    setLoading(false);
     try {
       const token = await AsyncStorage.getItem("token");
       const data = new FormData();
@@ -50,13 +52,16 @@ function Feedback({ navigation }) {
         {
           headers: {
             "Authorization": "Token " + token,
-            'Accept': 'application/json'
-            // "Content-Type": 'multipart/form-data'
+            'Accept': 'application/json',
+            "Content-Type": 'multipart/form-data'
           }
         })
+      Alert.alert("Уведомление", "Ваше письмо успешно отправлено. Мы обработаем запрос в ближайшее время");
       navigation.replace("MainMenu")
     }
     catch (err) {
+    setLoading(true);
+      Alert.alert("Ошибка", "Письмо не отправлено");
       console.log(err);
     }
 
@@ -108,11 +113,12 @@ function Feedback({ navigation }) {
         </View>
       </LinearGradient>
 
+      {!loading ? <ActivityIndicator /> :
       <TouchableOpacity activeOpacity={0.8} onPress={Send} >
         <ImageBackground source={require('../assets/images/button.png')} resizeMode='stretch' style={styles.bg_img} >
           <Text style={styles.text_btn} >Отправить</Text>
         </ImageBackground>
-      </TouchableOpacity>
+      </TouchableOpacity>}
 
       {/* </BlurView> */}
     </View>

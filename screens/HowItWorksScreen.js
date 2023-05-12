@@ -107,7 +107,7 @@ function HowItWorksScreen({ navigation }) {
         <Text style={{fontFamily:'Raleway_700Bold', textTransform:'uppercase', color:'#fff', fontSize:18, marginTop:'5%'}}>{videos[selectSnap][0]}</Text>
         <Pagination
           activeDotIndex={selectSnap}
-          dotsLength={Platform.OS == 'ios' ? ios_videos.length : videos.length}
+          dotsLength={videos.length}
           containerStyle={{ height: '100%' }}
           // dotColor='#7BCFD6'
           dotStyle={{ backgroundColor: '#7BCFD6', width: 15, height: 15, borderRadius: 50 }}
