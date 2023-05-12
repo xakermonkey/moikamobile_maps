@@ -12,44 +12,44 @@ function VerificationCodeScreen({ navigation, route }) {
     // const VerificationCodeScreen = ({ navigation }) => {
 
     useLayoutEffect(() => {
-        
+
     }, [navigation])
 
     const [code, setCode] = useState('');
 
     const sendCode = async () => {
         try {
-            const res = await axios.post(domain_mobile + "/api/set_code", {"number": route.params.number, "code": code});
+            const res = await axios.post(domain_mobile + "/api/set_code", { "number": route.params.number, "code": code });
             await AsyncStorage.setItem("token", res.data.token);
             await AsyncStorage.setItem("phone", route.params.number);
-            if (res.data.user.location.location != null){
+            if (res.data.user.location.location != null) {
                 await AsyncStorage.setItem("location", res.data.user.location.location);
             }
-            if (res.data.user.first_name != null){
+            if (res.data.user.first_name != null) {
                 await AsyncStorage.setItem("name", res.data.user.first_name);
             }
-            if (res.data.user.email != null){
+            if (res.data.user.email != null) {
                 await AsyncStorage.setItem("email", res.data.user.email);
             }
-            if (res.data.first_join == true){
-                navigation.dispatch(
-                    CommonActions.reset({
-                        index: 0,
-                        routes: [{ name: "Data" }]
-                    }));
-            }else{
-                navigation.dispatch(
-                    CommonActions.reset({
-                        index: 0,
-                        routes: [{ name: "MainMenu" }]
-                    }));
-            }
-            
+            // if (res.data.first_join == true){
+            navigation.dispatch(
+                CommonActions.reset({
+                    index: 0,
+                    routes: [{ name: "Data" }]
+                }));
+            // }else{
+            //     navigation.dispatch(
+            //         CommonActions.reset({
+            //             index: 0,
+            //             routes: [{ name: "MainMenu" }]
+            //         }));
+            // }
+
         }
-        catch (err){
+        catch (err) {
             Alert.alert("Ошибка!", "Введен некорректный код доступа");
         }
-        
+
     }
 
 

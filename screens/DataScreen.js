@@ -27,19 +27,22 @@ function DataScreen({ navigation }) {
                 console.log("Not location");
             }
             try {
-                const token = await AsyncStorage.getItem("token");
-                const res = await axios.get(domain_mobile + "/api/get_user", {
-                    headers: {
-                        "Authorization": 'Token ' + token
-                    }
-                });
+                const first_name = await AsyncStorage.getItem("name");
+                const email = await AsyncStorage.getItem("email");
+                const location = await AsyncStorage.getItem("location");
+                // const token = await AsyncStorage.getItem("token");
+                // const res = await axios.get(domain_mobile + "/api/get_user", {
+                //     headers: {
+                //         "Authorization": 'Token ' + token
+                //     }
+                // });
                 const ret = await axios.get(domain_web + "/get_country");
                 // console.warn(ret);
                 setCountry(ret.data.country);
-                setName(res.data.first_name);
-                setEmail(res.data.email);
-                if (res.data.location.location != null) {
-                    setLocation(res.data.location.location)
+                setName(first_name);
+                setEmail(email);
+                if (location != null) {
+                    setLocation(location);
                 }
 
             }
