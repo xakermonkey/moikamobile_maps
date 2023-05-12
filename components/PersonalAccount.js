@@ -28,7 +28,7 @@ function PersonalAccount({ navigation }) {
         fontFamily: 'Raleway_700Bold',
       },
       headerLeft: () => (
-        <TouchableOpacity style={{ left: 10 }} onPress={() => navigation.dispatch(DrawerActions.openDrawer())} activeOpacity={0.7}>
+        <TouchableOpacity style={{ left: Platform.OS == 'ios' ? 10 : 0 }} onPress={() => navigation.dispatch(DrawerActions.openDrawer())} activeOpacity={0.7}>
           <Ionicons name='chevron-back' size={32} color={'#7CD0D7'} />
         </TouchableOpacity>
       ),
