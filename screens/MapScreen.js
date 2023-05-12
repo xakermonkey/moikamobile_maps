@@ -11,7 +11,7 @@ import * as Device from 'expo-device';
 import * as Notifications from 'expo-notifications';
 import { StatusBar } from 'expo-status-bar';
 import * as TaskManager from "expo-task-manager";
-import { log } from 'react-native-reanimated';
+import { CommonActions } from '@react-navigation/native';
 
 Notifications.setNotificationHandler({
   handleNotification: async () => ({
@@ -46,7 +46,7 @@ function MapScreen({ navigation }) {
   const [isOpen, setDrawer] = useState(false);
   const [notification, setNotification] = useState(false);
   const notificationListener = useRef();
-  const [interval, setMyInterval] = useState(null);
+  const [city, setCity] = useState(null);
   const responseListener = useRef();
 
 
@@ -66,46 +66,49 @@ function MapScreen({ navigation }) {
     if (loc == null) {
       loc = "Краснодар";
     }
-    let phone = await AsyncStorage.getItem("phone")
-    const ret = await axios.get(domain_web + "/get_all_washes", { params: { location: loc, phone: phone } })
-    setWasheses(ret.data);
+    console.log(city);
+    setCity(loc);
+    if (city !== loc) {
+      let phone = await AsyncStorage.getItem("phone");
+      const ret = await axios.get(domain_web + "/get_all_washes", { params: { location: loc, phone: phone } })
+      setWasheses(ret.data);
+    }
   }
 
-  useFocusEffect(useCallback(() => { // функция при попадании экрана в фокус
-    (async () => {
-      if (isOpen === true) {
-        setDrawer(false)
+
+
+  const initMap = async () => {
+    if (isOpen === true) {
+      setDrawer(false)
+    }
+    if (map.current) {
+      let { status } = await Location.requestForegroundPermissionsAsync(); // запрос прав на определение геопозиции
+      const loc = await Location.getCurrentPositionAsync(); // получение последних известных координат
+      // setBLocation(status === 'granted')
+      if (status !== 'granted') {
+        Alert.alert("Ошибка", "Необходимо включить определение геопозиции");
       }
-      if (map.current) {
-        let { status } = await Location.requestForegroundPermissionsAsync(); // запрос прав на определение геопозиции
-        const loc = await Location.getCurrentPositionAsync(); // получение последних известных координат
-        // setBLocation(status === 'granted')
-        if (status !== 'granted') {
-          Alert.alert("Ошибка", "Необходимо включить определение геопозиции");
-        }
-        if (loc == null) { // если нет прав или не получилось получить координаты
-          return;
-        }
-        map.current.setCenter({ lon: loc.coords.longitude, lat: loc.coords.latitude }, 16, 0, 0, 1, Animation.SMOOTH); //координаты, зум, поворотом по азимуту и наклоном карты, длительность анимации, анимация
+      if (loc == null) { // если нет прав или не получилось получить координаты
+        return;
       }
 
+      map.current.setCenter({ lon: loc.coords.longitude, lat: loc.coords.latitude }, 16, 0, 0, 1, Animation.SMOOTH); //координаты, зум, поворотом по азимуту и наклоном карты, длительность анимации, анимация
+
+    }
+  }
+
+  useLayoutEffect(() => {
+    (async () => {
+      initMap();
     })();
+  }, [])
+
+  useFocusEffect(useCallback(() => { // функция при попадании экрана в фокус
+
     getOrderWashes();
     getWasheses();
 
   }, []));
-
-
-
-  const showWashes = useCallback(async () => {
-    console.log(washeses);
-    const start = showWasheses.length
-    const end = showWasheses.length + 10 > washeses.length ? showWasheses.length + (washeses.length - showWasheses.length) : showWasheses.length + 10
-    setShowWasheses([...showWasheses, ...washeses.slice(start, end)])
-    if (end == washeses.length && end != 0) {
-      clearInterval(interval);
-    }
-  }, [washeses, showWasheses])
 
   useEffect(() => {
     registerForPushNotificationsAsync();
@@ -238,22 +241,25 @@ function MapScreen({ navigation }) {
     }
   };
 
-  const checkVisible = (marker, region) => {
+  const checkVisible = (marker, region, preview) => {
     if (marker.lat < region.bottomRight.lat || marker.lat > region.topLeft.lat ||
-      marker.lon > region.bottomRight.lon || marker.lon < region.topLeft.lon) {
+      marker.lon > region.bottomRight.lon || marker.lon < region.topLeft.lon || preview.includes(marker)) {
       return false;
     }
     return true;
   }
 
   const onCameraPositionChangeEnd = async () => {
+    console.log("change");
     if (showWasheses.length < washeses.length) {
       const region = await getVisibleRegion();
-      let shWasheses = washeses.filter(obj => checkVisible(obj, region));
-      // if (shWasheses > 100) {
-      //   shWasheses = shWasheses.slice(0, 100);
-      // }
-      setShowWasheses(shWasheses);
+      let shWasheses = washeses.filter(obj => checkVisible(obj, region, showWasheses));
+      console.log("all on view washeses", shWasheses.length);
+      if (shWasheses.length > 5) {
+        shWasheses = shWasheses.slice(0, 5);
+        console.log(shWasheses.length);
+      }
+      setShowWasheses([...showWasheses, ...shWasheses]);
     }
 
   }
@@ -322,43 +328,33 @@ function MapScreen({ navigation }) {
           <ActivityIndicator color='black' size={'large'} />
           <Text>Идет загрузка карты</Text>
         </View>}
-      <ClusteredYamap
+      <YaMap
         ref={map}
         // userLocationIcon={{ uri: 'https://www.clipartmax.com/png/middle/180-1801760_pin-png.png' }}
         style={styles.container}
-        clusterColor="blue"
-        onCameraPositionChange={onCameraPositionChangeEnd}
-        clusteredMarkers={
-          showWasheses.map(obj => {
-            return ({
-              point: {
-                lat: parseFloat(obj.lat),
-                lon: parseFloat(obj.lon),
-              },
-              data: {
-                avatar: obj.avatar,
-                id: obj.id,
-                sale: obj.sale,
-              }
-            })
-          })
-        }
-        renderMarker={(info, index) => (
-          <Marker scale={0.6} key={index} point={info.point}
+        onCameraPositionChangeEnd={onCameraPositionChangeEnd}
+
+      >
+        {showWasheses.map((obj, index) => {
+          return (<Marker scale={0.6} key={index} point={{ lat: parseFloat(obj.lat), lon: parseFloat(obj.lon) }}
             source={require('../assets/images/location.png')} // {{ uri: domain_web + obj.avatar }}
             onPress={() => {
               (async () => {
-                await AsyncStorage.setItem("washer", info.data.id.toString());
-                await AsyncStorage.setItem("sale", info.data.sale.toString());
-                navigation.navigate('Catalog');
-                navigation.navigate('PointCarWash');
+                await AsyncStorage.setItem("washer", obj.id.toString());
+                await AsyncStorage.setItem("sale", obj.sale.toString());
+                // navigation.navigate('Catalog');
+                navigation.navigate('PointCarWash', { from: "map" });
+                // navigation.dispatch(
+                //   CommonActions.reset({
+                //     index: 0,
+                //     routes: [{ name: "PointCarWash", params: { from: "map" } }]
+                //   }))
               })();
             }}
-          />
-        )}
-      >
+          />)
+        })}
         {route != [] && <Polyline strokeWidth={7} strokeColor="#7CD0FF" points={route} />}
-      </ClusteredYamap>
+      </YaMap>
 
       {/* Dimensions.get('window').width */}
       {!isOpen &&

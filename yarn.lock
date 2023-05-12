@@ -5877,6 +5877,11 @@ react-native-codegen@^0.70.6:
     jscodeshift "^0.13.1"
     nullthrows "^1.1.1"
 
+react-native-fast-image@^8.6.3:
+  version "8.6.3"
+  resolved "https://registry.yarnpkg.com/react-native-fast-image/-/react-native-fast-image-8.6.3.tgz#6edc3f9190092a909d636d93eecbcc54a8822255"
+  integrity sha512-Sdw4ESidXCXOmQ9EcYguNY2swyoWmx53kym2zRsvi+VeFCHEdkO+WG1DK+6W81juot40bbfLNhkc63QnWtesNg==
+
 react-native-gesture-handler@~2.8.0:
   version "2.8.0"
   resolved "https://registry.yarnpkg.com/react-native-gesture-handler/-/react-native-gesture-handler-2.8.0.tgz#ef9857871c10663c95a51546225b6e00cd4740cf"
@@ -5935,6 +5940,11 @@ react-native-size-matters@^0.4.0:
   version "0.4.0"
   resolved "https://registry.yarnpkg.com/react-native-size-matters/-/react-native-size-matters-0.4.0.tgz#01bfd0d59454318f4e0b13fe9c1eb0523d70f2e0"
   integrity sha512-8/C0htHrFWeUm9N8JegmadovUfgTWkGBkDPZ1N3YkXtDWb+98Ya2gThiKcu445r8c7YhcrBfnHz/mYsXIusaOQ==
+
+react-native-skeleton-loaders@^1.4.0:
+  version "1.4.0"
+  resolved "https://registry.yarnpkg.com/react-native-skeleton-loaders/-/react-native-skeleton-loaders-1.4.0.tgz#aeea8e37c09a79a0828f5a6840c963659010af05"
+  integrity sha512-2c2m7VJ74ZrLf1RiXrhIgjGhpAHJejz3V7D3pL08LNUg5xmWsvdC4GohXsZ7y/8Uo9BrAdgPfAycp43GZQcxiw==
 
 react-native-snap-carousel@^3.9.1:
   version "3.9.1"

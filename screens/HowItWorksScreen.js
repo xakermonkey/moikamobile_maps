@@ -51,6 +51,7 @@ function HowItWorksScreen({ navigation }) {
     return (
       <View style={{ flex: 1, justifyContent: "center", alignItems: 'center',padding:10 }} >
         <Video
+        shouldPlay={true}
           ref={video}
           style={{ height: "100%", width: "100%", borderRadius:5  }}
           source={Platform.OS == 'ios' ? ios_videos[index][1] : videos[index][1]}

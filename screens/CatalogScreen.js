@@ -18,9 +18,9 @@ function CatalogScreen({ navigation }) {
   return (
     <Stack.Navigator>
       <Stack.Screen name="CarWashes" component={CarWashes} initialParams={{ sorted: 0, filters: [] }} />
-      <Stack.Screen name="PointCarWash" component={PointCarWash} options={{
+      {/* <Stack.Screen name="PointCarWash" component={PointCarWash} options={{
         
-      }} />
+      }} /> */}
       <Stack.Group screenOptions={{ presentation: 'modal' }} >
         <Stack.Screen name="CarFilters" component={CarFilters} options={{
           // headerShown: false,

@@ -11,6 +11,7 @@ import FeedbackScreen from './FeedbackScreen';
 import ApplicationSettingsScreen from './ApplicationSettingsScreen';
 import CatalogScreen from './CatalogScreen';
 import SuccessfulOrder from './SuccessfulOrder';
+import PointCarWash from '../components/PointCarWash';
 
 
 const Drawer = createDrawerNavigator();
@@ -125,6 +126,17 @@ function MainMenuScreen({ navigation }) {
         //     <Ionicons name='chevron-back' size={28} color={'#7CD0D7'} />
         //     </TouchableOpacity>
         // ),
+      }} />
+
+<Drawer.Screen name="PointCarWash" component={PointCarWash} options={{
+        // headerShown: false,
+        // headerStyle: {
+        //   backgroundColor: '#6E7476',
+        // },
+        // headerTitleStyle: {
+        //   color: '#fff',
+        //   textTransform: 'uppercase',
+        // }
       }} />
 
 <Drawer.Screen name="Successful" component={SuccessfulOrder} options={{

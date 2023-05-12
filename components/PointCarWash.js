@@ -1,13 +1,14 @@
-import React, { useRef, useLayoutEffect, useState } from 'react';
+import React, { useRef, useLayoutEffect, useState, useCallback } from 'react';
 import { ActivityIndicator, StyleSheet, View, Text, Dimensions, Alert, TouchableOpacity, Image } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import axios from 'axios';
 import { domain_web } from '../domain';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { CommonActions } from '@react-navigation/native';
+import { CommonActions, useFocusEffect } from '@react-navigation/native';
 import Carousel, { Pagination } from 'react-native-snap-carousel';
 import { StatusBar } from 'expo-status-bar';
 import FastImage from 'react-native-fast-image';
+import { Skeleton } from 'react-native-skeleton-loaders'
 
 function PointCarWash({ navigation, route }) {
 
@@ -18,10 +19,45 @@ function PointCarWash({ navigation, route }) {
   const [currentIndex, setCurrentIndex] = useState([]);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [washer, setWasher] = useState(null);
+  const [loading, setLoading] = useState(true);
 
   const carouselRef = useRef()
 
-  useLayoutEffect(() => {
+  const checkAccount = async () => {
+    const token = await AsyncStorage.getItem("token");
+    if (token != null) {
+      const washer = await AsyncStorage.getItem("washer")
+      const res = await axios.get(domain_web + "/" + washer + "/get_work_time");
+      if (Object.keys(res.data).length != 0) {
+        navigation.navigate('MakingOrderScreen');
+      } else {
+        Alert.alert("Ошибка", "В данную автомойку нельзя записаться");
+      }
+    } else {
+      Alert.alert('Внимаение', 'Вы не авторизованы', [{ 'text': 'Ок' }, {
+        'text': 'Войти', onPress: async () => {
+          await AsyncStorage.multiRemove((await AsyncStorage.getAllKeys()).filter(obj => obj != "first_join_app"));
+          navigation.dispatch(
+            CommonActions.reset({
+              index: 0,
+              routes: [{ name: "Login" }]
+            }));
+        }
+      }])
+    }
+  }
+  const goToCatalog = () => {
+    navigation.navigate("Catalog");
+  }
+
+  useFocusEffect(useCallback(() => {
+    setWasher(null);
+    setFilt(null);
+    setCurrentIndex([]);
+    setPhoto(null);
+    setSelectFilt(0);
+    setSelectImage(0);
+    setLoading(true);
     navigation.setOptions({
       title: 'ЗАГРУЗКА...',
       headerShadowVisible: false,
@@ -35,8 +71,14 @@ function PointCarWash({ navigation, route }) {
         fontFamily: 'Raleway_700Bold',
       },
       headerLeft: () => (
-        <TouchableOpacity style={{ left: 10 }} onPress={() => navigation.navigate('CarWashes')} activeOpacity={0.7}>
+        <TouchableOpacity style={{ left: 10 }} onPress={() => route.params.from == "map" ? navigation.navigate('Map') : goToCatalog()
+        } activeOpacity={0.7} >
           <Ionicons name='chevron-back' size={32} color={'#7CD0D7'} />
+        </TouchableOpacity >
+      ),
+      headerRight: () => (
+        <TouchableOpacity style={{ right: 20 }} onPress={checkAccount} activeOpacity={0.7}>
+          <Ionicons name='cart-outline' size={28} color={'#7CD0D7'} />
         </TouchableOpacity>
       )
     });
@@ -49,36 +91,10 @@ function PointCarWash({ navigation, route }) {
       setCurrentIndex(new Array(Object.keys(res.data.photo).length).fill(0));
       setPhoto(res.data.photo);
       navigation.setOptions({
-        title: res.data.washer.name_washer,
-        headerRight: () => (
-          <TouchableOpacity style={{ right: 20 }} onPress={async () => {
-            if (token != null) {
-              const washer = await AsyncStorage.getItem("washer")
-              const res = await axios.get(domain_web + "/" + washer + "/get_work_time");
-              if (Object.keys(res.data).length != 0) {
-                navigation.navigate('MakingOrderScreen');
-              } else {
-                Alert.alert("Ошибка", "В данную автомойку нельзя записаться");
-              }
-            } else {
-              Alert.alert('Внимаение', 'Вы не авторизованы', [{ 'text': 'Ок' }, {
-                'text': 'Войти', onPress: async () => {
-                  await AsyncStorage.multiRemove((await AsyncStorage.getAllKeys()).filter(obj => obj != "first_join_app"));
-                  navigation.dispatch(
-                    CommonActions.reset({
-                      index: 0,
-                      routes: [{ name: "Login" }]
-                    }));
-                }
-              }])
-            }
-          }} activeOpacity={0.7}>
-            <Ionicons name='cart-outline' size={28} color={'#7CD0D7'} />
-          </TouchableOpacity>
-        )
-      });
+        title: res.data.washer.name_washer
+      })
     })();
-  }, [navigation]);
+  }, []));
 
   if (photo === null) {
     return (
@@ -87,17 +103,24 @@ function PointCarWash({ navigation, route }) {
       </View>)
   }
 
+  const handleLoad = () => {
+    setLoading(false);
+  }
+
   const renderPhoto = ({ item, index }) => {
     return (
       <View style={{ alignItems: 'center' }}>
+        {loading && <Skeleton color='#7C8183' w={'97%'} h={'100%'} />}
         <FastImage
           style={{ width: "97%", height: "100%" }}
           width="97%"
           height="100%"
+          onLoad={handleLoad}
           source={{
             uri: domain_web + item.photo,
-            priority: index == 0 ? FastImage.priority.high : index == 1 ? FastImage.priority.normal : FastImage.priority.low 
-          }} />
+            priority: index == 0 ? FastImage.priority.high : index == 1 ? FastImage.priority.normal : FastImage.priority.low
+          }
+          } />
         {/* resizeMethod='auto' resizeMode='contain' */}
       </View>
     );
