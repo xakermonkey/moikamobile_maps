@@ -338,7 +338,7 @@ function MapScreen({ navigation }) {
         {showWasheses.map((obj, index) => {
           return (<Marker scale={0.6} key={index} point={{ lat: parseFloat(obj.lat), lon: parseFloat(obj.lon) }}
             source={require('../assets/images/location.png')} // {{ uri: domain_web + obj.avatar }}
-            onPress={() => {
+            onPress={() => { 
               (async () => {
                 await AsyncStorage.setItem("washer", obj.id.toString());
                 await AsyncStorage.setItem("sale", obj.sale.toString());
