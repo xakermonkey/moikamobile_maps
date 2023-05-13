@@ -11,7 +11,6 @@ import * as SplashScreen from "expo-splash-screen";
 import { StatusBar } from 'expo-status-bar';
 
 function LoginScreen({ navigation }) {
-    // const LoginScreen = ({ navigation }) => {
 
     const [regions, setRegions] = useState(null);
 

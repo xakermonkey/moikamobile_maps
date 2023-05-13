@@ -28,7 +28,7 @@ function OrderDetails({ navigation, route }) {
           textTransform: 'uppercase',
         },
         headerLeft: () => (
-          <TouchableOpacity style={{left:10}} onPress={() => navigation.navigate('MyOrders')} activeOpacity={0.7}>
+          <TouchableOpacity style={{left:0}} onPress={() => navigation.navigate('MyOrders')} activeOpacity={0.7}>
             <Ionicons name='chevron-back' size={32} color={'#7CD0D7'} />
             </TouchableOpacity>
         ),

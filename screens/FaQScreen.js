@@ -1,6 +1,5 @@
 import React, { useState, useLayoutEffect } from 'react';
 import { View, StyleSheet, SafeAreaView, Text } from 'react-native';
-// import { createStackNavigator } from '@react-navigation/stack';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { TouchableOpacity } from 'react-native';
 import { Ionicons, AntDesign } from '@expo/vector-icons';
@@ -10,7 +9,6 @@ import axios from 'axios';
 import { domain_web } from "../domain";
 import { StatusBar } from 'expo-status-bar';
 
-// const Stack = createStackNavigator();
 const Stack = createNativeStackNavigator();
 
 function FaQ({ navigation }) {

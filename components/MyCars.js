@@ -25,12 +25,12 @@ function MyCars({ navigation }) {
           textTransform: 'uppercase',
         },
         headerLeft: () => (
-          <TouchableOpacity style={{left: Platform.OS == 'ios' ? 10 : 0 }} onPress={() => navigation.navigate("PersonalAccountScreen")} activeOpacity={0.7}>
+          <TouchableOpacity style={{left: Platform.OS == 'ios' ? 0 : 0 }} onPress={() => navigation.navigate("PersonalAccountScreen")} activeOpacity={0.7}>
             <Ionicons name='chevron-back' size={32} color={'#7CD0D7'} />
             </TouchableOpacity>
         ),
         headerRight: () => (
-          <TouchableOpacity style={{right: Platform.OS == 'ios' ? 20 : 0 }} onPress={() => navigation.navigate('AddEditCar', {"body": "", "number": "", "id": null, "title": "Добавление авто"})} activeOpacity={0.7}>
+          <TouchableOpacity style={{right: Platform.OS == 'ios' ? 0 : 0 }} onPress={() => navigation.navigate('AddEditCar', {"body": "", "number": "", "id": null, "title": "Добавление авто"})} activeOpacity={0.7}>
             <AntDesign name='pluscircleo' size={28} color={'#7CD0D7'} />
             </TouchableOpacity>
         ),

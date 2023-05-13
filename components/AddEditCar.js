@@ -33,7 +33,7 @@ function AddEditCar({ navigation, route }) {
         textTransform: 'uppercase',
       },
       headerLeft: () => (
-        <TouchableOpacity style={{ left: 15 }} onPress={() => navigation.goBack()} activeOpacity={0.7}>
+        <TouchableOpacity style={{ left: 0 }} onPress={() => navigation.goBack()} activeOpacity={0.7}>
           <Ionicons name='close' size={28} color={'#7CD0D7'} />
         </TouchableOpacity>
       ),

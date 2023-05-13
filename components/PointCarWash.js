@@ -28,7 +28,7 @@ function PointCarWash({ navigation, route }) {
     if (bool) {
       navigation.setOptions({
         headerRight: () => (
-          <View style={{ right: Platform.OS == 'ios' ? 20 : 0 }}>
+          <View style={{ right: Platform.OS == 'ios' ? 0 : 0 }}>
           <ActivityIndicator />
           </View>
         )
@@ -36,7 +36,7 @@ function PointCarWash({ navigation, route }) {
     } else {
       navigation.setOptions({
         headerRight: () => (
-          <TouchableOpacity style={{ right: 20 }} onPress={checkAccount} activeOpacity={0.7}>
+          <TouchableOpacity style={{ right: 0 }} onPress={checkAccount} activeOpacity={0.7}>
             <Ionicons name='cart-outline' size={28} color={'#7CD0D7'} />
           </TouchableOpacity>
         )
@@ -97,14 +97,14 @@ function PointCarWash({ navigation, route }) {
         fontFamily: 'Raleway_700Bold',
       },
       headerLeft: () => (
-        <TouchableOpacity style={{ left: Platform.OS == 'ios' ? 10 : 0 }} onPress={() => route.params.from == "map" ? navigation.navigate('Map') : goToCatalog()
+        <TouchableOpacity style={{ left: Platform.OS == 'ios' ? 0 : 0 }} onPress={() => route.params.from == "map" ? navigation.navigate('Map') : goToCatalog()
         } activeOpacity={0.7} >
           <Ionicons name='chevron-back' size={32} color={'#7CD0D7'} />
         </TouchableOpacity >
       ),
       headerRight: () => (
         makeLoad ? <ActivityIndicator /> :
-          <TouchableOpacity style={{ right: Platform.OS == 'ios' ? 20 : 0 }} onPress={checkAccount} activeOpacity={0.7}>
+          <TouchableOpacity style={{ right: Platform.OS == 'ios' ? 0 : 0 }} onPress={checkAccount} activeOpacity={0.7}>
             <Ionicons name='cart-outline' size={28} color={'#7CD0D7'} />
           </TouchableOpacity>
       )

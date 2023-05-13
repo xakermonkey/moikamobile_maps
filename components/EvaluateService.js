@@ -39,7 +39,7 @@ function EvaluateService({ navigation, route }) {
           <TouchableOpacity style={{ flex: 1 }} onPress={() => navigation.navigate('OrderDetails')} activeOpacity={0.7} >
             <Ionicons name='close' size={28} color={'#7CD0D7'} />
           </TouchableOpacity>
-          <View style={{ alignItems: 'center', flex:8 }}>
+          <View style={{ alignItems: 'center', flex:9 }}>
             <Text style={styles.bold_text}>Насколько вы довольны{'\n'}качеством обслуживания?</Text>
           </View>
           <View style={{ flex: 1 }}></View>

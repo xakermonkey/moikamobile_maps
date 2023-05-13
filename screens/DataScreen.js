@@ -6,7 +6,6 @@ import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { domain_mobile, domain_web } from "../domain";
 import * as Location from 'expo-location';
-import { getPermissionLocation } from "../permissions";
 import { Picker } from '@react-native-picker/picker';
 import { validate } from 'react-email-validator';
 import { StatusBar } from 'expo-status-bar';

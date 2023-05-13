@@ -7,17 +7,13 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios from 'axios';
 import { domain_web } from '../domain';
 import { FlatList } from 'react-native';
-import { Montserrat_700Bold } from '@expo-google-fonts/montserrat';
-import { DrawerActions } from '@react-navigation/native';
 import { StatusBar } from 'expo-status-bar';
 import { Skeleton, SkeletonGroup } from 'react-native-skeleton-loaders'
 
 
 function MyOrders({ navigation }) {
 
-
   const [orders, setOrders] = useState([]);
-
 
   useLayoutEffect(() => {
     navigation.setOptions({
@@ -31,12 +27,12 @@ function MyOrders({ navigation }) {
           textTransform: 'uppercase',
         },
         headerLeft: () => (
-          <TouchableOpacity style={{left: Platform.OS == 'ios' ? 10 : 0}} onPress={() => navigation.navigate('PersonalAccountScreen')} activeOpacity={0.7}>
+          <TouchableOpacity style={{left: Platform.OS == 'ios' ? 0 : 0}} onPress={() => navigation.navigate('PersonalAccountScreen')} activeOpacity={0.7}>
             <Ionicons name='chevron-back' size={32} color={'#7CD0D7'} />
             </TouchableOpacity>
         ),
         headerRight: () => (
-          <TouchableOpacity style={{right: Platform.OS == 'ios' ? 20 : 0}} onPress={() => navigation.navigate('Catalog')} activeOpacity={0.7}>
+          <TouchableOpacity style={{right: Platform.OS == 'ios' ? 0 : 0}} onPress={() => navigation.navigate('Catalog')} activeOpacity={0.7}>
             <AntDesign name='pluscircleo' size={28} color={'#7CD0D7'} />
             </TouchableOpacity>
         ),
