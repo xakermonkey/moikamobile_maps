@@ -28,7 +28,7 @@ function PersonalAccount({ navigation }) {
         fontFamily: 'Raleway_700Bold',
       },
       headerLeft: () => (
-        <TouchableOpacity style={{ left: Platform.OS == 'ios' ? 10 : 0 }} onPress={() => navigation.dispatch(DrawerActions.openDrawer())} activeOpacity={0.7}>
+        <TouchableOpacity style={{ left: Platform.OS == 'ios' ? 0 : 0 }} onPress={() => navigation.dispatch(DrawerActions.openDrawer())} activeOpacity={0.7}>
           <Ionicons name='chevron-back' size={32} color={'#7CD0D7'} />
         </TouchableOpacity>
       ),
@@ -90,7 +90,7 @@ function PersonalAccount({ navigation }) {
             {/* <TextInput style={styles.input_text} value={email} /> */}
             <Text style={styles.input_text}>{email}</Text>
             <LinearGradient colors={['#00266F', '#7BCFD6']} start={[1, 0]} style={styles.gradient_line} />
-            <Text style={styles.dc_text}>Личную информацию можно изменить через обратную связь</Text>
+            <Text style={styles.dc_text}>Личную информацию можно изменить через обратную связь или при авторизации</Text>
 
           </View>
         </LinearGradient>

@@ -5,6 +5,7 @@ import PointCarWash from '../components/PointCarWash';
 
 import MakingOrderScreen from '../components/MakingOrderScreen';
 
+
 // import { createStackNavigator } from '@react-navigation/stack';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { TouchableOpacity } from 'react-native';
@@ -21,25 +22,22 @@ function CatalogScreen({ navigation }) {
       {/* <Stack.Screen name="PointCarWash" component={PointCarWash} options={{
         
       }} /> */}
-      <Stack.Group screenOptions={{ presentation: 'modal' }} >
+      {/* <Stack.Group screenOptions={{ presentation: 'modal' }} > */}
         <Stack.Screen name="CarFilters" component={CarFilters} options={{
           // headerShown: false,
           // contentStyle: { opacity: 1 },
+        presentation: 'modal',
         }} />
-      </Stack.Group>
-      {/* 
+      {/* </Stack.Group> */}
+{/*       
         <Stack.Group screenOptions={{ presentation: 'modal' }} >
-          <Stack.Screen name="MakingOrder" component={MakingOrder} options={{
-          headerShown: false,
-          contentStyle:{opacity:1},
-          }} />
           <Stack.Screen name="GeneralPriceList" component={GeneralPriceList} options={{
           headerShown: false,
           contentStyle:{opacity:1},
           }} />
         </Stack.Group> */}
 
-      <Stack.Screen name="MakingOrderScreen" component={MakingOrderScreen} options={{
+      {/* <Stack.Screen name="MakingOrderScreen" component={MakingOrderScreen} options={{
         presentation: 'modal',
         headerShown: false,
         // headerShown: false,
@@ -55,19 +53,7 @@ function CatalogScreen({ navigation }) {
           // fontWeight: 'bold',
           fontFamily: 'Raleway_700Bold',
         },
-        // headerLeft: () => (
-        //   <TouchableOpacity onPress={() => navigation.navigate('CarWashes')} activeOpacity={0.7}>
-        //     <Ionicons name='chevron-back' size={28} color={'#7CD0D7'} />
-        //     </TouchableOpacity>
-        // ),
-        // headerRight: () => (
-        //   <TouchableOpacity onPress={() => navigation.navigate('MakingOrder')} activeOpacity={0.7}>
-        //     <Ionicons name='cart-outline' size={28} color={'#7CD0D7'} />
-        //   </TouchableOpacity>
-        // ),
-      }} />
-
-
+      }} /> */}
     </Stack.Navigator>
   );
 }

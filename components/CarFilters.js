@@ -37,7 +37,7 @@ function CarFilters({ navigation, route }) {
       fontFamily: 'Raleway_700Bold',
       // },
       headerLeft: () => (
-        <TouchableOpacity style={{ left: 15 }} activeOpacity={0.7} onPress={() => navigation.goBack()}>
+        <TouchableOpacity style={{ left: 0 }} activeOpacity={0.7} onPress={() => navigation.goBack()}>
           <Ionicons name='close' size={28} color={'#7CD0D7'} />
         </TouchableOpacity>
       )

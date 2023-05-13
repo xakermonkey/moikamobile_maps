@@ -163,7 +163,7 @@ function OrderСompletion({ navigation }) {
         await axios.post(domain_mobile + "/api/accept_payment", { "uuid": uuid }, { headers: { "Authorization": "Token " + token } });
       }
       setLoading(false);
-      navigation.navigate("CarWashes");
+      navigation.navigate("PointCarWash");
       setTimeout(() => navigation.navigate("Successful"), 1000)
     } catch (err) {
       console.log(err);

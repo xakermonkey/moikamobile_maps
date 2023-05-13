@@ -1,5 +1,5 @@
 import React, { useRef, useLayoutEffect, useState, useCallback } from 'react';
-import { ActivityIndicator, StyleSheet, View, Text, Dimensions, Alert, TouchableOpacity, Image } from 'react-native';
+import { ActivityIndicator, StyleSheet, View, Text, Dimensions, Alert, TouchableOpacity, Image, Platform } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import axios from 'axios';
 import { domain_web } from '../domain';
@@ -20,20 +20,46 @@ function PointCarWash({ navigation, route }) {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [washer, setWasher] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [makeLoad, setMakeLoad] = useState(false);
 
   const carouselRef = useRef()
 
+  const changeHeader = (bool) => {
+    if (bool) {
+      navigation.setOptions({
+        headerRight: () => (
+          <View style={{ right: Platform.OS == 'ios' ? 20 : 0 }}>
+          <ActivityIndicator />
+          </View>
+        )
+      })
+    } else {
+      navigation.setOptions({
+        headerRight: () => (
+          <TouchableOpacity style={{ right: 20 }} onPress={checkAccount} activeOpacity={0.7}>
+            <Ionicons name='cart-outline' size={28} color={'#7CD0D7'} />
+          </TouchableOpacity>
+        )
+      })
+    }
+  }
+
   const checkAccount = async () => {
+    changeHeader(true);
     const token = await AsyncStorage.getItem("token");
     if (token != null) {
       const washer = await AsyncStorage.getItem("washer")
       const res = await axios.get(domain_web + "/" + washer + "/get_work_time");
       if (Object.keys(res.data).length != 0) {
-        navigation.navigate('MakingOrderScreen');
+        // navigation.navigate('Modal', { screen: 'GeneralPriceList', presentation: 'modal' })
+        // navigation.navigate('Catalog');
+        navigation.navigate('MakingOrderModal');
       } else {
+        changeHeader(false);
         Alert.alert("Ошибка", "В данную автомойку нельзя записаться");
       }
     } else {
+      changeHeader(false);
       Alert.alert('Внимаение', 'Вы не авторизованы', [{ 'text': 'Ок' }, {
         'text': 'Войти', onPress: async () => {
           await AsyncStorage.multiRemove((await AsyncStorage.getAllKeys()).filter(obj => obj != "first_join_app"));
@@ -71,15 +97,16 @@ function PointCarWash({ navigation, route }) {
         fontFamily: 'Raleway_700Bold',
       },
       headerLeft: () => (
-        <TouchableOpacity style={{ left: 10 }} onPress={() => route.params.from == "map" ? navigation.navigate('Map') : goToCatalog()
+        <TouchableOpacity style={{ left: Platform.OS == 'ios' ? 10 : 0 }} onPress={() => route.params.from == "map" ? navigation.navigate('Map') : goToCatalog()
         } activeOpacity={0.7} >
           <Ionicons name='chevron-back' size={32} color={'#7CD0D7'} />
         </TouchableOpacity >
       ),
       headerRight: () => (
-        <TouchableOpacity style={{ right: 20 }} onPress={checkAccount} activeOpacity={0.7}>
-          <Ionicons name='cart-outline' size={28} color={'#7CD0D7'} />
-        </TouchableOpacity>
+        makeLoad ? <ActivityIndicator /> :
+          <TouchableOpacity style={{ right: Platform.OS == 'ios' ? 20 : 0 }} onPress={checkAccount} activeOpacity={0.7}>
+            <Ionicons name='cart-outline' size={28} color={'#7CD0D7'} />
+          </TouchableOpacity>
       )
     });
     (async () => {

@@ -1,5 +1,7 @@
 import React from 'react';
 import { createDrawerNavigator } from '@react-navigation/drawer';
+import { createNativeStackNavigator } from '@react-navigation/native-stack';
+
 import { useWindowDimensions } from 'react-native';
 
 import { DrawerContent } from './DrawerContent';
@@ -9,12 +11,24 @@ import FaQScreen from './FaQScreen';
 import PersonalAccountScreen from './PersonalAccountScreen';
 import FeedbackScreen from './FeedbackScreen';
 import ApplicationSettingsScreen from './ApplicationSettingsScreen';
+
 import CatalogScreen from './CatalogScreen';
+
 import SuccessfulOrder from './SuccessfulOrder';
 import PointCarWash from '../components/PointCarWash';
 
+import GeneralPriceList from '../components/GeneralPriceList';
+import PriceListFor from '../components/PriceListFor';
+import SelectDate from '../components/SelectDate';
+import SelectCar from '../components/SelectCar';
+import SelectPaymentMethod from '../components//SelectPaymentMethod';
+import OrderСompletion from '../components/OrderСompletion';
+import { NavigationContainer } from '@react-navigation/native';
+import MakingOrderScreen from '../components/MakingOrderScreen';
+
 
 const Drawer = createDrawerNavigator();
+const Stack = createNativeStackNavigator();
 
 function MainMenuScreen({ navigation }) {
   const dimensions = useWindowDimensions();
@@ -73,18 +87,10 @@ function MainMenuScreen({ navigation }) {
           color: '#fff',
           textTransform: 'uppercase',
         },
-        
-        // headerLeft: () => (
-        //   <TouchableOpacity onPress={() => navigation.navigate('CarFilters')} activeOpacity={0.7} style={{marginLeft:'15%'}}>
-        //     <Ionicons name='chevron-back' size={28} color={'#7CD0D7'} />
-        //     </TouchableOpacity>
-        // ),
-        // headerRight: () => (
-        //   <TouchableOpacity onPress={() => navigation.navigate('CarFilters')} activeOpacity={0.7} style={{marginRight:'20%'}}>
-        //     <FontAwesome name='filter' size={28} color={'#7CD0D7'} />
-        //   </TouchableOpacity>
-        // ),
         }} />
+        
+
+
       <Drawer.Screen name="PersonalAccount" component={PersonalAccountScreen} options={{
           headerShown: false,
           headerShadowVisible: false,
@@ -128,8 +134,9 @@ function MainMenuScreen({ navigation }) {
         // ),
       }} />
 
-<Drawer.Screen name="PointCarWash" component={PointCarWash} options={{
-        // headerShown: false,
+<Drawer.Screen name="PointCarWashDrawer" component={MakingOrderScreen} options={{
+// <Drawer.Screen name="PointCarWash" component={PointCarWash} options={{
+        headerShown: false,
         // headerStyle: {
         //   backgroundColor: '#6E7476',
         // },

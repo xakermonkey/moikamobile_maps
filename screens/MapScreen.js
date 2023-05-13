@@ -343,7 +343,7 @@ function MapScreen({ navigation }) {
                 await AsyncStorage.setItem("washer", obj.id.toString());
                 await AsyncStorage.setItem("sale", obj.sale.toString());
                 // navigation.navigate('Catalog');
-                navigation.navigate('PointCarWash', { from: "map" });
+                navigation.navigate('PointCarWashDrawer', { from: "map" });
                 // navigation.dispatch(
                 //   CommonActions.reset({
                 //     index: 0,
