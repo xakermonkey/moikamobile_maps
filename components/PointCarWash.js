@@ -9,6 +9,7 @@ import Carousel, { Pagination } from 'react-native-snap-carousel';
 import { StatusBar } from 'expo-status-bar';
 import FastImage from 'react-native-fast-image';
 import { Skeleton } from 'react-native-skeleton-loaders'
+import { log } from 'react-native-reanimated';
 
 function PointCarWash({ navigation, route }) {
 
@@ -76,6 +77,16 @@ function PointCarWash({ navigation, route }) {
     navigation.navigate("Catalog");
   }
 
+
+  const nav = () => {
+    if (route.params.from == "map"){
+      console.log("from point:", route.params.loc);
+      navigation.navigate('Map', {loc: route.params.loc});
+    }else{
+      goToCatalog();
+    }
+  }
+
   useFocusEffect(useCallback(() => {
     setWasher(null);
     setFilt(null);
@@ -96,8 +107,7 @@ function PointCarWash({ navigation, route }) {
         fontFamily: 'Raleway_700Bold',
       },
       headerLeft: () => (
-        <TouchableOpacity style={{ left: Platform.OS == 'ios' ? 0 : 0 }} onPress={() => route.params.from == "map" ? navigation.navigate('Map', {loc: route.params.loc}) : goToCatalog()
-        } activeOpacity={0.7} >
+        <TouchableOpacity style={{ left: Platform.OS == 'ios' ? 0 : 0 }} onPress={nav} activeOpacity={0.7} >
           <Ionicons name='chevron-back' size={32} color={'#7CD0D7'} />
         </TouchableOpacity >
       ),

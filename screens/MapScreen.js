@@ -36,10 +36,10 @@ TaskManager.defineTask(
   }
 );
 
-function MapScreen({ navigation }) {
+function MapScreen({ navigation, route }) {
 
   const [washes, setWashes] = useState({});
-  const [route, setRoute] = useState([]);
+  const [routes, setRoute] = useState([]);
   const [washeses, setWasheses] = useState([]);
   const [showWasheses, setShowWasheses] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -94,11 +94,10 @@ function MapScreen({ navigation }) {
       }
       console.log(route.params)
       if (route.params?.loc) {
-        map.current.setCenter({ lon: route.params.loc.lon, lat: route.params.loc.lat }, route.params.loc.zoom, 0, 0, 1, Animation.SMOOTH); //координаты, зум, поворотом по азимуту и наклоном карты, длительность анимации, анимация
-
+        map.current.setCenter({ lon: route.params.loc.point.lon, lat: route.params.loc.point.lat }, route.params.loc.zoom, 0, 0, 1, Animation.SMOOTH); //координаты, зум, поворотом по азимуту и наклоном карты, длительность анимации, анимация
       } else {
+        console.log("initMap")
         map.current.setCenter({ lon: loc.coords.longitude, lat: loc.coords.latitude }, 16, 0, 0, 1, Animation.SMOOTH); //координаты, зум, поворотом по азимуту и наклоном карты, длительность анимации, анимация
-
       }
 
     }
@@ -111,11 +110,13 @@ function MapScreen({ navigation }) {
   }, [])
 
   useFocusEffect(useCallback(() => { // функция при попадании экрана в фокус
-    initMap();
-    getOrderWashes();
-    setLoading(true);
-    getWasheses();
-  }, []));
+    (async () => {
+      initMap();
+      getOrderWashes();
+      setLoading(true);
+      getWasheses();
+    })()
+  }, [route]));
 
   useEffect(() => {
     registerForPushNotificationsAsync();
@@ -382,7 +383,7 @@ function MapScreen({ navigation }) {
                 navigation.dispatch(
                   CommonActions.reset({
                     index: 0,
-                    routes: [{ name: "PointCarWashDrawer", params: { from: "map",  loc: await getCurrentPosition() } }]
+                    routes: [{ name: "PointCarWashDrawer", params: { from: "map", loc: await getCurrentPosition() } }]
                   }));
                 // navigation.navigate('PointCarWashDrawer', { from: "map" });
               })();
@@ -433,7 +434,7 @@ function MapScreen({ navigation }) {
               }}
             />)
         })} */}
-        {route != [] && <Polyline strokeWidth={7} strokeColor="#7CD0FF" points={route} />}
+        {routes != [] && <Polyline strokeWidth={7} strokeColor="#7CD0FF" points={route} />}
       </ClusteredYamap>
 
       {/* Dimensions.get('window').width */}
