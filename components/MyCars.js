@@ -12,6 +12,7 @@ import { Skeleton, SkeletonGroup } from 'react-native-skeleton-loaders'
 function MyCars({ navigation }) {
 
   const [cars, setCars] = useState([]);
+  const [loading, setLoading] = useState(true)
 
   useLayoutEffect(() => {
     navigation.setOptions({
@@ -44,8 +45,7 @@ function MyCars({ navigation }) {
       catch (err) {
         console.log(err);
       }
-
-
+      setLoading(false);
     })();
   }, [navigation])
 
@@ -87,18 +87,21 @@ function MyCars({ navigation }) {
 
   const EmptyComponent = () => {
     return (
-      // <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-      //   <Text style={{fontFamily:'Montserrat_700Bold', textTransform:'uppercase', fontSize:18, padding:'5%', color:'#fff'}}>Нет машин</Text>
-      // </View>
-      <View style={styles.gradient_background_padding}>
-      <SkeletonGroup numberOfItems={3} direction="column" stagger={{ delay: 1 }}>
-            <Skeleton color='#7C8183' w={'100%'} h={80} />
-      </SkeletonGroup>
+      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+        <Text style={{fontFamily:'Montserrat_700Bold', textTransform:'uppercase', fontSize:18, padding:'5%', color:'#fff'}}>Нет машин</Text>
       </View>
     )
   }
 
-
+  if (loading){
+    return(<View style={styles.container}>
+      <View style={styles.main}>
+    <SkeletonGroup numberOfItems={3} direction="column" stagger={{ delay: 1 }}>
+          <Skeleton color='#7C8183' w={'100%'} h={80} />
+    </SkeletonGroup>
+    </View>
+    </View>)
+  }
   return (
     <SafeAreaView style={styles.container} >
       <StatusBar/>

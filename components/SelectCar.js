@@ -1,5 +1,5 @@
 import React, { useLayoutEffect, useState } from 'react';
-import { StyleSheet, View, Text, TouchableOpacity, ImageBackground, Image } from 'react-native';
+import { StyleSheet, View, Text, TouchableOpacity, ImageBackground, Image, FlatList } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons, FontAwesome5 } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -37,6 +37,19 @@ function SelectCar({ navigation }) {
     }
   }
 
+  const carView = ({item}) => {
+    return (
+      <View key={item.id} >
+                <TouchableOpacity activeOpacity={0.7} onPress={() => clickCar(item.number)} style={styles.margin_TouchOpac}>
+                  <View style={[styles.row, {height:28}]}>
+                    <Text style={[styles.text, {width:'40%'}]}>{item.body}</Text>
+                    <Text style={[styles.bold_text, {width:'40%'}]}>{item.number}</Text>
+                    {selectCar == item.number ? <FontAwesome5 name='check' size={28} color={'#7CD0D7'} style={{width:'10%'}}/> : <View style={{width:'10%'}}></View>}
+                  </View>
+                </TouchableOpacity>
+                <LinearGradient colors={['#00266F', '#7BCFD6']} start={[1, 0]} style={styles.gradient_line} />
+              </View>)
+  }
 
   return (
     <View style={styles.container}>
@@ -60,7 +73,13 @@ function SelectCar({ navigation }) {
           colors={['#01010199', '#35343499']}
           start={[0, 1]}
           style={styles.gradient_background} >
-          {cars.map(obj => {
+            <FlatList
+            data={cars}
+            // ListEmptyComponent={<EmptyComponent />}
+            keyExtractor={item => item.id}
+            renderItem={carView}
+          />
+          {/* {cars.map(obj => {
             return (
               <View key={obj.id} >
                 <TouchableOpacity activeOpacity={0.7} onPress={() => clickCar(obj.number)} style={styles.margin_TouchOpac}>
@@ -73,7 +92,7 @@ function SelectCar({ navigation }) {
                 <LinearGradient colors={['#00266F', '#7BCFD6']} start={[1, 0]} style={styles.gradient_line} />
               </View>
             )
-          })}
+          })} */}
         </LinearGradient>
 
         <TouchableOpacity activeOpacity={0.8} onPress={clickNext} style={{ marginTop: '5%' }} >
@@ -120,6 +139,7 @@ const styles = StyleSheet.create({
     marginTop: '5%',
     borderRadius: 5,
     padding: '5%',
+    height: '80%'
   },
   subtext: {
     fontSize: 8,

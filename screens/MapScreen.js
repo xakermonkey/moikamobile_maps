@@ -72,6 +72,7 @@ function MapScreen({ navigation }) {
       let phone = await AsyncStorage.getItem("phone");
       const ret = await axios.get(domain_web + "/get_all_washes", { params: { location: loc, phone: phone } })
       setWasheses(ret.data);
+      setTimeout(() => setLoading(false), 1000);
     }
   }
 
@@ -91,23 +92,29 @@ function MapScreen({ navigation }) {
       if (loc == null) { // если нет прав или не получилось получить координаты
         return;
       }
+      console.log(route.params)
+      if (route.params?.loc) {
+        map.current.setCenter({ lon: route.params.loc.lon, lat: route.params.loc.lat }, route.params.loc.zoom, 0, 0, 1, Animation.SMOOTH); //координаты, зум, поворотом по азимуту и наклоном карты, длительность анимации, анимация
 
-      map.current.setCenter({ lon: loc.coords.longitude, lat: loc.coords.latitude }, 16, 0, 0, 1, Animation.SMOOTH); //координаты, зум, поворотом по азимуту и наклоном карты, длительность анимации, анимация
+      } else {
+        map.current.setCenter({ lon: loc.coords.longitude, lat: loc.coords.latitude }, 16, 0, 0, 1, Animation.SMOOTH); //координаты, зум, поворотом по азимуту и наклоном карты, длительность анимации, анимация
+
+      }
 
     }
   }
 
   useLayoutEffect(() => {
     (async () => {
-      initMap();
+      // initMap();
     })();
   }, [])
 
   useFocusEffect(useCallback(() => { // функция при попадании экрана в фокус
-
+    initMap();
     getOrderWashes();
+    setLoading(true);
     getWasheses();
-
   }, []));
 
   useEffect(() => {
@@ -241,28 +248,45 @@ function MapScreen({ navigation }) {
     }
   };
 
-  const checkVisible = (marker, region, preview) => {
-    if (marker.lat < region.bottomRight.lat || marker.lat > region.topLeft.lat ||
-      marker.lon > region.bottomRight.lon || marker.lon < region.topLeft.lon || preview.includes(marker)) {
-      return false;
-    }
-    return true;
+  // const checkVisible = (marker, region, preview) => {
+  //   if (marker.lat < region.bottomRight.lat || marker.lat > region.topLeft.lat ||
+  //     marker.lon > region.bottomRight.lon || marker.lon < region.topLeft.lon || preview.includes(marker)) {
+  //     return false;
+  //   }
+  //   return true;
+  // }
+
+  const getMultirandom = (arr, num) => {
+    const shuffled = [...arr].sort(() => 0.5 - Math.random());
+    return shuffled.slice(0, num);
   }
 
-  const onCameraPositionChangeEnd = async () => {
-    console.log("change");
-    if (showWasheses.length < washeses.length) {
-      const region = await getVisibleRegion();
-      let shWasheses = washeses.filter(obj => checkVisible(obj, region, showWasheses));
-      console.log("all on view washeses", shWasheses.length);
-      if (shWasheses.length > 5) {
-        shWasheses = shWasheses.slice(0, 5);
-        console.log(shWasheses.length);
-      }
-      setShowWasheses([...showWasheses, ...shWasheses]);
-    }
+  // const onCameraPositionChangeEnd = async () => {
+  //   const position = await getCurrentPosition();
+  //   if (showWasheses.length < washeses.length) {
+  //     const region = await getVisibleRegion();
+  //     let shWasheses = washeses.filter(obj => checkVisible(obj, region, showWasheses));
+  //     console.log("all on view washeses", shWasheses.length);
+  //     if (shWasheses.length > 0){
+  //       if (position.zoom > 12){
+  //         if (shWasheses.length > 5) {
+  //           shWasheses = shWasheses.slice(0, 5);
+  //           console.log(shWasheses.length);
+  //         }
+  //       }else{
+  //         if (shWasheses.length > 10) {
+  //           shWasheses = shWasheses.slice(0, 10);
+  //           console.log(shWasheses.length);
+  //         }
+  //       }
+  //     }
+  //     else{
+  //       shWasheses = washeses.slice(0, 10);
+  //     }
 
-  }
+  //     setShowWasheses([...showWasheses, ...shWasheses]);
+  //   }
+  // }
 
 
 
@@ -323,41 +347,149 @@ function MapScreen({ navigation }) {
   return (
     <View style={styles.container}>
       <StatusBar />
-      {/* {loading &&
+      {loading &&
         <View style={{ justifyContent: 'center', alignItems: 'center', position: 'absolute', width: '100%', height: '100%', zIndex: 1 }} >
           <ActivityIndicator color='black' size={'large'} />
           <Text>Идет загрузка карты</Text>
-        </View>} */}
-      <YaMap
+        </View>}
+      <ClusteredYamap
         ref={map}
         // userLocationIcon={{ uri: 'https://www.clipartmax.com/png/middle/180-1801760_pin-png.png' }}
         style={styles.container}
-        onCameraPositionChangeEnd={onCameraPositionChangeEnd}
-
-      >
-        {showWasheses.map((obj, index) => {
-          return (<Marker scale={Platform.OS == 'ios' ? 0.6 : 0.3} key={index} point={{ lat: parseFloat(obj.lat), lon: parseFloat(obj.lon) }}
-            source={require('../assets/images/location.png')} // {{ uri: domain_web + obj.avatar }}
-            onPress={() => { 
+        // onCameraPositionChangeEnd={onCameraPositionChangeEnd}
+        clusterColor="blue"
+        clusteredMarkers={
+          washeses.map(obj => {
+            return ({
+              point: {
+                lat: parseFloat(obj.lat),
+                lon: parseFloat(obj.lon),
+              },
+              data: {
+                avatar: obj.avatar,
+                id: obj.id,
+                sale: obj.sale,
+              }
+            })
+          })
+        }
+        renderMarker={(obj, index) => (Platform.OS === "android" ?
+          <Marker scale={0.3} key={index} point={obj.point}
+            onPress={() => {
               (async () => {
-                await AsyncStorage.setItem("washer", obj.id.toString());
-                await AsyncStorage.setItem("sale", obj.sale.toString());
-                // navigation.navigate('Catalog');
-                navigation.navigate('PointCarWashDrawer', { from: "map" });
-                // navigation.dispatch(
-                //   CommonActions.reset({
-                //     index: 0,
-                //     routes: [{ name: "PointCarWash", params: { from: "map" } }]
-                //   }))
+                await AsyncStorage.setItem("washer", obj.data.id.toString());
+                await AsyncStorage.setItem("sale", obj.data.sale.toString());
+                navigation.dispatch(
+                  CommonActions.reset({
+                    index: 0,
+                    routes: [{ name: "PointCarWashDrawer", params: { from: "map",  loc: await getCurrentPosition() } }]
+                  }));
+                // navigation.navigate('PointCarWashDrawer', { from: "map" });
               })();
             }}
-          />)
-        })}
+          ><Image source={require('../assets/images/location.png')} style={{ width: 60, resizeMode: 'contain' }} /></Marker>
+          :
+          <Marker scale={0.3} key={index} point={obj.point}
+            source={require('../assets/images/location.png')}
+            onPress={() => {
+              (async () => {
+                await AsyncStorage.setItem("washer", obj.data.id.toString());
+                await AsyncStorage.setItem("sale", obj.data.sale.toString());
+                navigation.navigate('PointCarWashDrawer', { from: "map", loc: await getCurrentPosition() });
+              })();
+            }}
+          />
+        )}
+      >
+
+        {/* {showWasheses.map((obj, index) => {
+          return (Platform.OS === "android" ?
+            <Marker scale={0.3} key={index} point={{ lat: parseFloat(obj.lat), lon: parseFloat(obj.lon) }} // scale={Platform.OS == 'ios' ? 0.6 : 0.3}
+              // source={require('../assets/images/location.png')} // {{ uri: domain_web + obj.avatar }}
+              onPress={() => {
+                (async () => {
+                  await AsyncStorage.setItem("washer", obj.id.toString());
+                  await AsyncStorage.setItem("sale", obj.sale.toString());
+                  // navigation.navigate('Catalog');
+                  navigation.navigate('PointCarWashDrawer', { from: "map" });
+                  // navigation.dispatch(
+                  //   CommonActions.reset({
+                  //     index: 0,
+                  //     routes: [{ name: "PointCarWash", params: { from: "map" } }]
+                  //   }))
+                })();
+              }}
+            ><Image source={require('../assets/images/location.png')} style={{ width: 60, resizeMode: 'contain' }} /></Marker>
+            : <Marker scale={0.3
+            } key={index} point={{ lat: parseFloat(obj.lat), lon: parseFloat(obj.lon) }} // scale={Platform.OS == 'ios' ? 0.6 : 0.3}
+              source={require('../assets/images/location.png')}
+              onPress={() => {
+                (async () => {
+                  await AsyncStorage.setItem("washer", obj.id.toString());
+                  await AsyncStorage.setItem("sale", obj.sale.toString());
+                  // navigation.navigate('Catalog');
+                  navigation.navigate('PointCarWashDrawer', { from: "map" });
+                })();
+              }}
+            />)
+        })} */}
         {route != [] && <Polyline strokeWidth={7} strokeColor="#7CD0FF" points={route} />}
-      </YaMap>
+      </ClusteredYamap>
 
       {/* Dimensions.get('window').width */}
-      {!isOpen &&
+
+
+      <View style={{
+        position: 'absolute',
+        top: Dimensions.get('window').height * 0.1,
+        left: Dimensions.get('window').width * 0.05
+      }}>
+        <TouchableOpacity activeOpacity={0.8} onPress={() => { navigation.dispatch(DrawerActions.openDrawer()); }} style={{}} >
+          <Image source={require('../assets/images/map_main.png')} style={styles.bg_img} />
+        </TouchableOpacity>
+      </View>
+      <View style={{
+        position: 'absolute',
+        top: Dimensions.get('window').height * 0.1,
+        right: Dimensions.get('window').width * 0.05
+      }}>
+        <TouchableOpacity activeOpacity={0.8} onPress={() => navigation.navigate('AnsQues')} style={{}} >
+          <Image source={require('../assets/images/map_faq.png')} />
+        </TouchableOpacity>
+      </View>
+
+      <View style={{
+        position: 'absolute',
+        bottom: Dimensions.get('window').height * 0.1,
+        left: Dimensions.get('window').width * 0.05
+      }}>
+        <TouchableOpacity activeOpacity={0.9} onPress={zoomUp} style={{}} >
+          <Image source={require('../assets/images/map_plus.png')} resizeMode='stretch' style={{ width: 60, height: 60 }} />
+        </TouchableOpacity>
+        <TouchableOpacity activeOpacity={0.9} onPress={zoomDown} style={{}} >
+          <Image source={require('../assets/images/map_minus.png')} resizeMode='stretch' style={{ width: 60, height: 60 }} />
+        </TouchableOpacity>
+      </View>
+
+      <View style={{
+        position: 'absolute',
+        bottom: Dimensions.get('window').height * 0.1,
+        right: Dimensions.get('window').width * 0.05
+      }}>
+        <View style={{ bottom: 20 }}>
+          <TouchableOpacity activeOpacity={0.8} onPress={findRoute} style={{}} >
+            <Image source={require('../assets/images/map_route.png')} style={styles.bg_img} />
+          </TouchableOpacity>
+        </View>
+        <View style={{ width: 60 }}>
+          <TouchableOpacity activeOpacity={0.8} onPress={zoomToMe} style={{}} >
+            <Image source={require('../assets/images/map_navigation.png')} style={styles.bg_img} />
+          </TouchableOpacity>
+        </View>
+      </View>
+
+
+      {/* {!isOpen &&
         <SafeAreaView style={{ position: 'absolute', paddingTop: Platform.OS === "android" ? RNStatusBar.currentHeight : 0 }}>
           <View style={{ width: 1, height: Platform.OS === 'ios' ? Dimensions.get('window').height - 100 : Dimensions.get('window').height - 20, justifyContent: 'space-between' }}>
             <View style={{ height: 1, flexDirection: 'row', justifyContent: 'space-between', width: Dimensions.get('window').width, paddingVertical: 30, paddingHorizontal: 20 }}>
@@ -402,7 +534,7 @@ function MapScreen({ navigation }) {
               </View>
             </View>
           </View>
-        </SafeAreaView>}
+        </SafeAreaView>} */}
     </View>
   );
 }

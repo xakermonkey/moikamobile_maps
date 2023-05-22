@@ -25,16 +25,16 @@ function MainMenuScreen({ navigation }) {
   const dimensions = useWindowDimensions();
 
   return (
-    <Drawer.Navigator drawerContent={props => <DrawerContent { ...props } /> } screenOptions={{
+    <Drawer.Navigator drawerContent={props => <DrawerContent {...props} />} screenOptions={{
       drawerType: dimensions.width >= 768 ? 'permanent' : 'front',
       drawerStyle: {
         backgroundColor: '#6E7476',
         width: '84%',
-        height:'100%'
+        height: '100%'
       },
       drawerActiveTintColor: '#fff',
       drawerInactiveTintColor: '#fff',
-      
+
     }}>
       <Drawer.Screen name="Map" component={MapScreen} options={{
         headerShown: false,
@@ -68,21 +68,21 @@ function MainMenuScreen({ navigation }) {
           color: '#fff',
           textTransform: 'uppercase',
         },
-        }} />
-        
+      }} />
+
 
 
       <Drawer.Screen name="PersonalAccount" component={PersonalAccountScreen} options={{
-          headerShown: false,
-          headerShadowVisible: false,
-          headerStyle: {
-            backgroundColor: '#6E7476',
-          },
-          headerTitleStyle: {
-            color: '#fff',
-            textTransform: 'uppercase',
-          },
-        }} />
+        headerShown: false,
+        headerShadowVisible: false,
+        headerStyle: {
+          backgroundColor: '#6E7476',
+        },
+        headerTitleStyle: {
+          color: '#fff',
+          textTransform: 'uppercase',
+        },
+      }} />
       <Drawer.Screen name="Feedback" component={FeedbackScreen} options={{
         headerShown: false,
       }} />
@@ -98,12 +98,13 @@ function MainMenuScreen({ navigation }) {
         },
       }} />
 
-<Drawer.Screen name="PointCarWashDrawer" component={MakingOrderScreen} options={{
+      <Drawer.Screen name="PointCarWashDrawer" component={MakingOrderScreen} options={{
+        swipeEnabled: false,
         headerShown: false,
       }} />
 
-<Drawer.Screen name="Successful" component={SuccessfulOrder} options={{
-  swipeEnabled: false,
+      <Drawer.Screen name="Successful" component={SuccessfulOrder} options={{
+        swipeEnabled: false,
         headerShown: false,
         headerStyle: {
           backgroundColor: '#6E7476',

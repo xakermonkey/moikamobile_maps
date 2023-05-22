@@ -14,6 +14,7 @@ import { Skeleton, SkeletonGroup } from 'react-native-skeleton-loaders'
 function MyOrders({ navigation }) {
 
   const [orders, setOrders] = useState([]);
+  const [loading, setLoading] = useState(true)
 
   useLayoutEffect(() => {
     navigation.setOptions({
@@ -46,18 +47,14 @@ function MyOrders({ navigation }) {
       })
       console.log(res.data);
       setOrders(res.data);
+      setLoading(false);
     })();
   }, [navigation])
 
   const EmptyComponent = () => {
     return (
-      // <View style={{ marginTop:'10%' }}>
-      //   <Text style={{ textAlign: 'center', textTransform:'uppercase', color:'#fff', fontFamily:'Montserrat_700Bold' }}>У вас еще нет заказов</Text>
-      // </View>
-      <View style={{}}>
-      <SkeletonGroup numberOfItems={5} direction="column" stagger={{ delay: 1 }}>
-            <Skeleton color='#7C8183' w={'100%'} h={150} />
-      </SkeletonGroup>
+      <View style={{ marginTop:'10%' }}>
+        <Text style={{ textAlign: 'center', textTransform:'uppercase', color:'#fff', fontFamily:'Montserrat_700Bold' }}>У вас еще нет заказов</Text>
       </View>
     )
   }
@@ -98,7 +95,15 @@ function MyOrders({ navigation }) {
     </TouchableOpacity>)
   }
 
-
+  if (loading){
+    return(<View style={styles.container}>
+      <View style={styles.main}>
+      <SkeletonGroup numberOfItems={5} direction="column" stagger={{ delay: 1 }}>
+            <Skeleton color='#7C8183' w={'100%'} h={150} />
+      </SkeletonGroup>
+      </View>
+      </View>)
+  }
   return (
     <SafeAreaView style={styles.container} >
       <StatusBar/>

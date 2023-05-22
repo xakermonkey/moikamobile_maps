@@ -1,5 +1,5 @@
 import React, { useState, useLayoutEffect } from 'react';
-import { StyleSheet, View, Text, TouchableOpacity, ImageBackground, Image, Platform } from 'react-native';
+import { StyleSheet, View, Text, TouchableOpacity, ImageBackground, Image, Platform, Alert } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons, } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -79,6 +79,7 @@ function AddEditCar({ navigation, route }) {
         }));
     }
     catch (err) {
+      Alert.alert("Ошибка", "У Вас уже есть автомобиль с таким номером");
       console.log(err);
     }
 

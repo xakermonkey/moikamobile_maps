@@ -89,7 +89,6 @@ function PointCarWash({ navigation, route }) {
       headerShadowVisible: false,
       headerStyle: {
         backgroundColor: '#6E7476',
-
       },
       headerTintColor: '#fff',
       headerTitleStyle: {
@@ -97,7 +96,7 @@ function PointCarWash({ navigation, route }) {
         fontFamily: 'Raleway_700Bold',
       },
       headerLeft: () => (
-        <TouchableOpacity style={{ left: Platform.OS == 'ios' ? 0 : 0 }} onPress={() => route.params.from == "map" ? navigation.navigate('Map') : goToCatalog()
+        <TouchableOpacity style={{ left: Platform.OS == 'ios' ? 0 : 0 }} onPress={() => route.params.from == "map" ? navigation.navigate('Map', {loc: route.params.loc}) : goToCatalog()
         } activeOpacity={0.7} >
           <Ionicons name='chevron-back' size={32} color={'#7CD0D7'} />
         </TouchableOpacity >
