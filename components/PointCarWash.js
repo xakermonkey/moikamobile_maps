@@ -30,7 +30,7 @@ function PointCarWash({ navigation, route }) {
       navigation.setOptions({
         headerRight: () => (
           <View style={{ right: Platform.OS == 'ios' ? 0 : 0 }}>
-          <ActivityIndicator />
+            <ActivityIndicator />
           </View>
         )
       })
@@ -79,10 +79,19 @@ function PointCarWash({ navigation, route }) {
 
 
   const nav = () => {
-    if (route.params.from == "map"){
+    if (route.params.from == "map") {
       console.log("from point:", route.params.loc);
-      navigation.navigate('Map', {loc: route.params.loc});
-    }else{
+      if (Platform.OS == 'android') {
+        navigation.dispatch(
+          CommonActions.reset({
+            index: 0,
+            routes: [{ name: "Map", params: { loc: route.params.loc } }]
+          }));
+      } else {
+        navigation.navigate('Map', { loc: route.params.loc });
+      }
+
+    } else {
       goToCatalog();
     }
   }
@@ -106,6 +115,18 @@ function PointCarWash({ navigation, route }) {
         textTransform: 'uppercase',
         fontFamily: 'Raleway_700Bold',
       },
+      headerTitle: () => (
+        <View style={{ width: '100%' }}>
+          <View style={{ width: '70%' }}>
+            <Text numberOfLines={1} style={{
+              textTransform: 'uppercase',
+              fontSize: 20,
+              fontFamily: 'Raleway_700Bold', color: '#fff'
+            }}>ЗАГРУЗКА...</Text>
+          </View>
+        </View>
+      ),
+
       headerLeft: () => (
         <TouchableOpacity style={{ left: Platform.OS == 'ios' ? 0 : 0 }} onPress={nav} activeOpacity={0.7} >
           <Ionicons name='chevron-back' size={32} color={'#7CD0D7'} />
@@ -127,7 +148,17 @@ function PointCarWash({ navigation, route }) {
       setCurrentIndex(new Array(Object.keys(res.data.photo).length).fill(0));
       setPhoto(res.data.photo);
       navigation.setOptions({
-        title: res.data.washer.name_washer
+        headerTitle: () => (
+          <View style={{ width: '100%' }}>
+            <View style={{ width: '70%' }}>
+              <Text numberOfLines={1} style={{
+                textTransform: 'uppercase',
+              fontSize: 20,
+                fontFamily: 'Raleway_700Bold', color: '#fff'
+              }}>{res.data.washer.name_washer}</Text>
+            </View>
+          </View>
+        ),
       })
     })();
   }, []));

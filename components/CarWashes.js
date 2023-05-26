@@ -25,6 +25,7 @@ function CarWashes({ navigation, route }) {
   const [bView, setBVeiw] = useState(false); // Отображение Пикера (ios)
   const [loading, setLoading] = useState(false); // Отображение загрузки
   const [bLocation, setBLocation] = useState(false); // Вкл/Выкл геолокация
+  const [bPicker, setBPicker] = useState(false); // Вкл/Выкл геолокация
 
 
   const dist_sort = (a, b, coords) => { // функция сортировки моек по расстоянию 
@@ -137,7 +138,6 @@ function CarWashes({ navigation, route }) {
       try {
         console.log("Start Layout");
         let countries = JSON.parse(await AsyncStorage.getItem("countries"));
-        console.log(countries);
         if (countries == null) {
           const ret = await axios.get(domain_web + "/get_country") // получение всех городов
           countries = ret.data.country
@@ -153,7 +153,6 @@ function CarWashes({ navigation, route }) {
         }
         let stocks = JSON.parse(await AsyncStorage.getItem("_stocks"));
         let washes = JSON.parse(await AsyncStorage.getItem("washeses"));
-        console.log(stocks, washes);
         if (stocks == null || washes == null) {
           const phone = await AsyncStorage.getItem("phone"); // получение телефона из хранилища
           const res = await axios.get(domain_web + "/get_catalog", // получение моек с фильтрами
@@ -186,6 +185,7 @@ function CarWashes({ navigation, route }) {
 
 
   const checkUpdate = async () => {
+    setBPicker(true);
     console.log("Start CheckUpdate");
     const col = await Location.getLastKnownPositionAsync();
     const countries = JSON.parse(await AsyncStorage.getItem("countries"));
@@ -211,6 +211,7 @@ function CarWashes({ navigation, route }) {
     setStock(res.data.stock); // сохранение акций в State
     AsyncStorage.setItem("_stocks", JSON.stringify(res.data.stock));
     AsyncStorage.setItem("washeses", JSON.stringify(res.data.washer));
+    setBPicker(false);
     console.log("End CheckUpdate");
 
   }
@@ -265,6 +266,7 @@ function CarWashes({ navigation, route }) {
 
 
   const newLocation = async (value) => { // изменение города
+    console.log("start new loc");
     setLoading(true); // устанавливаем загрузку в true
     setLocation(value); // передаем в useState название города (локации)
     await AsyncStorage.setItem("location", value); // сохранение города в хранилище
@@ -287,6 +289,7 @@ function CarWashes({ navigation, route }) {
     AsyncStorage.setItem("_stocks", JSON.stringify(res.data.stock));
     AsyncStorage.setItem("washeses", JSON.stringify(res.data.washer));
     setBVeiw(false)
+    console.log("end new loc")
   }
 
 
@@ -401,10 +404,10 @@ function CarWashes({ navigation, route }) {
           <Text style={styles.subtext}>местоположение</Text>
           {Platform.OS === 'ios' ?
             <View>
-              <TouchableOpacity activeOpacity={0.7} onPress={() => setBVeiw(!bView)}>
+              <TouchableOpacity activeOpacity={0.7} disabled={bPicker}  onPress={() => setBVeiw(!bView)}>
                 <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingHorizontal: '0%' }}>
                   <Text style={styles.city}>{location}</Text>
-                  <Ionicons name='chevron-forward' size={24} style={{ color: '#7CD0D7' }} />
+                  {bPicker ? <ActivityIndicator  /> : <Ionicons name='chevron-forward' size={24} style={{ color: '#7CD0D7' }} />}
                 </View>
               </TouchableOpacity>
               {bView &&

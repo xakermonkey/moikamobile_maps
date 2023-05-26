@@ -1,5 +1,5 @@
 import React, { useLayoutEffect, useState } from 'react';
-import { StyleSheet, View, Text, TouchableOpacity, ImageBackground, Image, FlatList } from 'react-native';
+import { StyleSheet, View, Text, TouchableOpacity, ImageBackground, Image, FlatList, ScrollView } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons, FontAwesome5 } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -69,17 +69,19 @@ function SelectCar({ navigation }) {
           <View style={{flex:1}}></View>
         </View>
 
+        <ScrollView showsVerticalScrollIndicator={false}>
         <LinearGradient
           colors={['#01010199', '#35343499']}
           start={[0, 1]}
           style={styles.gradient_background} >
-            <FlatList
+            {/* <FlatList
             data={cars}
+            // contentContainerStyle={{height: '80%'}}
             // ListEmptyComponent={<EmptyComponent />}
             keyExtractor={item => item.id}
             renderItem={carView}
-          />
-          {/* {cars.map(obj => {
+          /> */}
+          {cars.map(obj => {
             return (
               <View key={obj.id} >
                 <TouchableOpacity activeOpacity={0.7} onPress={() => clickCar(obj.number)} style={styles.margin_TouchOpac}>
@@ -92,7 +94,7 @@ function SelectCar({ navigation }) {
                 <LinearGradient colors={['#00266F', '#7BCFD6']} start={[1, 0]} style={styles.gradient_line} />
               </View>
             )
-          })} */}
+          })}
         </LinearGradient>
 
         <TouchableOpacity activeOpacity={0.8} onPress={clickNext} style={{ marginTop: '5%' }} >
@@ -101,6 +103,7 @@ function SelectCar({ navigation }) {
           </ImageBackground>
         </TouchableOpacity>
 
+</ScrollView>
       </View>
     </View>
   );
@@ -139,7 +142,7 @@ const styles = StyleSheet.create({
     marginTop: '5%',
     borderRadius: 5,
     padding: '5%',
-    height: '80%'
+    // height: '80%'
   },
   subtext: {
     fontSize: 8,

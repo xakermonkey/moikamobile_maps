@@ -84,7 +84,7 @@ function DataScreen({ navigation }) {
                 await AsyncStorage.setItem("name", name);
                 await AsyncStorage.setItem("email", email);
                 navigation.navigate('MainMenu');
-            }else{
+            } else {
                 Alert.alert("Ошибка", "Введен неверный формат почты");
             }
 
@@ -97,7 +97,7 @@ function DataScreen({ navigation }) {
 
     return (
         <SafeAreaView style={styles.container} >
-            <StatusBar/>
+            <StatusBar />
             <View style={styles.main}>
 
                 <LinearGradient colors={['#7BCFD6', '#FFF737']} start={[1, 0]} style={styles.gradient_btn} >
@@ -113,29 +113,46 @@ function DataScreen({ navigation }) {
                     </View>
                 </LinearGradient>
 
-
-                <LinearGradient colors={['#7BCFD6', '#FFF737']} start={[1, 0]} style={styles.gradient_btn} >
-                    <View style={styles.text_with_background}>
-                        <TouchableOpacity activeOpacity={0.7} onPress={() => setBView(!bView)}>
-                            <Text style={styles.subtext}>местоположение</Text>
-                            <View style={styles.row}>
-                                <Text style={styles.text}>{location}</Text>
+                {Platform.OS === 'ios' ?
+                    <LinearGradient colors={['#7BCFD6', '#FFF737']} start={[1, 0]} style={styles.gradient_btn} >
+                        <View style={styles.text_with_background}>
+                            <TouchableOpacity activeOpacity={0.7} onPress={() => setBView(!bView)}>
+                                <Text style={styles.subtext}>местоположение</Text>
                                 <View style={styles.row}>
-                                    <Ionicons name='chevron-forward' size={24} style={{ color: '#7CD0D7' }} />
-                                    <TouchableOpacity onPress={getLocation} activeOpacity={0.8} style={{ marginLeft: '10%' }} >
-                                        <FontAwesome5 name='location-arrow' size={24} style={{ color: '#7CD0D7' }} />
-                                    </TouchableOpacity>
+                                    <Text style={styles.text}>{location}</Text>
+                                    <View style={styles.row}>
+                                        <Ionicons name='chevron-forward' size={24} style={{ color: '#7CD0D7' }} />
+                                        <TouchableOpacity onPress={getLocation} activeOpacity={0.8} style={{ marginLeft: '10%' }} >
+                                            <FontAwesome5 name='location-arrow' size={24} style={{ color: '#7CD0D7' }} />
+                                        </TouchableOpacity>
+                                    </View>
                                 </View>
+                            </TouchableOpacity>
+                            {bView && <Picker
+                                selectedValue={location}
+                                itemStyle={{ height: 150 }}
+                                onValueChange={(value, index) => setLocation(value)}>
+                                {country.map(obj => <Picker.Item color='#fff' key={obj} label={obj} value={obj} />)}
+                            </Picker>}
+                        </View>
+                    </LinearGradient> :
+
+                    <LinearGradient colors={['#7BCFD6', '#FFF737']} start={[1, 0]} style={styles.gradient_btn} >
+                        <View style={styles.text_with_background_android}>
+                            <Text style={styles.subtext_android}>местоположение</Text>
+                            <View style={{flexDirection: 'row', alignItems: 'center'}}>
+                            <Picker
+                                selectedValue={location}
+                                style={{ color: '#fff', width: '85%' }}
+                                onValueChange={(value, index) => setLocation(value)}>
+                                {country.map(obj => <Picker.Item key={obj} label={obj} value={obj} />)}
+                            </Picker>
+                            <TouchableOpacity onPress={getLocation} activeOpacity={0.8} style={{  }} >
+                                <FontAwesome5 name='location-arrow' size={24} style={{ color: '#7CD0D7' }} />
+                            </TouchableOpacity>
                             </View>
-                        </TouchableOpacity>
-                        {bView && <Picker
-                            selectedValue={location}
-                            itemStyle={{ height: 150 }}
-                            onValueChange={(value, index) => setLocation(value)}>
-                            {country.map(obj => <Picker.Item color='#fff' key={obj} label={obj} value={obj} />)}
-                        </Picker>}
-                    </View>
-                </LinearGradient>
+                        </View>
+                    </LinearGradient>}
 
 
                 <TouchableOpacity activeOpacity={0.8} onPress={sendData} style={styles.mt} >
@@ -168,6 +185,13 @@ const styles = StyleSheet.create({
         color: '#CBCBCB',
         fontFamily: 'Raleway_400Regular'
     },
+    subtext_android: {
+        marginLeft: '5%',
+        marginTop: '2%',
+        fontSize: 11,
+        color: '#CBCBCB',
+        fontFamily: 'Raleway_400Regular'
+    },
 
 
     input: {
@@ -193,6 +217,14 @@ const styles = StyleSheet.create({
     text_with_background: {
         paddingHorizontal: '5%',
         paddingVertical: '2%',
+        // alignItems: 'center',
+        backgroundColor: '#6E7476',
+        borderRadius: 5,
+    },
+
+    text_with_background_android: {
+        // paddingLeft: '5%',
+        // paddingTop: '2%',
         // alignItems: 'center',
         backgroundColor: '#6E7476',
         borderRadius: 5,

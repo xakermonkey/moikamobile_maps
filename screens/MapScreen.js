@@ -61,19 +61,22 @@ function MapScreen({ navigation, route }) {
     setWashes(res.data); // сохранеине адреса в State
   }
 
-  const getWasheses = async () => {
+
+  const getCity = async () => {
     let loc = await AsyncStorage.getItem("location");
     if (loc == null) {
       loc = "Краснодар";
     }
-    console.log(city);
     setCity(loc);
-    if (city !== loc) {
-      let phone = await AsyncStorage.getItem("phone");
-      const ret = await axios.get(domain_web + "/get_all_washes", { params: { location: loc, phone: phone } })
-      setWasheses(ret.data);
-      setTimeout(() => setLoading(false), 1000);
-    }
+    return loc;
+  }
+
+
+  const getWasheses = async (loc) => {
+    let phone = await AsyncStorage.getItem("phone");
+    const ret = await axios.get(domain_web + "/get_all_washes", { params: { location: loc, phone: phone } })
+    setWasheses(ret.data);
+    setTimeout(() => setLoading(false), 1000);
   }
 
 
@@ -83,23 +86,23 @@ function MapScreen({ navigation, route }) {
       setDrawer(false)
     }
     if (map.current) {
-      let { status } = await Location.requestForegroundPermissionsAsync(); // запрос прав на определение геопозиции
-      const loc = await Location.getCurrentPositionAsync(); // получение последних известных координат
+      // let { status } = await Location.requestForegroundPermissionsAsync(); // запрос прав на определение геопозиции
+      // const loc = await Location.getLastKnownPositionAsync(); // получение последних известных координат
       // setBLocation(status === 'granted')
-      if (status !== 'granted') {
-        Alert.alert("Ошибка", "Необходимо включить определение геопозиции");
-      }
-      if (loc == null) { // если нет прав или не получилось получить координаты
-        return;
-      }
-      console.log(route.params)
+      // if (status !== 'granted') {
+      // Alert.alert("Ошибка", "Необходимо включить определение геопозиции");
+      // }
+      // if (loc == null) { // если нет прав или не получилось получить координаты
+      // return;
+      // }
+      // console.log(route.params)
       if (route.params?.loc) {
         map.current.setCenter({ lon: route.params.loc.point.lon, lat: route.params.loc.point.lat }, route.params.loc.zoom, 0, 0, 1, Animation.SMOOTH); //координаты, зум, поворотом по азимуту и наклоном карты, длительность анимации, анимация
-      } else {
-        console.log("initMap")
-        map.current.setCenter({ lon: loc.coords.longitude, lat: loc.coords.latitude }, 16, 0, 0, 1, Animation.SMOOTH); //координаты, зум, поворотом по азимуту и наклоном карты, длительность анимации, анимация
       }
-
+      // } else {
+      // console.log("initMap")
+      // map.current.setCenter({ lon: loc.coords.longitude, lat: loc.coords.latitude }, 16, 0, 0, 1, Animation.SMOOTH); //координаты, зум, поворотом по азимуту и наклоном карты, длительность анимации, анимация
+      // }
     }
   }
 
@@ -111,10 +114,16 @@ function MapScreen({ navigation, route }) {
 
   useFocusEffect(useCallback(() => { // функция при попадании экрана в фокус
     (async () => {
-      initMap();
-      getOrderWashes();
-      setLoading(true);
-      getWasheses();
+      if (Platform.OS == 'android') {
+        initMap();
+      }
+      const loc = await getCity();
+      console.log(loc, city);
+      if (city !== loc) {
+        getOrderWashes();
+        setLoading(true);
+        getWasheses(loc);
+      }
     })()
   }, [route]));
 
@@ -249,67 +258,28 @@ function MapScreen({ navigation, route }) {
     }
   };
 
-  // const checkVisible = (marker, region, preview) => {
-  //   if (marker.lat < region.bottomRight.lat || marker.lat > region.topLeft.lat ||
-  //     marker.lon > region.bottomRight.lon || marker.lon < region.topLeft.lon || preview.includes(marker)) {
-  //     return false;
-  //   }
-  //   return true;
-  // }
-
-  const getMultirandom = (arr, num) => {
-    const shuffled = [...arr].sort(() => 0.5 - Math.random());
-    return shuffled.slice(0, num);
-  }
-
-  // const onCameraPositionChangeEnd = async () => {
-  //   const position = await getCurrentPosition();
-  //   if (showWasheses.length < washeses.length) {
-  //     const region = await getVisibleRegion();
-  //     let shWasheses = washeses.filter(obj => checkVisible(obj, region, showWasheses));
-  //     console.log("all on view washeses", shWasheses.length);
-  //     if (shWasheses.length > 0){
-  //       if (position.zoom > 12){
-  //         if (shWasheses.length > 5) {
-  //           shWasheses = shWasheses.slice(0, 5);
-  //           console.log(shWasheses.length);
-  //         }
-  //       }else{
-  //         if (shWasheses.length > 10) {
-  //           shWasheses = shWasheses.slice(0, 10);
-  //           console.log(shWasheses.length);
-  //         }
-  //       }
-  //     }
-  //     else{
-  //       shWasheses = washeses.slice(0, 10);
-  //     }
-
-  //     setShowWasheses([...showWasheses, ...shWasheses]);
-  //   }
-  // }
-
 
 
   findRoute = async () => { // поиск пути
     if (Object.keys(washes).length != 0) { // если есть адрес автомойки в которой открыт заказ
-      // console.log(washes)
+      console.log(washes)
 
       if (map.current) {
         let { status } = await Location.getForegroundPermissionsAsync(); // проверка на наличие прав
         const loc = await Location.getCurrentPositionAsync(); // получение ТОЧНОЙ позиции
         if (Object.keys(washes).length != 0) { // если есть адрес автомойки в которой открыт заказ
-          // console.log(washes)
+          console.log(washes)
 
           if (status !== 'granted' || loc == null) { // если нет прав иил не получена геопозиция
             Alert.alert("Ошибка", "Для построения маршрута необходимо включить определение геопозиции");
             return;
           }
-          // console.warn({ lon: loc.coords.longitude, lat: loc.coords.latitude });
+          console.warn({ lon: loc.coords.longitude, lat: loc.coords.latitude });
           Alert.alert("Приятной дороги", "Идет поиск самого короткого маршрута");
           map.current.findDrivingRoutes([{ lon: loc.coords.longitude, lat: loc.coords.latitude }, { lon: parseFloat(washes.lon), lat: parseFloat(washes.lat) }], (event) => {
+            // console.log(event.routes[0])
             if (event.routes.length == 0) {
-              // console.warn(event.routes[0])
+
               map.current.setCenter({ lon: loc.coords.longitude, lat: loc.coords.latitude }, 12, 0, 0, 1, Animation.SMOOTH);
               return;
             }
@@ -318,6 +288,7 @@ function MapScreen({ navigation, route }) {
             for (let i = 0; i < len; i++) {
               arr = [...arr, ...event.routes[0].sections[i].points];
             }
+            console.log(arr);
             setRoute(arr);
           })
         } else {
@@ -335,16 +306,6 @@ function MapScreen({ navigation, route }) {
     }
   }
 
-  // if (loading) {
-  //   return (
-  //     <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }} >
-  //       <ActivityIndicator color='black' size={'large'} />
-  //     </View>
-  //   )
-  // }
-
-  //ПЕРЕСМОТРЕТЬ КАРТУУУУ!!!!!
-  // YaMap.resetLocale(); // язык системы
   return (
     <View style={styles.container}>
       <StatusBar />
@@ -353,11 +314,16 @@ function MapScreen({ navigation, route }) {
           <ActivityIndicator color='black' size={'large'} />
           <Text>Идет загрузка карты</Text>
         </View>}
+        {routes != [] ?
+      <YaMap
+        ref={map}
+        style={styles.container}>
+        {/* <Polyline strokeWidth={7} strokeColor="#7CD0FF" points={[{ "lat": 60.001058999007924, "lon": 30.25570100808355 }, { "lat": 60.00105900000001, "lon": 30.255701 }, { "lat": 60.001194, "lon": 30.255771 }, { "lat": 60.001395, "lon": 30.255874 }, { "lat": 60.002194, "lon": 30.256286 }, { "lat": 60.003408, "lon": 30.256914 }, { "lat": 60.003986, "lon": 30.257213 }, { "lat": 60.004673, "lon": 30.257568 }, { "lat": 60.00485, "lon": 30.257658 }, { "lat": 60.005539, "lon": 30.258014 }, { "lat": 60.006, "lon": 30.258248 }, { "lat": 60.006272, "lon": 30.258392 }, { "lat": 60.006666, "lon": 30.258589 }, { "lat": 60.00671, "lon": 30.258621 }, { "lat": 60.006752, "lon": 30.258675 }, { "lat": 60.0068, "lon": 30.258752 }, { "lat": 60.006834, "lon": 30.258842 }, { "lat": 60.006856, "lon": 30.25893 }, { "lat": 60.006869, "lon": 30.259002 }, { "lat": 60.006879, "lon": 30.259086 }, { "lat": 60.006884, "lon": 30.259197 }, { "lat": 60.006879, "lon": 30.259339 }, { "lat": 60.006881, "lon": 30.25946 }, { "lat": 60.006891, "lon": 30.259542 }, { "lat": 60.006901, "lon": 30.259617 }, { "lat": 60.00695700154974, "lon": 30.25986100675243 }, { "lat": 60.006957000000014, "lon": 30.259861000000004 }, { "lat": 60.00703, "lon": 30.26007 }, { "lat": 60.007102, "lon": 30.260287 }, { "lat": 60.007168, "lon": 30.260477 }, { "lat": 60.007245, "lon": 30.260708 }, { "lat": 60.007384, "lon": 30.26108 }, { "lat": 60.007431, "lon": 30.26116 }, { "lat": 60.007462, "lon": 30.261199 }, { "lat": 60.007488, "lon": 30.261223 }, { "lat": 60.00754, "lon": 30.261232 }, { "lat": 60.007615, "lon": 30.261225 }, { "lat": 60.007735, "lon": 30.261199 }, { "lat": 60.00781, "lon": 30.261151 }, { "lat": 60.007844, "lon": 30.261104 }, { "lat": 60.007873, "lon": 30.261052 }, { "lat": 60.007897, "lon": 30.260983 }, { "lat": 60.007914, "lon": 30.260918 }, { "lat": 60.007937, "lon": 30.260811 }, { "lat": 60.007961, "lon": 30.260679 }, { "lat": 60.007973, "lon": 30.260582 }, { "lat": 60.008039, "lon": 30.260079 }, { "lat": 60.00807600095363, "lon": 30.259790992577244 }, { "lat": 60.00807600000001, "lon": 30.259791 }, { "lat": 60.008094, "lon": 30.259489 }, { "lat": 60.008094, "lon": 30.259364 }, { "lat": 60.008082, "lon": 30.259253 }, { "lat": 60.008067, "lon": 30.259182 }, { "lat": 60.008046, "lon": 30.259113 }, { "lat": 60.008016, "lon": 30.259048 }, { "lat": 60.007973, "lon": 30.25897 }, { "lat": 60.007926, "lon": 30.258907 }]} /> */}
+        {routes != [] && <Polyline strokeWidth={7} strokeColor="#7CD0FF" points={routes} />}
+      </YaMap> :
       <ClusteredYamap
         ref={map}
-        // userLocationIcon={{ uri: 'https://www.clipartmax.com/png/middle/180-1801760_pin-png.png' }}
         style={styles.container}
-        // onCameraPositionChangeEnd={onCameraPositionChangeEnd}
         clusterColor="blue"
         clusteredMarkers={
           washeses.map(obj => {
@@ -380,11 +346,7 @@ function MapScreen({ navigation, route }) {
               (async () => {
                 await AsyncStorage.setItem("washer", obj.data.id.toString());
                 await AsyncStorage.setItem("sale", obj.data.sale.toString());
-                navigation.dispatch(
-                  CommonActions.reset({
-                    index: 0,
-                    routes: [{ name: "PointCarWashDrawer", params: { from: "map", loc: await getCurrentPosition() } }]
-                  }));
+                navigation.navigate('PointCarWashDrawer', { from: "map", loc: await getCurrentPosition() });
                 // navigation.navigate('PointCarWashDrawer', { from: "map" });
               })();
             }}
@@ -402,43 +364,7 @@ function MapScreen({ navigation, route }) {
           />
         )}
       >
-
-        {/* {showWasheses.map((obj, index) => {
-          return (Platform.OS === "android" ?
-            <Marker scale={0.3} key={index} point={{ lat: parseFloat(obj.lat), lon: parseFloat(obj.lon) }} // scale={Platform.OS == 'ios' ? 0.6 : 0.3}
-              // source={require('../assets/images/location.png')} // {{ uri: domain_web + obj.avatar }}
-              onPress={() => {
-                (async () => {
-                  await AsyncStorage.setItem("washer", obj.id.toString());
-                  await AsyncStorage.setItem("sale", obj.sale.toString());
-                  // navigation.navigate('Catalog');
-                  navigation.navigate('PointCarWashDrawer', { from: "map" });
-                  // navigation.dispatch(
-                  //   CommonActions.reset({
-                  //     index: 0,
-                  //     routes: [{ name: "PointCarWash", params: { from: "map" } }]
-                  //   }))
-                })();
-              }}
-            ><Image source={require('../assets/images/location.png')} style={{ width: 60, resizeMode: 'contain' }} /></Marker>
-            : <Marker scale={0.3
-            } key={index} point={{ lat: parseFloat(obj.lat), lon: parseFloat(obj.lon) }} // scale={Platform.OS == 'ios' ? 0.6 : 0.3}
-              source={require('../assets/images/location.png')}
-              onPress={() => {
-                (async () => {
-                  await AsyncStorage.setItem("washer", obj.id.toString());
-                  await AsyncStorage.setItem("sale", obj.sale.toString());
-                  // navigation.navigate('Catalog');
-                  navigation.navigate('PointCarWashDrawer', { from: "map" });
-                })();
-              }}
-            />)
-        })} */}
-        {routes != [] && <Polyline strokeWidth={7} strokeColor="#7CD0FF" points={route} />}
-      </ClusteredYamap>
-
-      {/* Dimensions.get('window').width */}
-
+      </ClusteredYamap>}
 
       <View style={{
         position: 'absolute',
@@ -489,53 +415,6 @@ function MapScreen({ navigation, route }) {
         </View>
       </View>
 
-
-      {/* {!isOpen &&
-        <SafeAreaView style={{ position: 'absolute', paddingTop: Platform.OS === "android" ? RNStatusBar.currentHeight : 0 }}>
-          <View style={{ width: 1, height: Platform.OS === 'ios' ? Dimensions.get('window').height - 100 : Dimensions.get('window').height - 20, justifyContent: 'space-between' }}>
-            <View style={{ height: 1, flexDirection: 'row', justifyContent: 'space-between', width: Dimensions.get('window').width, paddingVertical: 30, paddingHorizontal: 20 }}>
-              <View style={{ width: 60 }}>
-                <TouchableOpacity activeOpacity={0.8} onPress={() => { navigation.dispatch(DrawerActions.openDrawer()); }} style={{}} >
-                  <Image source={require('../assets/images/map_main.png')} style={styles.bg_img} />
-                </TouchableOpacity>
-              </View>
-              <View style={{ width: 60 }}>
-                <TouchableOpacity activeOpacity={0.8} onPress={() => navigation.navigate('AnsQues')} style={{}} >
-                  <Image source={require('../assets/images/map_faq.png')} style={styles.bg_img} />
-                </TouchableOpacity>
-              </View>
-            </View>
-
-            <View style={{ flexDirection: 'row', justifyContent: 'space-between', width: Dimensions.get('window').width, bottom: 0, padding: 20 }}>
-              <View style={{}}>
-                <View style={{ width: 60 }}>
-                  <TouchableOpacity activeOpacity={0.9} onPress={zoomUp} style={{}} >
-                    <Image source={require('../assets/images/map_plus.png')} resizeMode='stretch' style={{ width: 60, height: 60 }} />
-                  </TouchableOpacity>
-                </View>
-                <View style={{ width: 60 }}>
-                  <TouchableOpacity activeOpacity={0.9} onPress={zoomDown} style={{}} >
-                    <Image source={require('../assets/images/map_minus.png')} resizeMode='stretch' style={{ width: 60, height: 60 }} />
-                  </TouchableOpacity>
-                </View>
-              </View>
-
-
-              <View style={{}}>
-                <View style={{ width: 60, bottom: 20 }}>
-                  <TouchableOpacity activeOpacity={0.8} onPress={findRoute} style={{}} >
-                    <Image source={require('../assets/images/map_route.png')} style={styles.bg_img} />
-                  </TouchableOpacity>
-                </View>
-                <View style={{ width: 60 }}>
-                  <TouchableOpacity activeOpacity={0.8} onPress={zoomToMe} style={{}} >
-                    <Image source={require('../assets/images/map_navigation.png')} style={styles.bg_img} />
-                  </TouchableOpacity>
-                </View>
-              </View>
-            </View>
-          </View>
-        </SafeAreaView>} */}
     </View>
   );
 }
@@ -546,18 +425,5 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
   },
-  img: {
-    // height: '100%',
-    // width: '100%'
-  },
-  map_btn: {
-    // position: 'absolute', zIndex: 1,
-    // width: '100%', height: '100%',
-    // justifyContent: 'space-between'
-  },
-  row: {
-    // flexDirection: 'row', justifyContent: 'space-between',
-    // width: '100%',
-    // padding: '5%',
-  },
+
 })

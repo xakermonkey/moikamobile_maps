@@ -72,7 +72,7 @@ function OrderСompletion({ navigation }) {
         const { hostname, path, queryParams } = Linking.parse(res.data.uri);
         setUuid(queryParams.orderId);
         setPayUri(res.data.uri);
-        
+
       }
       setLoading(false);
     })();
@@ -80,7 +80,7 @@ function OrderСompletion({ navigation }) {
 
 
   const checkPayment = useCallback(() => {
-  (async () => {
+    (async () => {
       const res = await axios.post(domain_mobile + "/api/check_payment", { "uuid": uuid }, { headers: { "Authorization": "Token " + token } });
       if (res.data.status) {
         await createOrder(washer, time, date, body, sale, servise, payment, uuid);
@@ -89,12 +89,12 @@ function OrderСompletion({ navigation }) {
       }
       setLoading(false);
     })();
-}, [token, uuid, washer, time, date, body, sale, servise, payment, loading])
+  }, [token, uuid, washer, time, date, body, sale, servise, payment, loading])
 
 
   const handler = useCallback(async (event) => {
     setLoading(true);
-    if (Platform.OS == 'ios'){
+    if (Platform.OS == 'ios') {
       WebBrowser.dismissBrowser();
     }
     try {
@@ -109,23 +109,23 @@ function OrderСompletion({ navigation }) {
   const PayOrder = useCallback(() => {
     setLoading(true);
     (async () => {
-        if (payment == "Безналичный расчёт") {    
-          if (linkListener == null){
-            const listener = Linking.addEventListener("url", handler);
-            setLinkListener(listener);
-          }
-          const results = await WebBrowser.openBrowserAsync(payUri);
-          if (results.type != "dismiss") {
-          checkPayment();
-          }
-          return;
-        } else {
-          // setLoading(true);
-          await createOrder(washer, time, date, body, sale, servise, payment, uuid);
-          // setLoading(false);
+      if (payment == "Безналичный расчёт") {
+        if (linkListener == null) {
+          const listener = Linking.addEventListener("url", handler);
+          setLinkListener(listener);
         }
-      })();
-    }, [payUri, linkListener, washer, time, date, body, sale, servise, payment, uuid, loading])
+        const results = await WebBrowser.openBrowserAsync(payUri);
+        if (results.type != "dismiss") {
+          checkPayment();
+        }
+        return;
+      } else {
+        // setLoading(true);
+        await createOrder(washer, time, date, body, sale, servise, payment, uuid);
+        // setLoading(false);
+      }
+    })();
+  }, [payUri, linkListener, washer, time, date, body, sale, servise, payment, uuid, loading])
 
 
   const createOrder = async (washer, time, date, body, sale, servise, payment, uuid) => {
@@ -159,7 +159,7 @@ function OrderСompletion({ navigation }) {
         });
       let keys = await AsyncStorage.getAllKeys()
       await AsyncStorage.multiRemove(keys.filter(key => key.startsWith("stock") || key.startsWith("servise_")))
-      if (payment == "Безналичный расчёт") {    
+      if (payment == "Безналичный расчёт") {
         await axios.post(domain_mobile + "/api/accept_payment", { "uuid": uuid }, { headers: { "Authorization": "Token " + token } });
       }
       setLoading(false);
@@ -168,7 +168,7 @@ function OrderСompletion({ navigation }) {
     } catch (err) {
       console.log(err);
       Alert.alert("Упс", "Даннное время уже забронировано");
-      if (payment == "Безналичный расчёт") {    
+      if (payment == "Безналичный расчёт") {
         await axios.post(domain_mobile + "/api/cancel_payment", { "uuid": uuid }, { headers: { "Authorization": "Token " + token } });
       }
       navigation.dispatch(
@@ -183,17 +183,25 @@ function OrderСompletion({ navigation }) {
 
   };
 
-  if(loading){
-    return(<View>
-      <ActivityIndicator size='large' />
-    </View>)
+  if (loading) {
+    return (
+      <View style={styles.container}>
+        <StatusBar />
+        <Image blurRadius={91} style={[StyleSheet.absoluteFill, styles.image]} source={require('../assets/images/blur_background.png')} resizeMode='cover' />
+        <View style={{ justifyContent: 'space-evenly', alignItems: 'center', padding: '5%', flex: 1 }}>
+          <Image source={require('../assets/images/logo_succes.png')} />
+          <Text style={[styles.bold_text, { textAlign: 'center' }]}>Идет создание заказа</Text>
+          <ActivityIndicator size='large' />
+        </View>
+      </View>
+    )
   }
 
 
 
   return (
     <View style={styles.container}>
-      <StatusBar/>
+      <StatusBar />
       <Image blurRadius={91} style={[StyleSheet.absoluteFill, styles.image]} source={require('../assets/images/blur_background.png')} resizeMode='cover' />
       <View style={styles.blurContainer}>
         <View style={[styles.row, { justifyContent: 'center', alignItems: "center", width: "100%", marginTop: '5%' }]}>
