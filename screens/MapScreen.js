@@ -114,9 +114,9 @@ function MapScreen({ navigation, route }) {
 
   useFocusEffect(useCallback(() => { // функция при попадании экрана в фокус
     (async () => {
-      if (Platform.OS == 'android') {
-        initMap();
-      }
+      // if (Platform.OS == 'android') {
+      //   initMap();
+      // }
       const loc = await getCity();
       console.log(loc, city);
       if (city !== loc) {
