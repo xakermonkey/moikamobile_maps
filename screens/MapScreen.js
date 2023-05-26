@@ -314,14 +314,41 @@ function MapScreen({ navigation, route }) {
           <ActivityIndicator color='black' size={'large'} />
           <Text>Идет загрузка карты</Text>
         </View>}
-        {routes != [] ?
       <YaMap
         ref={map}
         style={styles.container}>
-        {/* <Polyline strokeWidth={7} strokeColor="#7CD0FF" points={[{ "lat": 60.001058999007924, "lon": 30.25570100808355 }, { "lat": 60.00105900000001, "lon": 30.255701 }, { "lat": 60.001194, "lon": 30.255771 }, { "lat": 60.001395, "lon": 30.255874 }, { "lat": 60.002194, "lon": 30.256286 }, { "lat": 60.003408, "lon": 30.256914 }, { "lat": 60.003986, "lon": 30.257213 }, { "lat": 60.004673, "lon": 30.257568 }, { "lat": 60.00485, "lon": 30.257658 }, { "lat": 60.005539, "lon": 30.258014 }, { "lat": 60.006, "lon": 30.258248 }, { "lat": 60.006272, "lon": 30.258392 }, { "lat": 60.006666, "lon": 30.258589 }, { "lat": 60.00671, "lon": 30.258621 }, { "lat": 60.006752, "lon": 30.258675 }, { "lat": 60.0068, "lon": 30.258752 }, { "lat": 60.006834, "lon": 30.258842 }, { "lat": 60.006856, "lon": 30.25893 }, { "lat": 60.006869, "lon": 30.259002 }, { "lat": 60.006879, "lon": 30.259086 }, { "lat": 60.006884, "lon": 30.259197 }, { "lat": 60.006879, "lon": 30.259339 }, { "lat": 60.006881, "lon": 30.25946 }, { "lat": 60.006891, "lon": 30.259542 }, { "lat": 60.006901, "lon": 30.259617 }, { "lat": 60.00695700154974, "lon": 30.25986100675243 }, { "lat": 60.006957000000014, "lon": 30.259861000000004 }, { "lat": 60.00703, "lon": 30.26007 }, { "lat": 60.007102, "lon": 30.260287 }, { "lat": 60.007168, "lon": 30.260477 }, { "lat": 60.007245, "lon": 30.260708 }, { "lat": 60.007384, "lon": 30.26108 }, { "lat": 60.007431, "lon": 30.26116 }, { "lat": 60.007462, "lon": 30.261199 }, { "lat": 60.007488, "lon": 30.261223 }, { "lat": 60.00754, "lon": 30.261232 }, { "lat": 60.007615, "lon": 30.261225 }, { "lat": 60.007735, "lon": 30.261199 }, { "lat": 60.00781, "lon": 30.261151 }, { "lat": 60.007844, "lon": 30.261104 }, { "lat": 60.007873, "lon": 30.261052 }, { "lat": 60.007897, "lon": 30.260983 }, { "lat": 60.007914, "lon": 30.260918 }, { "lat": 60.007937, "lon": 30.260811 }, { "lat": 60.007961, "lon": 30.260679 }, { "lat": 60.007973, "lon": 30.260582 }, { "lat": 60.008039, "lon": 30.260079 }, { "lat": 60.00807600095363, "lon": 30.259790992577244 }, { "lat": 60.00807600000001, "lon": 30.259791 }, { "lat": 60.008094, "lon": 30.259489 }, { "lat": 60.008094, "lon": 30.259364 }, { "lat": 60.008082, "lon": 30.259253 }, { "lat": 60.008067, "lon": 30.259182 }, { "lat": 60.008046, "lon": 30.259113 }, { "lat": 60.008016, "lon": 30.259048 }, { "lat": 60.007973, "lon": 30.25897 }, { "lat": 60.007926, "lon": 30.258907 }]} /> */}
+          {washeses.map((obj, index) => (Platform.OS === "android" ?
+          <Marker scale={0.3} key={index} point={{
+                lat: parseFloat(obj.lat),
+                lon: parseFloat(obj.lon),
+              }}
+            onPress={() => {
+              (async () => {
+                await AsyncStorage.setItem("washer", obj.id.toString());
+                await AsyncStorage.setItem("sale", obj.sale.toString());
+                navigation.navigate('PointCarWashDrawer', { from: "map", loc: await getCurrentPosition() });
+                // navigation.navigate('PointCarWashDrawer', { from: "map" });
+              })();
+            }}
+          ><Image source={require('../assets/images/location.png')} style={{ width: 60, resizeMode: 'contain' }} /></Marker>
+          :
+          <Marker scale={0.3} key={index} point={{
+                lat: parseFloat(obj.lat),
+                lon: parseFloat(obj.lon),
+              }}
+            source={require('../assets/images/location.png')}
+            onPress={() => {
+              (async () => {
+                await AsyncStorage.setItem("washer", obj.id.toString());
+                await AsyncStorage.setItem("sale", obj.sale.toString());
+                navigation.navigate('PointCarWashDrawer', { from: "map", loc: await getCurrentPosition() });
+              })();
+            }}
+          />
+        ))}
         {routes != [] && <Polyline strokeWidth={7} strokeColor="#7CD0FF" points={routes} />}
-      </YaMap> :
-      <ClusteredYamap
+      </YaMap> 
+      {/* <ClusteredYamap
         ref={map}
         style={styles.container}
         clusterColor="blue"
@@ -364,7 +391,7 @@ function MapScreen({ navigation, route }) {
           />
         )}
       >
-      </ClusteredYamap>}
+      </ClusteredYamap> */}
 
       <View style={{
         position: 'absolute',
