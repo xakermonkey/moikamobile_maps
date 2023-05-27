@@ -108,24 +108,27 @@ function MapScreen({ navigation, route }) {
 
   useLayoutEffect(() => {
     (async () => {
-      // initMap();
-    })();
-  }, [])
-
-  useFocusEffect(useCallback(() => { // функция при попадании экрана в фокус
-    (async () => {
-      // if (Platform.OS == 'android') {
-      //   initMap();
-      // }
       const loc = await getCity();
-      console.log(loc, city);
-      if (city !== loc) {
-        getOrderWashes();
-        setLoading(true);
-        getWasheses(loc);
-      }
-    })()
-  }, [route]));
+      getOrderWashes();
+      setLoading(true);
+      getWasheses(loc);
+    })();
+  }, [route])
+
+  // useFocusEffect(useCallback(() => { // функция при попадании экрана в фокус
+  //   (async () => {
+  //     // if (Platform.OS == 'android') {
+  //     //   initMap();
+  //     // }
+  //     const loc = await getCity();
+  //     console.log(loc, city);
+  //     if (city !== loc) {
+  //       getOrderWashes();
+  //       setLoading(true);
+  //       getWasheses(loc);
+  //     }
+  //   })()
+  // }, [route]));
 
   useEffect(() => {
     registerForPushNotificationsAsync();
@@ -317,11 +320,14 @@ function MapScreen({ navigation, route }) {
       <YaMap
         ref={map}
         style={styles.container}>
-          {washeses.map((obj, index) => (Platform.OS === "android" ?
+          {/* <Marker scale={0.3} point={{lat:59.925511, lon:30.319755,}}>
+          <Image source={require('../assets/images/location.png')} style={{ width: 60, resizeMode: 'contain' }} />
+          </Marker> */}
+        {washeses.map((obj, index) => (Platform.OS === "android" ?
           <Marker scale={0.3} key={index} point={{
-                lat: parseFloat(obj.lat),
-                lon: parseFloat(obj.lon),
-              }}
+            lat: parseFloat(obj.lat),
+            lon: parseFloat(obj.lon),
+          }}
             onPress={() => {
               (async () => {
                 await AsyncStorage.setItem("washer", obj.id.toString());
@@ -333,9 +339,9 @@ function MapScreen({ navigation, route }) {
           ><Image source={require('../assets/images/location.png')} style={{ width: 60, resizeMode: 'contain' }} /></Marker>
           :
           <Marker scale={0.3} key={index} point={{
-                lat: parseFloat(obj.lat),
-                lon: parseFloat(obj.lon),
-              }}
+            lat: parseFloat(obj.lat),
+            lon: parseFloat(obj.lon),
+          }}
             source={require('../assets/images/location.png')}
             onPress={() => {
               (async () => {
@@ -347,7 +353,7 @@ function MapScreen({ navigation, route }) {
           />
         ))}
         {routes != [] && <Polyline strokeWidth={7} strokeColor="#7CD0FF" points={routes} />}
-      </YaMap> 
+      </YaMap>
       {/* <ClusteredYamap
         ref={map}
         style={styles.container}

@@ -404,10 +404,10 @@ function CarWashes({ navigation, route }) {
           <Text style={styles.subtext}>местоположение</Text>
           {Platform.OS === 'ios' ?
             <View>
-              <TouchableOpacity activeOpacity={0.7} disabled={bPicker}  onPress={() => setBVeiw(!bView)}>
+              <TouchableOpacity activeOpacity={0.7} disabled={bPicker} onPress={() => setBVeiw(!bView)}>
                 <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingHorizontal: '0%' }}>
                   <Text style={styles.city}>{location}</Text>
-                  {bPicker ? <ActivityIndicator  /> : <Ionicons name='chevron-forward' size={24} style={{ color: '#7CD0D7' }} />}
+                  {bPicker ? <ActivityIndicator /> : <Ionicons name='chevron-forward' size={24} style={{ color: '#7CD0D7' }} />}
                 </View>
               </TouchableOpacity>
               {bView &&
@@ -434,15 +434,22 @@ function CarWashes({ navigation, route }) {
               }
             </View> :
 
-            <Picker
-              selectedValue={location}
-              itemStyle={{}}
-              style={{ marginHorizontal: '-5%', color: '#fff' }}
-              onValueChange={(value, index) => newLocation(value)}>
-              {locations.map(obj => <Picker.Item key={obj} label={obj} value={obj} />)}
-            </Picker>
+            <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
+              <View style={{ width: '90%' }}>
+                <Picker
+                  dropdownIconColor={0x6E7476ff}
+                  dropdownIconRippleColor={0x6E7476ff}
+                  enabled={!bPicker}
+                  selectedValue={location}
+                  itemStyle={{}}
+                  style={{ marginHorizontal: '-5%', color: '#fff' }}
+                  onValueChange={(value, index) => newLocation(value)}>
+                  {locations.map(obj => <Picker.Item key={obj} label={obj} value={obj} />)}
+                </Picker>
+              </View>
+              {bPicker ? <ActivityIndicator /> : <Ionicons name='chevron-forward' size={24} style={{ color: '#7CD0D7' }} />}
+            </View>
           }
-
           {!bView && <LinearGradient colors={['#00266F', '#7BCFD6']} start={[1, 0]} style={styles.gradient_line} />}
         </View>
 
