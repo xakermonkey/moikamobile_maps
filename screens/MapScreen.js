@@ -10,31 +10,15 @@ import { domain_mobile, domain_web } from '../domain';
 import * as Device from 'expo-device';
 import * as Notifications from 'expo-notifications';
 import { StatusBar } from 'expo-status-bar';
-import * as TaskManager from "expo-task-manager";
 import { CommonActions } from '@react-navigation/native';
 
-Notifications.setNotificationHandler({
-  handleNotification: async () => ({
-    shouldShowAlert: true,
-    shouldPlaySound: true,
-    shouldSetBadge: true,
-  }),
-});
-
-const BACKGROUND_NOTIFICATION_TASK = "BACKGROUND-NOTIFICATION-TASK";
-
-TaskManager.defineTask(
-  BACKGROUND_NOTIFICATION_TASK,
-  ({ data, error, executionInfo }) => {
-    // console.log(data);
-    if (error) {
-      console.log("error occurred");
-    }
-    if (data) {
-      console.log("data-----", data);
-    }
-  }
-);
+// Notifications.setNotificationHandler({
+//   handleNotification: async () => ({
+//     shouldShowAlert: true,
+//     shouldPlaySound: true,
+//     shouldSetBadge: true,
+//   }),
+// });
 
 function MapScreen({ navigation, route }) {
 
@@ -132,14 +116,28 @@ function MapScreen({ navigation, route }) {
 
   useEffect(() => {
     registerForPushNotificationsAsync();
-
+    
     notificationListener.current = Notifications.addNotificationReceivedListener(notification => {
-      // console.log(notification);
+      // Получаем данные удаленного уведомления
+      // const { title, body, data } = notification.request.content;
+      // Преобразуем удаленное уведомление в локальное
+      // await Notifications.scheduleNotificationAsync({
+      //   content: {
+      //     title,
+      //     body,
+      //     data,
+      //   },
+      //   trigger: null, // Передайте null, чтобы уведомление было показано немедленно
+      // });
+
+      console.log('notification');
+      console.log(notification.request.content);
       setNotification(notification);
     });
 
     responseListener.current = Notifications.addNotificationResponseReceivedListener(response => {
-      // console.log(response);
+      console.log('response');
+      console.log(response);
       if (Platform.OS == "ios") {
         if (response.notification.request.content.categoryIdentifier == "successful") {
           navigation.navigate("PersonalAccount");
@@ -169,10 +167,10 @@ function MapScreen({ navigation, route }) {
 
     });
 
-    return () => {
-      Notifications.removeNotificationSubscription(notificationListener.current);
-      Notifications.removeNotificationSubscription(responseListener.current);
-    };
+    // return () => {
+    //   Notifications.removeNotificationSubscription(notificationListener.current);
+    //   Notifications.removeNotificationSubscription(responseListener.current);
+    // };
   }, []);
 
   const registerForPushNotificationsAsync = async () => {
@@ -211,14 +209,15 @@ function MapScreen({ navigation, route }) {
       alert('Must use physical device for Push Notifications');
     }
 
-    if (Platform.OS === 'android') {
-      await Notifications.setNotificationChannelAsync('default', {
-        name: 'default',
-        importance: Notifications.AndroidImportance.MAX,
-        vibrationPattern: [0, 250, 250, 250],
-        lightColor: '#FF231F7C',
-      });
-    }
+    // if (Platform.OS === 'android') {
+    //   await Notifications.setNotificationChannelAsync('miscellaneous', {
+    //     name: 'Miscellaneous',
+    //     sound: true,
+    //     importance: Notifications.AndroidImportance.MAX,
+    //     vibrationPattern: [0, 250, 250, 250],
+    //     lightColor: '#FF231F7C',
+    //   });
+    // }
 
   }
 

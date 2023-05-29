@@ -1,5 +1,6 @@
 import 'react-native-gesture-handler';
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect } from 'react';
+import { Platform } from 'react-native';
 
 // import { NavigationContainer } from '@react-navigation/native';
 // import { createStackNavigator } from '@react-navigation/stack';
@@ -15,10 +16,38 @@ import DataScreen from './screens/DataScreen';
 import VerificationCodeScreen from './screens/VerificationCodeScreen';
 import MainMenuScreen from './screens/MainMenuScreen';
 import HowItWorksScreen from './screens/HowItWorksScreen';
+
+import * as Notifications from 'expo-notifications';
+import * as TaskManager from "expo-task-manager";
+
 const Stack = createNativeStackNavigator();
 
 export default function App() {
-  
+
+  useEffect(() => {
+    setNotificationChannel();
+  });
+
+  // const BACKGROUND_NOTIFICATION_TASK = 'BACKGROUND-NOTIFICATION-TASK';
+  // TaskManager.defineTask(BACKGROUND_NOTIFICATION_TASK, ({ data, error, executionInfo }) => {
+  //   console.log('Received a notification in the background!');
+  //   console.log(data);
+  //   console.log(executionInfo);
+  // });
+  // Notifications.registerTaskAsync(BACKGROUND_NOTIFICATION_TASK);
+
+  const setNotificationChannel = async () => {
+    if (Platform.OS === 'android') {
+      await Notifications.setNotificationChannelAsync('notifications', {
+        name: 'Уведомления',
+        sound: true,
+        importance: Notifications.AndroidImportance.MAX,
+        vibrationPattern: [0, 250, 250, 250],
+        lightColor: '#FF231F7C',
+      });
+    }
+  }
+
   let [fontsLoaded] = useFonts({
     Raleway_400Regular, Raleway_700Bold, Montserrat_400Regular, Montserrat_700Bold,
   });
@@ -80,15 +109,4 @@ export default function App() {
     </NavigationContainer>
   );
 
-  async function registerForPushNotificationsAsync() {
-    if (Platform.OS === 'android') {
-      await Notifications.setNotificationChannelAsync('Уведомления', {
-        name: 'Уведомления',
-        importance: Notifications.AndroidImportance.MAX,
-        vibrationPattern: [0, 250, 250, 250],
-        lightColor: '#FF231F7C',
-      });
-    }
-  }
-  
 }

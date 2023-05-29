@@ -12,6 +12,8 @@
   <uses-permission android:name="android.permission.POST_NOTIFICATIONS"/>
   <uses-permission android:name="android.permission.SCHEDULE_EXACT_ALARM"/>
   <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED"/>
+  <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+
 
   <queries>
     <intent>
@@ -26,12 +28,18 @@
     <meta-data android:name="expo.modules.updates.EXPO_UPDATES_CHECK_ON_LAUNCH" android:value="ALWAYS"/>
     <meta-data android:name="expo.modules.updates.EXPO_UPDATES_LAUNCH_WAIT_MS" android:value="0"/>
     <meta-data android:name="expo.modules.updates.EXPO_UPDATE_URL" android:value="https://exp.host/@xakermonkey/t4yc"/>
+
     <meta-data
         android:name="expo.modules.notifications.default_notification_icon"
         android:resource="@drawable/ic_stat_name" />
-    <meta-data
-        android:name="expo.modules.notifications.default_notification_color"
-        android:resource="@color/splashscreen_background" />
+    <meta-data android:name="com.google.firebase.messaging.default_notification_icon"
+        android:resource="@drawable/ic_stat_name" />
+    <meta-data android:name="com.google.firebase.messaging.default_notification_channel_id"
+        android:value="notifications"/>
+<!--    <meta-data-->
+<!--        android:name="expo.modules.notifications.default_notification_color"-->
+<!--        android:resource="@color/splashscreen_background" />-->
+
     <activity android:name=".MainActivity" android:label="@string/app_name" android:configChanges="keyboard|keyboardHidden|orientation|screenSize|uiMode" android:launchMode="singleTask" android:windowSoftInputMode="adjustResize" android:theme="@style/Theme.App.SplashScreen" android:exported="true" android:screenOrientation="portrait">
       <intent-filter>
         <action android:name="android.intent.action.MAIN"/>
