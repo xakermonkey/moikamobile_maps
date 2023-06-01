@@ -81,7 +81,7 @@ function PriceListFor({ navigation, route }) {
         }
       }
       await AsyncStorage.setItem("total_price", total.toString());
-      navigation.navigate('SelectDate');
+      navigation.navigate('SelectCar');
     }
   }
 
