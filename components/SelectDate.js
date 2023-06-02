@@ -18,15 +18,8 @@ function SelectDate({ navigation }) {
 
   useLayoutEffect(() => {
     (async () => {
-      const washer = await AsyncStorage.getItem("washer");
-      const number = await AsyncStorage.getItem("car_number");
-      const res = await axios.get(domain_web + "/" + washer + "/get_work_time",
-        {
-          params: {
-            car_number: number
-          }
-        }
-      );
+      const washer = await AsyncStorage.getItem("washer")
+      const res = await axios.get(domain_web + "/" + washer + "/get_work_time");
       setData(res.data);
       if (Object.keys(res.data).length != 0) {
         setSelectDay(Object.keys(res.data)[0]);
@@ -42,7 +35,7 @@ function SelectDate({ navigation }) {
   const clickNext = async () => {
     await AsyncStorage.setItem("order_time", selectTime);
     await AsyncStorage.setItem("order_day", selectDay);
-    navigation.navigate('SelectPaymentMethod');
+    navigation.navigate('SelectCar');
   }
 
 
@@ -52,11 +45,11 @@ function SelectDate({ navigation }) {
     navigation.navigate('PriceListFor')
   }
 
-  const daySelector = async (value) => {
+  const daySelector = async (value) => { 
     setSelectDay(value); setSelectTime(data[value][0]);
     setBDay(false)
   }
-  const timeSelector = async (value) => {
+  const timeSelector = async (value) => { 
     setSelectTime(value);
     setBTime(false)
   }
@@ -73,7 +66,7 @@ function SelectDate({ navigation }) {
   }
   return (
     <View style={styles.container}>
-      <StatusBar />
+        <StatusBar />
       <Image blurRadius={91} style={[StyleSheet.absoluteFill, styles.image]} source={require('../assets/images/blur_background.png')} resizeMode='cover' />
       <View style={styles.blurContainer}>
         <TouchableWithoutFeedback onPress={() => { setBDay(false); setBTime(false) }} accessible={false} >

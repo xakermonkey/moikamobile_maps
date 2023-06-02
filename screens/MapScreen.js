@@ -12,14 +12,6 @@ import * as Notifications from 'expo-notifications';
 import { StatusBar } from 'expo-status-bar';
 import { CommonActions } from '@react-navigation/native';
 
-// Notifications.setNotificationHandler({
-//   handleNotification: async () => ({
-//     shouldShowAlert: true,
-//     shouldPlaySound: true,
-//     shouldSetBadge: true,
-//   }),
-// });
-
 function MapScreen({ navigation, route }) {
 
   const [washes, setWashes] = useState({});
@@ -28,8 +20,7 @@ function MapScreen({ navigation, route }) {
   const [showWasheses, setShowWasheses] = useState([]);
   const [loading, setLoading] = useState(false);
   const [isOpen, setDrawer] = useState(false);
-  const [notification, setNotification] = useState(false);
-  const notificationListener = useRef();
+  // const [notification, setNotification] = useState(false);
   const [city, setCity] = useState(null);
   const responseListener = useRef();
 
@@ -116,28 +107,10 @@ function MapScreen({ navigation, route }) {
 
   useEffect(() => {
     registerForPushNotificationsAsync();
-    
-    notificationListener.current = Notifications.addNotificationReceivedListener(notification => {
-      // Получаем данные удаленного уведомления
-      // const { title, body, data } = notification.request.content;
-      // Преобразуем удаленное уведомление в локальное
-      // await Notifications.scheduleNotificationAsync({
-      //   content: {
-      //     title,
-      //     body,
-      //     data,
-      //   },
-      //   trigger: null, // Передайте null, чтобы уведомление было показано немедленно
-      // });
-
-      console.log('notification');
-      console.log(notification.request.content);
-      setNotification(notification);
-    });
 
     responseListener.current = Notifications.addNotificationResponseReceivedListener(response => {
       console.log('response');
-      console.log(response);
+      console.log(response.notification.request.content.data.category);
       if (Platform.OS == "ios") {
         if (response.notification.request.content.categoryIdentifier == "successful") {
           navigation.navigate("PersonalAccount");
@@ -152,14 +125,18 @@ function MapScreen({ navigation, route }) {
         }
       }
       else if (Platform.OS == "android") {
-        if (response.notification.request.trigger.remoteMessage.notification.tag == "successful") {
+        // if (response.notification.request.trigger.remoteMessage.notification.tag == "successful") {
+        if (response.notification.request.content.data.category == "successful") {
           navigation.navigate("PersonalAccount");
           navigation.navigate("MyOrders");
-          navigation.navigate('OrderDetails', { orderId: response.notification.request.trigger.remoteMessage.data.order });
-          navigation.navigate('EvaluateService', { orderId: response.notification.request.trigger.remoteMessage.data.order });
+          // navigation.navigate('OrderDetails', { orderId: response.notification.request.trigger.remoteMessage.data.order });
+          // navigation.navigate('EvaluateService', { orderId: response.notification.request.trigger.remoteMessage.data.order });
+          navigation.navigate('OrderDetails', { orderId: response.notification.request.content.data.order });
+          navigation.navigate('EvaluateService', { orderId: response.notification.request.content.data.order });
           return;
         }
-        else if (response.notification.request.trigger.remoteMessage.notification.tag == "new_stock") {
+        // else if (response.notification.request.trigger.remoteMessage.notification.tag == "new_stock") {
+        else if (response.notification.request.content.data.category == "new_stock") {
           navigation.navigate("Catalog");
           return;
         }
@@ -177,7 +154,7 @@ function MapScreen({ navigation, route }) {
     // const pushtoken = await AsyncStorage.getItem("pushToken");
     if (Device.isDevice) {
       const devicePushToken = (await Notifications.getDevicePushTokenAsync()).data
-      // console.log(devicePushToken);
+      console.log(devicePushToken);
       // if (pushtoken == null) {
       try {
         const token = await AsyncStorage.getItem("token");

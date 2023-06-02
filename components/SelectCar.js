@@ -33,7 +33,7 @@ function SelectCar({ navigation }) {
   const clickNext = async () => {
     if (selectCar != null){
       await AsyncStorage.setItem("car_number", selectCar);
-      navigation.navigate("SelectDate");
+      navigation.navigate("SelectPaymentMethod");
     }
   }
 
