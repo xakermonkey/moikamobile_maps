@@ -33,7 +33,7 @@ function SelectCar({ navigation }) {
   const clickNext = async () => {
     if (selectCar != null){
       await AsyncStorage.setItem("car_number", selectCar);
-      navigation.navigate("SelectPaymentMethod");
+      navigation.navigate("SelectDate");
     }
   }
 
@@ -184,4 +184,3 @@ const styles = StyleSheet.create({
   },
   // конец кнопки
 });
-

@@ -1,5 +1,5 @@
 import React, { useEffect, useLayoutEffect, useState } from 'react'
-import { Image, ImageBackground, SafeAreaView, StyleSheet, Text, TouchableOpacity, View, ScrollView, Alert, Platform, Linking } from 'react-native'
+import { Image, ImageBackground, SafeAreaView, StyleSheet, Text, TouchableOpacity, View, ScrollView, Alert, Platform, Linking, ActivityIndicator } from 'react-native'
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
 import axios from 'axios';
@@ -9,6 +9,7 @@ import MaskInput from 'react-native-mask-input';
 import { Picker } from '@react-native-picker/picker';
 import * as SplashScreen from "expo-splash-screen";
 import { StatusBar } from 'expo-status-bar';
+import { log } from 'react-native-reanimated';
 
 function LoginScreen({ navigation }) {
 
@@ -71,6 +72,7 @@ function LoginScreen({ navigation }) {
 
     const setCode = async () => {
         setDisable(true);
+        console.log("clock");
         if (num.length < 14) {
             Alert.alert('Внимание', 'Неверный формат номера телефона');
             setDisable(false);
@@ -97,7 +99,7 @@ function LoginScreen({ navigation }) {
     return (
         <SafeAreaView style={styles.container} >
             <StatusBar />
-            <ScrollView style={styles.main}>
+            <ScrollView keyboardShouldPersistTaps="handled" style={styles.main}>
 
                 <View style={styles.logo}>
                     <Image source={require('../assets/images/logo.png')} />
@@ -155,8 +157,9 @@ function LoginScreen({ navigation }) {
 
 
                 <TouchableOpacity activeOpacity={0.8} onPress={setCode} disabled={disable} style={styles.mt} >
+
                     <ImageBackground source={require('../assets/images/button.png')} resizeMode='stretch' style={styles.bg_img} >
-                        <Text style={styles.text_btn} >Ок</Text>
+                        {disable ? <ActivityIndicator style={{paddingVertical:'5%'}} color="white" /> : <Text style={styles.text_btn} >Ок</Text>}
                     </ImageBackground>
                 </TouchableOpacity>
 
