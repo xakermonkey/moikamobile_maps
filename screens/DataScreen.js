@@ -1,5 +1,5 @@
 import React, { useLayoutEffect, useState } from 'react'
-import { StyleSheet, Text, View, SafeAreaView, TouchableOpacity, TextInput, ImageBackground, Alert } from 'react-native'
+import { StyleSheet, Text, View, SafeAreaView, TouchableOpacity, TextInput, ImageBackground, Alert, ActivityIndicator } from 'react-native'
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons, FontAwesome5 } from '@expo/vector-icons';
 import axios from 'axios';
@@ -18,6 +18,7 @@ function DataScreen({ navigation }) {
     const [location, setLocation] = useState("Краснодар");
     const [country, setCountry] = useState([]);
     const [bView, setBView] = useState(false);
+    const [disable, setDisable] = useState(false);
 
     useLayoutEffect(() => {
         (async () => {
@@ -66,6 +67,7 @@ function DataScreen({ navigation }) {
 
 
     const sendData = async () => {
+        setDisable(true);
         try {
             if (validate(email) || email === "") {
                 const token = await AsyncStorage.getItem('token');
@@ -86,11 +88,13 @@ function DataScreen({ navigation }) {
                 navigation.navigate('MainMenu');
             } else {
                 Alert.alert("Ошибка", "Введен неверный формат почты");
+            setDisable(false);
             }
 
         }
         catch (err) {
             console.log(err);
+            setDisable(false);
         }
     }
 
@@ -155,9 +159,9 @@ function DataScreen({ navigation }) {
                     </LinearGradient>}
 
 
-                <TouchableOpacity activeOpacity={0.8} onPress={sendData} style={styles.mt} >
+                <TouchableOpacity activeOpacity={0.8} onPress={sendData} disabled={disable} style={styles.mt} >
                     <ImageBackground source={require('../assets/images/button.png')} resizeMode='stretch' style={styles.bg_img} >
-                        <Text style={styles.text_btn} >Ок</Text>
+                    {disable ? <ActivityIndicator style={{paddingVertical:'5%'}} color="white" /> : <Text style={styles.text_btn} >Ок</Text>}
                     </ImageBackground>
                 </TouchableOpacity>
 

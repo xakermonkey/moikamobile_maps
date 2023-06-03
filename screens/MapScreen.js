@@ -23,7 +23,7 @@ function MapScreen({ navigation, route }) {
   // const [notification, setNotification] = useState(false);
   const [city, setCity] = useState(null);
   const responseListener = useRef();
-
+  const [disable, setDisable] = useState(false);
 
   YaMap.init('b5f1cf2d-be55-4198-9e5d-66f0be967a30');
   YaMap.setLocale('ru_RU');
@@ -240,6 +240,7 @@ function MapScreen({ navigation, route }) {
 
 
   findRoute = async () => { // поиск пути
+    setDisable(true);
     if (Object.keys(washes).length != 0) { // если есть адрес автомойки в которой открыт заказ
       console.log(washes)
 
@@ -251,6 +252,7 @@ function MapScreen({ navigation, route }) {
 
           if (status !== 'granted' || loc == null) { // если нет прав иил не получена геопозиция
             Alert.alert("Ошибка", "Для построения маршрута необходимо включить определение геопозиции");
+            setDisable(false);
             return;
           }
           console.warn({ lon: loc.coords.longitude, lat: loc.coords.latitude });
@@ -258,7 +260,6 @@ function MapScreen({ navigation, route }) {
           map.current.findDrivingRoutes([{ lon: loc.coords.longitude, lat: loc.coords.latitude }, { lon: parseFloat(washes.lon), lat: parseFloat(washes.lat) }], (event) => {
             // console.log(event.routes[0])
             if (event.routes.length == 0) {
-
               map.current.setCenter({ lon: loc.coords.longitude, lat: loc.coords.latitude }, 12, 0, 0, 1, Animation.SMOOTH);
               return;
             }
@@ -269,10 +270,12 @@ function MapScreen({ navigation, route }) {
             }
             console.log(arr);
             setRoute(arr);
+            setDisable(false);
           })
         } else {
           if (status !== 'granted' || loc == null) {
             Alert.alert("Ошибка", "Необходимо включить определение геопозиции");
+            setDisable(false);
             return;
           }
           map.current.setCenter({ lon: loc.coords.longitude, lat: loc.coords.latitude }, 12, 0, 0, 1, Animation.SMOOTH);
@@ -281,6 +284,7 @@ function MapScreen({ navigation, route }) {
       }
     } else {
       Alert.alert("Внимание", "Чтобы построить маршрут, необходимо оформить заказ");
+    setDisable(false);
       return;
     }
   }
@@ -413,8 +417,13 @@ function MapScreen({ navigation, route }) {
         right: Dimensions.get('window').width * 0.05
       }}>
         <View style={{ bottom: 20 }}>
-          <TouchableOpacity activeOpacity={0.8} onPress={findRoute} style={{}} >
-            <Image source={require('../assets/images/map_route.png')} style={styles.bg_img} />
+          <TouchableOpacity activeOpacity={0.8} onPress={findRoute} disabled={disable} style={{}} >
+          <Image source={require('../assets/images/map_route.png')} style={styles.bg_img} />
+          {disable &&
+          <View style={{ position:'absolute', alignItems:'center', justifyContent:'center', height:'100%', width:'100%' }}>
+            <ActivityIndicator color="black" />
+           </View>
+          }
           </TouchableOpacity>
         </View>
         <View style={{ width: 60 }}>

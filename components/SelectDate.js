@@ -1,5 +1,5 @@
 import React, { useLayoutEffect, useState, useEffect } from 'react';
-import { StyleSheet, View, Text, TouchableOpacity, ImageBackground, Image, Alert, Platform, TouchableWithoutFeedback, Keyboard, KeyboardAvoidingView } from 'react-native';
+import { StyleSheet, View, Text, TouchableOpacity, ImageBackground, Image, Alert, Platform, TouchableWithoutFeedback, ActivityIndicator, Keyboard, KeyboardAvoidingView } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
 import axios from 'axios';
@@ -63,13 +63,23 @@ function SelectDate({ navigation }) {
 
   if (selectDay == undefined) {
     return (
-      <View style={{ backgroundColor: '#6E7476', flex: 1 }}>
+      <View style={styles.container}>
         <StatusBar />
-        <View style={{ justifyContent: 'center', alignItems: 'center', flex: 1, padding: '5%' }}>
+        <Image blurRadius={91} style={[StyleSheet.absoluteFill, styles.image]} source={require('../assets/images/blur_background.png')} resizeMode='cover' />
+        <View style={{ justifyContent: 'space-evenly', alignItems: 'center', padding: '5%', flex: 1 }}>
           <Image source={require('../assets/images/logo_succes.png')} />
           <Text style={[styles.bold_text, { textAlign: 'center' }]}>Подбираем для вас время</Text>
+          <ActivityIndicator size='large' />
         </View>
-      </View>)
+      </View>
+      // <View style={{ backgroundColor: '#6E7476', flex: 1 }}>
+      //   <StatusBar />
+      //   <View style={{ justifyContent: 'center', alignItems: 'center', flex: 1, padding: '5%' }}>
+      //     <Image source={require('../assets/images/logo_succes.png')} />
+      //     <Text style={[styles.bold_text, { textAlign: 'center' }]}>Подбираем для вас время</Text>
+      //   </View>
+      // </View>
+      )
   }
   return (
     <View style={styles.container}>

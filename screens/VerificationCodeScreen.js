@@ -1,5 +1,5 @@
 import React, { useLayoutEffect, useState } from 'react'
-import { StyleSheet, Text, View, SafeAreaView, TouchableOpacity, TextInput, ImageBackground, Alert } from 'react-native'
+import { StyleSheet, Text, View, SafeAreaView, TouchableOpacity, TextInput, ImageBackground, Alert, ActivityIndicator } from 'react-native'
 import { LinearGradient } from 'expo-linear-gradient';
 import axios from 'axios';
 import { domain_mobile } from '../domain';
@@ -16,8 +16,10 @@ function VerificationCodeScreen({ navigation, route }) {
     }, [navigation])
 
     const [code, setCode] = useState('');
+    const [disable, setDisable] = useState(false);
 
     const sendCode = async () => {
+        setDisable(true);
         try {
             const res = await axios.post(domain_mobile + "/api/set_code", { "number": route.params.number, "code": code });
             await AsyncStorage.setItem("token", res.data.token);
@@ -48,6 +50,7 @@ function VerificationCodeScreen({ navigation, route }) {
         }
         catch (err) {
             Alert.alert("Ошибка!", "Введен некорректный код доступа");
+            setDisable(false);
         }
 
     }
@@ -67,9 +70,9 @@ function VerificationCodeScreen({ navigation, route }) {
                     </View>
                 </LinearGradient>
 
-                <TouchableOpacity activeOpacity={0.8} onPress={sendCode} style={styles.mt} >
+                <TouchableOpacity activeOpacity={0.8} onPress={sendCode} disabled={disable} style={styles.mt} >
                     <ImageBackground source={require('../assets/images/button.png')} resizeMode='stretch' style={styles.bg_img} >
-                        <Text style={styles.text_btn} >Далее</Text>
+                    {disable ? <ActivityIndicator style={{paddingVertical:'5%'}} color="white" /> : <Text style={styles.text_btn} >Далее</Text>}
                     </ImageBackground>
                 </TouchableOpacity>
 
