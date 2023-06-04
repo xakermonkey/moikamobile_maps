@@ -19,8 +19,12 @@ import HowItWorksScreen from './screens/HowItWorksScreen';
 
 import * as Notifications from 'expo-notifications';
 import messaging from '@react-native-firebase/messaging';
+// import * as SplashScreen from "expo-splash-screen";
 
 const Stack = createNativeStackNavigator();
+// SplashScreen.preventAutoHideAsync()
+//   .then((result) => console.log(`SplashScreen.preventAutoHideAsync() succeeded: ${result}`))
+//   .catch(console.warn); // it's good to explicitly catch and inspect any error
 
 export default function App() {
 
@@ -82,8 +86,17 @@ export default function App() {
     return null;
   }
 
+  // const componentDidMount = () => {
+  //   // Hides native splash screen after 2s
+  //   setTimeout(async () => {
+  //     await SplashScreen.hideAsync();
+  //   }, 2000);
+  // }
+
   return (
-    <NavigationContainer>
+    <NavigationContainer
+    // onReady={componentDidMount} 
+    >
       <Stack.Navigator initialRouteName='Login' >
         <Stack.Screen name="Login" component={LoginScreen} options={{
           headerShown: false,
@@ -91,16 +104,17 @@ export default function App() {
         <Stack.Screen name="how_it_works" component={HowItWorksScreen} />
         <Stack.Screen name="VerificationCode" component={VerificationCodeScreen} options={{
           title: '', // Код из СМС
-          headerBackTitleVisible: false,
+          // // headerBackTitle: '',
+          // headerBackTitleVisible: false,
           headerShadowVisible: false,
           headerStyle: {
             backgroundColor: '#6E7476',
           },
-          headerTintColor: '#fff',
-          headerTitleStyle: {
-            fontWeight: 'bold',
-            fontFamily: 'Raleway_700Bold',
-          },
+          // headerTintColor: '#fff',
+          // headerTitleStyle: {
+          //   fontWeight: 'bold',
+          //   fontFamily: 'Raleway_700Bold',
+          // },
           //   navigationOptions: ({ navigation }) => 
           //   ({ headerLeft: () => (
           //     <TouchableOpacity onPress={() => navigation.navigate('Login')} activeOpacity={0.7}>

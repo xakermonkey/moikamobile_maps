@@ -420,8 +420,11 @@ function MapScreen({ navigation, route }) {
           <TouchableOpacity activeOpacity={0.8} onPress={findRoute} disabled={disable} style={{}} >
           <Image source={require('../assets/images/map_route.png')} style={styles.bg_img} />
           {disable &&
-          <View style={{ position:'absolute', alignItems:'center', justifyContent:'center', height:'100%', width:'100%' }}>
-            <ActivityIndicator color="black" />
+          <View style={{ position:'absolute', alignItems:'center', justifyContent:'center', height:'100%', width:'100%',
+          backgroundColor:'rgba(00, 00, 00, 0.7)',
+          borderRadius:5
+          }}>
+            <ActivityIndicator color="white" />
            </View>
           }
           </TouchableOpacity>

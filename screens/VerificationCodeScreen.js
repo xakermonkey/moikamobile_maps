@@ -1,4 +1,4 @@
-import React, { useLayoutEffect, useState } from 'react'
+import React, { useLayoutEffect, useState, useEffect } from 'react'
 import { StyleSheet, Text, View, SafeAreaView, TouchableOpacity, TextInput, ImageBackground, Alert, ActivityIndicator } from 'react-native'
 import { LinearGradient } from 'expo-linear-gradient';
 import axios from 'axios';
@@ -6,14 +6,28 @@ import { domain_mobile } from '../domain';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { CommonActions } from '@react-navigation/native';
 import { StatusBar } from 'expo-status-bar';
+import { Ionicons } from '@expo/vector-icons';
 
 
 function VerificationCodeScreen({ navigation, route }) {
     // const VerificationCodeScreen = ({ navigation }) => {
 
-    useLayoutEffect(() => {
-
-    }, [navigation])
+    useEffect(() => {
+        navigation.setOptions({
+          headerLeft: () => (
+        <TouchableOpacity onPress={() => navigation.goBack()} activeOpacity={0.7}>
+        <Ionicons name='chevron-back' size={32} color={'#7CD0D7'} />
+      </TouchableOpacity>
+          ),
+        });
+      }, [navigation]);
+    // useLayoutEffect(() => {
+    //     navigation.setOptions({
+    //       headerBackTitle: '',
+    //       headerBackTitleVisible: false,
+    //       headerShadowVisible: false,
+    //     })
+    // }, [navigation])
 
     const [code, setCode] = useState('');
     const [disable, setDisable] = useState(false);
@@ -139,6 +153,7 @@ const styles = StyleSheet.create({
     },
     bg_img: {
         alignItems: 'center',
+        height:52
     },
     // конец кнопки
 

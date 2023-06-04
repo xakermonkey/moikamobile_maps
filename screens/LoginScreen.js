@@ -7,7 +7,6 @@ import { domain_mobile, domain_web } from '../domain';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import MaskInput from 'react-native-mask-input';
 import { Picker } from '@react-native-picker/picker';
-import * as SplashScreen from "expo-splash-screen";
 import { StatusBar } from 'expo-status-bar';
 import { log } from 'react-native-reanimated';
 
@@ -23,6 +22,7 @@ function LoginScreen({ navigation }) {
     const [bReg, setBReg] = useState(false);
 
     const [mask, setMask] = useState(['(', /\d/, /\d/, /\d/, ')', ' ', /\d/, /\d/, /\d/, '-', /\d/, /\d/, /\d/, /\d/]);
+    const [showElement, setShowElement] = useState(false);
 
 
     useLayoutEffect(() => {
@@ -49,7 +49,6 @@ function LoginScreen({ navigation }) {
             setRegions(res.data);
             setSelectReg(0)
 
-            await SplashScreen.hideAsync();
             const first_join_app = await AsyncStorage.getItem("first_join_app");
             if (first_join_app == null) {
                 navigation.navigate("how_it_works");
@@ -83,6 +82,28 @@ function LoginScreen({ navigation }) {
         }
     }
 
+    const reconnectServer = async () => {
+        const token = await AsyncStorage.getItem("token");
+        if (token != null) {
+            navigation.replace("MainMenu");
+            return;
+        }
+        const res = await axios.get(domain_web + "/get_code_region");
+        setRegions(res.data);
+        setSelectReg(0)
+        const first_join_app = await AsyncStorage.getItem("first_join_app");
+        if (first_join_app == null) {
+            navigation.navigate("how_it_works");
+        }
+    }
+
+    useEffect(() => {
+        const timeout = setTimeout(() => {
+          setShowElement(true);
+        }, 5000);
+    
+        return () => clearTimeout(timeout); // Очистка таймера при размонтировании компонента
+      }, []);
 
     if (regions == null) {
         return (
@@ -91,6 +112,13 @@ function LoginScreen({ navigation }) {
                 <View style={{ justifyContent: 'center', alignItems: 'center', flex: 1, padding: '5%' }}>
                     <Image source={require('../assets/images/logo_succes.png')} />
                     <Text style={[styles.bold_text, { textAlign: 'center' }]}>Пытаемся установить соединение с сервером</Text>
+                <View style={{width:'100%', marginTop: '20%'}}>
+                {showElement && <TouchableOpacity activeOpacity={0.8} onPress={reconnectServer} disabled={disable} style={{}} >
+                    <ImageBackground source={require('../assets/images/button.png')} resizeMode='stretch' style={styles.bg_img} >
+                        <Text style={styles.text_btn} >Повторить</Text>
+                    </ImageBackground>
+                </TouchableOpacity>}
+                </View>
                 </View>
             </View>
         )
@@ -157,7 +185,6 @@ function LoginScreen({ navigation }) {
 
 
                 <TouchableOpacity activeOpacity={0.8} onPress={setCode} disabled={disable} style={styles.mt} >
-
                     <ImageBackground source={require('../assets/images/button.png')} resizeMode='stretch' style={styles.bg_img} >
                         {disable ? <ActivityIndicator style={{paddingVertical:'5%'}} color="white" /> : <Text style={styles.text_btn} >Ок</Text>}
                     </ImageBackground>
@@ -329,6 +356,7 @@ const styles = StyleSheet.create({
     },
     bg_img: {
         alignItems: 'center',
+        height:52
     },
     // конец кнопки
 

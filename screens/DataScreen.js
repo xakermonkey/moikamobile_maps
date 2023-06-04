@@ -9,6 +9,7 @@ import * as Location from 'expo-location';
 import { Picker } from '@react-native-picker/picker';
 import { validate } from 'react-email-validator';
 import { StatusBar } from 'expo-status-bar';
+import { CommonActions } from '@react-navigation/native';
 
 
 function DataScreen({ navigation }) {
@@ -85,7 +86,12 @@ function DataScreen({ navigation }) {
                 await AsyncStorage.setItem("location", location);
                 await AsyncStorage.setItem("name", name);
                 await AsyncStorage.setItem("email", email);
-                navigation.navigate('MainMenu');
+                navigation.dispatch(
+                    CommonActions.reset({
+                        index: 0,
+                        routes: [{ name: "MainMenu" }]
+                    }));
+                // navigation.navigate('MainMenu');
             } else {
                 Alert.alert("Ошибка", "Введен неверный формат почты");
             setDisable(false);
@@ -269,6 +275,7 @@ const styles = StyleSheet.create({
     },
     bg_img: {
         alignItems: 'center',
+        height:52
     },
     // конец кнопки
 
