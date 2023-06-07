@@ -312,8 +312,8 @@ function MapScreen({ navigation, route }) {
               (async () => {
                 await AsyncStorage.setItem("washer", obj.id.toString());
                 await AsyncStorage.setItem("sale", obj.sale.toString());
-                navigation.navigate('PointCarWashDrawer', { from: "map", loc: await getCurrentPosition() });
-                // navigation.navigate('PointCarWashDrawer', { from: "map" });
+                navigation.navigate('MakingOrder', { from: "map", loc: await getCurrentPosition() });
+                // navigation.navigate('MakingOrder', { from: "map" });
               })();
             }}
           ><Image source={require('../assets/images/location.png')} style={{ width: 60, resizeMode: 'contain' }} /></Marker>
@@ -327,7 +327,7 @@ function MapScreen({ navigation, route }) {
               (async () => {
                 await AsyncStorage.setItem("washer", obj.id.toString());
                 await AsyncStorage.setItem("sale", obj.sale.toString());
-                navigation.navigate('PointCarWashDrawer', { from: "map", loc: await getCurrentPosition() });
+                navigation.navigate('MakingOrder', { from: "map", loc: await getCurrentPosition() });
               })();
             }}
           />
@@ -359,8 +359,8 @@ function MapScreen({ navigation, route }) {
               (async () => {
                 await AsyncStorage.setItem("washer", obj.data.id.toString());
                 await AsyncStorage.setItem("sale", obj.data.sale.toString());
-                navigation.navigate('PointCarWashDrawer', { from: "map", loc: await getCurrentPosition() });
-                // navigation.navigate('PointCarWashDrawer', { from: "map" });
+                navigation.navigate('MakingOrder', { from: "map", loc: await getCurrentPosition() });
+                // navigation.navigate('MakingOrder', { from: "map" });
               })();
             }}
           ><Image source={require('../assets/images/location.png')} style={{ width: 60, resizeMode: 'contain' }} /></Marker>
@@ -371,7 +371,7 @@ function MapScreen({ navigation, route }) {
               (async () => {
                 await AsyncStorage.setItem("washer", obj.data.id.toString());
                 await AsyncStorage.setItem("sale", obj.data.sale.toString());
-                navigation.navigate('PointCarWashDrawer', { from: "map", loc: await getCurrentPosition() });
+                navigation.navigate('MakingOrder', { from: "map", loc: await getCurrentPosition() });
               })();
             }}
           />

@@ -89,15 +89,9 @@ function CarFilters({ navigation, route }) {
       <Image blurRadius={91} style={[StyleSheet.absoluteFill, styles.image]} source={require('../assets/images/blur_background.png')} resizeMode='cover' />
       {/* <BlurView intensity={100} style={styles.blurContainer}> */}
       <View style={styles.blurContainer}>
-        {/* <TouchableOpacity onPress={() => navigation.replace('CarWashes', { "sorted": 0, "filters": [] })} activeOpacity={0.7} style={{}}>
-          <Ionicons name='close' size={28} color={'#7CD0D7'} />
-        </TouchableOpacity>
-        <View style={{ alignItems: 'center' }}>
-          <Text style={styles.bold_text}>Фильтр</Text>
-        </View> */}
-
-        {perm && <View>
-          {Platform.OS === 'ios' ?
+        
+        {perm && Platform.OS === 'ios' ?
+          <View>
             <LinearGradient
               colors={['#01010199', '#35343499']}
               start={[0, 1]}
@@ -108,13 +102,29 @@ function CarFilters({ navigation, route }) {
                   <Text style={styles.text}>{sort[selectSort]}</Text>
                 </View>
               </TouchableOpacity>
-              {bSort && <Picker
+              </LinearGradient>
+              {bSort && 
+              <View style={{
+                position:'absolute', top:50,left:0,right:0,
+                // zIndex: 11,
+                backgroundColor: '#6E7476', borderRadius: 5, shadowColor: "#000",
+                shadowOffset: {
+                  width: 0,
+                  height: 10,
+                },
+                shadowOpacity: 0.8,
+                shadowRadius: 15,
+              }}>
+              <Picker
                 selectedValue={selectSort}
-                onValueChange={(value, index) => setSelectSort(value)}>
+                itemStyle={{ height: 120 }}
+                onValueChange={(value, index) => {setSelectSort(value); setBSort(false); }}>
                 <Picker.Item color='#fff' label="Расстояние" value={0} />
                 <Picker.Item label="Рейтинг" color='#fff' value={1} />
-              </Picker>}
-            </LinearGradient> :
+              </Picker>
+              </View>
+              }</View>
+             :
 
             <LinearGradient
               colors={['#01010199', '#35343499']}
@@ -130,9 +140,9 @@ function CarFilters({ navigation, route }) {
               </Picker>
             </LinearGradient>
           }
-        </View>}
 
 
+<View style={{zIndex:-1}}>
         <LinearGradient
           colors={['#01010199', '#35343499']}
           start={[0, 1]}
@@ -166,7 +176,7 @@ function CarFilters({ navigation, route }) {
           </ImageBackground>
         </TouchableOpacity>
 
-
+        </View>
 
         {/* </BlurView> */}
       </View>
