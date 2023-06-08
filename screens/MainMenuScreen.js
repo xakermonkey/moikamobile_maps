@@ -98,7 +98,7 @@ function MainMenuScreen({ navigation }) {
         },
       }} />
 
-      <Drawer.Screen name="PointCarWashDrawer" component={MakingOrderScreen} options={{
+      <Drawer.Screen name="MakingOrder" component={MakingOrderScreen} options={{
         swipeEnabled: false,
         headerShown: false,
       }} />

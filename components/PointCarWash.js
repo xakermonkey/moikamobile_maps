@@ -37,9 +37,12 @@ function PointCarWash({ navigation, route }) {
     } else {
       navigation.setOptions({
         headerRight: () => (
-          <TouchableOpacity style={{ right: 0 }} onPress={checkAccount} activeOpacity={0.7}>
-            <Ionicons name='cart-outline' size={28} color={'#7CD0D7'} />
+          <TouchableOpacity style={{ right: 0 }} onPress={navigation.openDrawer()} activeOpacity={0.7}>
+            <Ionicons name='menu-sharp' size={28} color={'#7CD0D7'} />
           </TouchableOpacity>
+          // <TouchableOpacity style={{ right: 0 }} onPress={checkAccount} activeOpacity={0.7}>
+          //   <Ionicons name='cart-outline' size={28} color={'#7CD0D7'} />
+          // </TouchableOpacity>
         )
       })
     }
@@ -117,15 +120,11 @@ function PointCarWash({ navigation, route }) {
         fontFamily: 'Raleway_700Bold',
       },
       headerTitle: () => (
-        <View style={{ width: '100%' }}>
-          <View style={{ width: '70%' }}>
             <Text numberOfLines={1} style={{
               textTransform: 'uppercase',
               fontSize: 20,
               fontFamily: 'Raleway_700Bold', color: '#fff'
             }}>ЗАГРУЗКА...</Text>
-          </View>
-        </View>
       ),
 
       headerLeft: () => (
@@ -135,9 +134,12 @@ function PointCarWash({ navigation, route }) {
       ),
       headerRight: () => (
         makeLoad ? <ActivityIndicator /> :
-          <TouchableOpacity style={{ right: Platform.OS == 'ios' ? 0 : 0 }} onPress={checkAccount} activeOpacity={0.7}>
-            <Ionicons name='cart-outline' size={28} color={'#7CD0D7'} />
-          </TouchableOpacity>
+        <TouchableOpacity style={{ right: 0 }} onPress={() => navigation.openDrawer()} activeOpacity={0.7}>
+          <Ionicons name='menu-sharp' size={28} color={'#7CD0D7'} />
+        </TouchableOpacity>
+          // <TouchableOpacity style={{ right: Platform.OS == 'ios' ? 0 : 0 }} onPress={checkAccount} activeOpacity={0.7}>
+          //   <Ionicons name='cart-outline' size={28} color={'#7CD0D7'} />
+          // </TouchableOpacity>
       )
     });
     (async () => {
@@ -150,15 +152,11 @@ function PointCarWash({ navigation, route }) {
       setPhoto(res.data.photo);
       navigation.setOptions({
         headerTitle: () => (
-          <View style={{ width: '100%' }}>
-            <View style={{ width: '70%' }}>
               <Text numberOfLines={1} style={{
                 textTransform: 'uppercase',
               fontSize: 20,
                 fontFamily: 'Raleway_700Bold', color: '#fff'
               }}>{res.data.washer.name_washer}</Text>
-            </View>
-          </View>
         ),
       })
     })();

@@ -1,5 +1,5 @@
 import React, { useState, useLayoutEffect, useEffect } from 'react';
-import { StyleSheet, View, Text, SafeAreaView, Alert, TouchableOpacity, ImageBackground, Dimensions } from 'react-native';
+import { StyleSheet, View, Text, SafeAreaView, Alert, TouchableOpacity, ImageBackground, Dimensions, ActivityIndicator } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { CommonActions } from '@react-navigation/native';
@@ -14,6 +14,7 @@ function PersonalAccount({ navigation }) {
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
   const [email, setEmail] = useState("");
+  const [disable, setDisable] = useState(false);
 
   useLayoutEffect(() => {
     navigation.setOptions({
@@ -44,6 +45,7 @@ function PersonalAccount({ navigation }) {
   }, [navigation])
 
   const Logout = async () => {
+    setDisable(true);
     const token = await AsyncStorage.getItem("token");
     const pushToken = await AsyncStorage.getItem("pushToken");
     try {
@@ -117,9 +119,9 @@ function PersonalAccount({ navigation }) {
           </LinearGradient>
         </TouchableOpacity> */}
 
-        <TouchableOpacity activeOpacity={0.8} onPress={Logout} style={[styles.mt_TouchOpac, { marginTop: '10%' }]} >
+        <TouchableOpacity activeOpacity={0.8} onPress={Logout} disabled={disable} style={[styles.mt_TouchOpac, { marginTop: '10%' }]} >
           <ImageBackground source={require('../assets/images/button.png')} resizeMode='stretch' style={styles.bg_img} >
-            <Text style={styles.text_btn} >Выйти</Text>
+          {disable ? <ActivityIndicator style={{paddingVertical:'5%'}} color="white" /> : <Text style={styles.text_btn} >Выйти</Text>}
           </ImageBackground>
         </TouchableOpacity>
 
@@ -212,6 +214,7 @@ const styles = StyleSheet.create({
   },
   bg_img: {
     alignItems: 'center',
+    height:52
   },
   // конец кнопки выйти
 

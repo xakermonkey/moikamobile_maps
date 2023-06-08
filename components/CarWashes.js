@@ -262,7 +262,7 @@ function CarWashes({ navigation, route }) {
     navigation.dispatch(
       CommonActions.reset({
         index: 0,
-        routes: [{ name: "PointCarWashDrawer", params: { from: "catalog" } }]
+        routes: [{ name: "MakingOrder", params: { from: "catalog" } }]
       }))
   }
 
@@ -357,7 +357,8 @@ function CarWashes({ navigation, route }) {
             <Image cacheKey={item.avatar} source={{ uri: domain_web + item.avatar }} style={{ width: '28%', height: '100%', borderRadius: 5 }} width={95} height={95} resizeMode='center' />
             <View style={{ width: '43%' }}>
               <Text style={styles.stocks}>{item.address}</Text>
-              <Text onPress={() => { Linking.openURL('tel:' + item.phone); }} style={styles.text_in_item}>{item.phone}</Text>
+              {item.phone &&
+              <Text onPress={() => { Linking.openURL('tel:' + item.phone); }} style={styles.text_in_item}>{item.phone}</Text>}
               <Text style={styles.text_in_item}>Скидка {item.sale}%</Text>
               <Text style={styles.text_in_item}>{coords != null && "В " + ConvertDistance(item) + " от вас"}</Text>
             </View>
