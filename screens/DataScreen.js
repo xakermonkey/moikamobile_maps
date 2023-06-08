@@ -86,6 +86,7 @@ function DataScreen({ navigation }) {
                 await AsyncStorage.setItem("location", location);
                 await AsyncStorage.setItem("name", name);
                 await AsyncStorage.setItem("email", email);
+                await AsyncStorage.setItem("cars", res.data.cars.toString());
                 navigation.dispatch(
                     CommonActions.reset({
                         index: 0,

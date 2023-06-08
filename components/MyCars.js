@@ -56,6 +56,9 @@ function MyCars({ navigation }) {
         {headers: {
           "Authorization": "Token " + token
         }});
+        const _cars = await AsyncStorage.getItem("cars");
+        await AsyncStorage.setItem("cars", (parseFloat(_cars) - 1).toString());
+
         const carIndex = cars.indexOf(obj);
         setCars([...cars.slice(0, carIndex), ...cars.slice(carIndex + 1, )]);
     }catch (err) {

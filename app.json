@@ -3,6 +3,7 @@
     "name": "moika",
     "slug": "moika",
     "version": "1.0.0",
+    "scheme": "ru.t4yc.moikamobile",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",

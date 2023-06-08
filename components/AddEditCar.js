@@ -71,7 +71,10 @@ function AddEditCar({ navigation, route }) {
           }
         );
       }
-
+      if (route.params.id == null){
+        const cars = await AsyncStorage.getItem("cars")
+        await AsyncStorage.setItem("cars", (parseFloat(cars)+1).toString());
+      }
       navigation.dispatch(
         CommonActions.reset({
           index: 0,

@@ -105,6 +105,12 @@ function LoginScreen({ navigation }) {
         return () => clearTimeout(timeout); // Очистка таймера при размонтировании компонента
       }, []);
 
+
+    const noAuthNavigate = async () => {
+        await AsyncStorage.setItem("cars", "1");
+        navigation.navigate('MainMenu')
+    }
+
     if (regions == null) {
         return (
             <View style={styles.container}>
@@ -203,7 +209,7 @@ function LoginScreen({ navigation }) {
                             </TouchableOpacity>
                             <Text style={styles.text_gray}>использования сервиса</Text>
                         </View>
-                        <TouchableOpacity activeOpacity={0.8} onPress={() => navigation.navigate('MainMenu')} style={styles.mt} >
+                        <TouchableOpacity activeOpacity={0.8} onPress={noAuthNavigate} style={styles.mt} >
                             <Text style={{ color: '#7CD0D7', fontSize: 11 }}>пропустить</Text>
 
                         </TouchableOpacity>

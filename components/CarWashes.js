@@ -64,6 +64,7 @@ function CarWashes({ navigation, route }) {
       if (coord == null) { // если не переданы координаты, значит локация выключена
         return washes;
       } else {
+        console.log("sort");
         return washes.sort((a, b) => dist_sort(a, b, coord)); // сортировка по расстоянию
       }
     }
@@ -74,6 +75,7 @@ function CarWashes({ navigation, route }) {
       if (coord == null) {
         return washes;
       } else {
+        console.log("sort");
         return washes.sort((a, b) => dist_sort(a, b, coord));
       }
     }
@@ -85,13 +87,14 @@ function CarWashes({ navigation, route }) {
 
 
   const checkCar = async () => {
-    const token = await AsyncStorage.getItem("token"); // получение токена из хранилища
-    if (token != null) { // если токен не равен null
-      const cars = await axios.get(domain_mobile + "/api/get_cars", { headers: { "Authorization": "Token " + token } }); // запрос на получение машин пользователя
-      setCountCar(cars.data.length); // сохранение ответа в useState
-    } else {
-      setCountCar(1) // если пользователь не авторизирован
-    }
+    setCountCar(parseFloat(await AsyncStorage.getItem("cars")));
+    // const token = await AsyncStorage.getItem("token"); // получение токена из хранилища
+    // if (token != null) { // если токен не равен null
+    //   const cars = await axios.get(domain_mobile + "/api/get_cars", { headers: { "Authorization": "Token " + token } }); // запрос на получение машин пользователя
+    //   setCountCar(cars.data.length); // сохранение ответа в useState
+    // } else {
+    //   setCountCar(1) // если пользователь не авторизирован
+    // }
   }
 
 
@@ -124,6 +127,7 @@ function CarWashes({ navigation, route }) {
           filters: []
         });
       }
+      await checkCar();
       let { status } = await Location.getForegroundPermissionsAsync(); // проверка прав на геолокацию
       const col = await Location.getLastKnownPositionAsync(); // получение координат последнего местоположение
       setBLocation(status === 'granted' && col != null) // true если есть права иначе false
@@ -174,7 +178,7 @@ function CarWashes({ navigation, route }) {
         setWashes(washesSorted(washes, col)); // сортировка моек и сохранение в State
         setStock(stocks); // сохранение акций в State
         console.log("finish Layout");
-        checkCar();
+
       }
       catch (err) {
         console.log(err);
@@ -187,6 +191,7 @@ function CarWashes({ navigation, route }) {
   const checkUpdate = async () => {
     setBPicker(true);
     console.log("Start CheckUpdate");
+    await checkCar();
     const col = await Location.getLastKnownPositionAsync();
     const countries = JSON.parse(await AsyncStorage.getItem("countries"));
     const location = await AsyncStorage.getItem("location"); // получение города из хранилища
