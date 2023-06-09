@@ -88,13 +88,6 @@ function CarWashes({ navigation, route }) {
 
   const checkCar = async () => {
     setCountCar(parseFloat(await AsyncStorage.getItem("cars")));
-    // const token = await AsyncStorage.getItem("token"); // получение токена из хранилища
-    // if (token != null) { // если токен не равен null
-    //   const cars = await axios.get(domain_mobile + "/api/get_cars", { headers: { "Authorization": "Token " + token } }); // запрос на получение машин пользователя
-    //   setCountCar(cars.data.length); // сохранение ответа в useState
-    // } else {
-    //   setCountCar(1) // если пользователь не авторизирован
-    // }
   }
 
 
@@ -165,6 +158,8 @@ function CarWashes({ navigation, route }) {
                 filter: route.params == undefined ? [] : route.params.filters,
                 sorted: route.params == undefined ? 0 : route.params.sorted,
                 location: location == null ? countries[0] : location,
+                lat: col.coords.latitude,
+                lon: col.coords.longitude,
                 phone: phone
               }
             }
