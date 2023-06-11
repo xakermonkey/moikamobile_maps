@@ -167,7 +167,7 @@ function PriceListFor({ navigation, route }) {
           <TouchableOpacity style={{ flex:1 }} onPress={() => navigation.navigate('GeneralPriceList')} activeOpacity={0.7}  >
             <Ionicons name='chevron-back' size={32} color={'#7CD0D7'} />
           </TouchableOpacity>
-          <Text style={[styles.bold_text, {flex:4}]}>Прайс-лист "{body}"</Text>
+          <Text style={[styles.bold_text, {flex:5}]}>Прайс-лист "{body}"</Text>
           <View style={{flex:1}}></View>
         </View>
 

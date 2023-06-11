@@ -118,8 +118,8 @@ android {
         applicationId 'ru.t4yc.moikamobile'
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
-        versionCode 8
-        versionName "0.18"
+        versionCode 9
+        versionName "0.19"
     }
 
     splits {
