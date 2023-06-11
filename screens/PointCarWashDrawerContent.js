@@ -1,5 +1,5 @@
 import React, { useLayoutEffect, useState } from 'react';
-import { View, StyleSheet, Text, SafeAreaView, TouchableOpacity, Linking } from 'react-native';
+import { View, StyleSheet, Text, SafeAreaView, TouchableOpacity, Linking, Platform } from 'react-native';
 import { DrawerContentScrollView, DrawerItem, createDrawerNavigator } from '@react-navigation/drawer';
 import { Ionicons, FontAwesome, FontAwesome5, MaterialIcons, Feather } from '@expo/vector-icons';
 import { DrawerActions } from '@react-navigation/native';
@@ -26,7 +26,7 @@ export function DrawerContent(props) {
     }, [props.navigation])
 
     return (
-        <SafeAreaView style={{ flex: 1 }}>
+        <SafeAreaView style={{ flex: 1, marginTop: Platform.OS == 'android' && '20%' }}>
             <StatusBar/>
             {/* <DrawerContentScrollView {...props}> */}
 

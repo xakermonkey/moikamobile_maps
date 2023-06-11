@@ -93,7 +93,7 @@ function MapScreen({ navigation, route }) {
           return;
         }
         const loc = await Location.getCurrentPositionAsync(); // получение ТОЧНОЙ позиции
-        Alert.alert("Приятной дороги", "Идет поиск самого короткого маршрута");
+        Alert.alert("Маршрут построен", "Приятной дороги"); // Приятной дороги // Идет поиск самого короткого маршрута
         map.current.findDrivingRoutes([{ lon: loc.coords.longitude, lat: loc.coords.latitude }, { lon: parseFloat(route.params.washes.lon), lat: parseFloat(route.params.washes.lat) }], (event) => {
           if (event.routes.length == 0) {
             map.current.setCenter({ lon: loc.coords.longitude, lat: loc.coords.latitude }, 12, 0, 0, 1, Animation.SMOOTH);
