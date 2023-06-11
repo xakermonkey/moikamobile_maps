@@ -84,9 +84,9 @@ export function DrawerContent(props) {
                         </View>
                     )}
                     style={styles.mt}
-                    label={'Тел.: 4345543345'}
+                    label={'Тел.: '+ washer.phone}
                     labelStyle={{ color: '#fff', fontSize: 14, fontFamily: 'Raleway_400Regular', textTransform: 'uppercase' }}
-                    onPress={() => { Linking.openURL('tel:' + '4345543345') }}
+                    onPress={() => { Linking.openURL('tel:' + 'washer.phone') }}
                 />
 
             {/* </DrawerContentScrollView> */}
