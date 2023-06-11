@@ -324,7 +324,7 @@ function CarWashes({ navigation, route }) {
         }
       );
       setCoords(col); // сохранение полученных координат в State
-      setWashes(washesSorted(res.data.washer, col)); // сортировка моек и сохранение в State
+      setWashes(res.data.washer, col); // сортировка моек и сохранение в State
       setStock(res.data.stock); // сохранение в State акций
       AsyncStorage.setItem("_stocks", JSON.stringify(res.data.stock));
       AsyncStorage.setItem("washeses", JSON.stringify(res.data.washer));

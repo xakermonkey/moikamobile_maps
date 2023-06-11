@@ -6,7 +6,7 @@ import { useLayoutEffect, useState, useCallback } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { domain_mobile, domain_web } from '../domain';
 import axios from 'axios';
-import { CommonActions } from '@react-navigation/native';
+import { CommonActions, useFocusEffect } from '@react-navigation/native';
 import * as WebBrowser from 'expo-web-browser';
 import * as Linking from "expo-linking";
 import { res } from 'react-email-validator';
@@ -79,8 +79,15 @@ function OrderСompletion({ navigation }) {
   }, [navigation])
 
 
+  useFocusEffect(useCallback(() => {
+    console.log("focus");
+    checkPayment();
+  }, []))
+
+
   const checkPayment = useCallback(() => {
     (async () => {
+      console.log("check");
       const res = await axios.post(domain_mobile + "/api/check_payment", { "uuid": uuid }, { headers: { "Authorization": "Token " + token } });
       if (res.data.status) {
         await createOrder(washer, time, date, body, sale, servise, payment, uuid);
@@ -93,6 +100,7 @@ function OrderСompletion({ navigation }) {
 
 
   const handler = useCallback(async (event) => {
+    console.log("handler");
     setLoading(true);
     if (Platform.OS == 'ios') {
       WebBrowser.dismissBrowser();
@@ -205,7 +213,7 @@ function OrderСompletion({ navigation }) {
       <Image blurRadius={91} style={[StyleSheet.absoluteFill, styles.image]} source={require('../assets/images/blur_background.png')} resizeMode='cover' />
       <View style={styles.blurContainer}>
         <View style={[styles.row, { justifyContent: 'center', alignItems: "center", width: "100%", marginTop: '5%' }]}>
-          <TouchableOpacity style={{ flex: 1 }} onPress={() => navigation.navigate('SelectPaymentMethod')} activeOpacity={0.7} >
+          <TouchableOpacity style={{ flex: 1 }} onPress={() => {checkPayment(); navigation.navigate('SelectPaymentMethod')}} activeOpacity={0.7} >
             <Ionicons name='chevron-back' size={28} color={'#7CD0D7'} />
           </TouchableOpacity>
           <Text style={[styles.bold_text, { flex: 4 }]}>Завершение заказа</Text>
