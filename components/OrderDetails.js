@@ -55,7 +55,7 @@ function OrderDetails({ navigation, route }) {
 
   if (order == null | loading) {
     return (
-      <View style={{ flex: 1 }} >
+      <View style={styles.container} >
         <ActivityIndicator />
       </View>
     )

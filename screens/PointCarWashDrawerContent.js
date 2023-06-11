@@ -77,17 +77,17 @@ export function DrawerContent(props) {
                     labelStyle={{ color: '#fff', fontSize: 14, fontFamily: 'Raleway_400Regular', textTransform: 'uppercase' }}
                     onPress={() => { props.navigation.navigate('RatingAndReviews') }}
                 />
-                <DrawerItem
+                {/* <DrawerItem
                     icon={({ color, size }) => (
                       <View style={{width:24}}>
                         {/* <FontAwesome name='star' size={24} color={'#7CD0D7'} /> */}
-                        </View>
+                        {/* </View>
                     )}
                     style={styles.mt}
                     label={'Тел.: '+ washer.phone}
                     labelStyle={{ color: '#fff', fontSize: 14, fontFamily: 'Raleway_400Regular', textTransform: 'uppercase' }}
-                    onPress={() => { Linking.openURL('tel:' + 'washer.phone') }}
-                />
+                    onPress={() => { Linking.openURL('tel:' + 'washer.phone') }} */}
+                {/* /> */} 
 
             {/* </DrawerContentScrollView> */}
         </SafeAreaView>

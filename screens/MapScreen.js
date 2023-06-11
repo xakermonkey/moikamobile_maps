@@ -289,7 +289,7 @@ function MapScreen({ navigation, route }) {
             return;
           }
           console.warn({ lon: loc.coords.longitude, lat: loc.coords.latitude });
-          Alert.alert("Приятной дороги", "Идет поиск самого короткого маршрута");
+          Alert.alert("Маршрут построен", "Приятной дороги"); // Приятной дороги // Идет поиск самого короткого маршрута
           map.current.findDrivingRoutes([{ lon: loc.coords.longitude, lat: loc.coords.latitude }, { lon: parseFloat(washes.lon), lat: parseFloat(washes.lat) }], (event) => {
             // console.log(event.routes[0])
             if (event.routes.length == 0) {

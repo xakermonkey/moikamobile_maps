@@ -40,6 +40,11 @@ export default function App() {
     }),
   });
   useEffect(() => {
+    (async () => {
+      await AsyncStorage.setItem("sorted", "0");
+      await AsyncStorage.setItem("filters", "[]");
+    })();
+
     setNotificationChannel();
     messaging().onMessage(async remoteMessage => {
       console.log('FBremoteMessage');
@@ -93,12 +98,6 @@ export default function App() {
   //     await SplashScreen.hideAsync();
   //   }, 2000);
   // }
-  useLayoutEffect(() => {
-    (async () => {
-      await AsyncStorage.setItem("sorted", "0");
-      await AsyncStorage.setItem("filters", "[]");
-    })();
-  }, [])
 
   return (
     <NavigationContainer

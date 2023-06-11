@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { StyleSheet, View, Text, TextInput, TouchableOpacity, ImageBackground, Image } from 'react-native';
+import { StyleSheet, View, Text, TextInput, TouchableOpacity, ImageBackground, Image, Alert, ActivityIndicator } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons, FontAwesome } from '@expo/vector-icons';
 import axios from 'axios';
@@ -13,10 +13,13 @@ function EvaluateService({ navigation, route }) {
 
   const [rate, setRate] = useState(1);
   const [text, setText] = useState("");
+  const [disable, setDisable] = useState(false);
 
 
   const addComment = async () => {
     if (text != "") {
+    setDisable(true);
+    try {
       const name = await AsyncStorage.getItem("name");
       const res = await axios.post(domain_web + "/add_comment", {
         order: route.params.orderId,
@@ -24,11 +27,20 @@ function EvaluateService({ navigation, route }) {
         comment: text,
         name: name
       })
+      Alert.alert("Успешно", "Спасибо за Ваш отзыв!");
       navigation.dispatch(
         CommonActions.reset({
           index: 0,
           routes: [{ name: "PersonalAccountScreen" }, { name: "MyOrders" }]
         }));
+      } catch (err) {
+        setLoading(false);
+          Alert.alert("Ошибка", "Что то пошло не так");
+          console.log(err);
+        }
+    } else {
+    setDisable(false);
+      Alert.alert("Уведомление", "Пожалуйста, оставьте комментарий. Нам важно Ваше мнение");
     }
   }
 
@@ -70,7 +82,7 @@ function EvaluateService({ navigation, route }) {
 
         <TouchableOpacity activeOpacity={0.8} onPress={addComment} style={{ marginTop: '5%' }} >
           <ImageBackground source={require('../assets/images/button.png')} resizeMode='stretch' style={styles.bg_img} >
-            <Text style={styles.text_btn} >Ок</Text>
+          {disable ? <ActivityIndicator style={{paddingVertical:'5%'}} color="white" /> : <Text style={styles.text_btn} >Ок</Text>}
           </ImageBackground>
         </TouchableOpacity>
         {/* </BlurView> */}
@@ -118,13 +130,14 @@ const styles = StyleSheet.create({
     marginTop: '5%',
     borderRadius: 5,
     padding: '5%',
-    minHeight: '20%',
+    // minHeight: '20%',
   },
   text: {
     marginTop: '2%',
     fontSize: 14,
     color: '#fff',
     fontFamily: 'Raleway_400Regular',
+    minHeight: '18%',
   },
 
   text_btn: {
@@ -136,6 +149,7 @@ const styles = StyleSheet.create({
   },
   bg_img: {
     alignItems: 'center',
+    height:52
   },
   // конец кнопки ок
 });

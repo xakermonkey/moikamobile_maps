@@ -14,13 +14,13 @@ function VerificationCodeScreen({ navigation, route }) {
 
     useEffect(() => {
         navigation.setOptions({
-          headerLeft: () => (
-        <TouchableOpacity onPress={() => navigation.goBack()} activeOpacity={0.7}>
-        <Ionicons name='chevron-back' size={32} color={'#7CD0D7'} />
-      </TouchableOpacity>
-          ),
+            headerLeft: () => (
+                <TouchableOpacity onPress={() => navigation.goBack()} activeOpacity={0.7}>
+                    <Ionicons name='chevron-back' size={32} color={'#7CD0D7'} />
+                </TouchableOpacity>
+            ),
         });
-      }, [navigation]);
+    }, [navigation]);
     // useLayoutEffect(() => {
     //     navigation.setOptions({
     //       headerBackTitle: '',
@@ -86,7 +86,7 @@ function VerificationCodeScreen({ navigation, route }) {
 
                 <TouchableOpacity activeOpacity={0.8} onPress={sendCode} disabled={disable} style={styles.mt} >
                     <ImageBackground source={require('../assets/images/button.png')} resizeMode='stretch' style={styles.bg_img} >
-                    {disable ? <ActivityIndicator style={{paddingVertical:'5%'}} color="white" /> : <Text style={styles.text_btn} >Далее</Text>}
+                        {disable ? <ActivityIndicator style={{ paddingVertical: '5%' }} color="white" /> : <Text style={styles.text_btn} >Далее</Text>}
                     </ImageBackground>
                 </TouchableOpacity>
 
@@ -153,7 +153,7 @@ const styles = StyleSheet.create({
     },
     bg_img: {
         alignItems: 'center',
-        height:52
+        height: 52
     },
     // конец кнопки
 
