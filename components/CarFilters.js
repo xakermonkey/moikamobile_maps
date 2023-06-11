@@ -10,6 +10,7 @@ import { Picker } from '@react-native-picker/picker';
 import { CommonActions } from '@react-navigation/native';
 import * as Location from "expo-location";
 import { StatusBar } from 'expo-status-bar';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 
 function CarFilters({ navigation, route }) {
@@ -18,8 +19,8 @@ function CarFilters({ navigation, route }) {
   const [filters, setFilters] = useState([]);
   const [sort, setSort] = useState(["По расстоянию", "По рейтингу"]);
   const [bSort, setBSort] = useState(false);
-  const [selectSort, setSelectSort] = useState(route.params.sorted);
-  const [check, setCheck] = useState(route.params.filters);
+  const [selectSort, setSelectSort] = useState();
+  const [check, setCheck] = useState([]);
   const [perm, setPerm] = useState(true);
 
   useLayoutEffect(() => {
@@ -46,7 +47,18 @@ function CarFilters({ navigation, route }) {
       let { status } = await Location.requestForegroundPermissionsAsync();
       const locPerm = await Location.getLastKnownPositionAsync() != null;
       setPerm(locPerm);
-      setSelectSort(0);
+      const sorted = await AsyncStorage.getItem("sorted");
+      if (sorted != null) {
+        setSelectSort(parseInt(sorted));
+      } else {
+        setSelectSort(0);
+      }
+      const filters = await AsyncStorage.getItem("filters");
+      if (filters != null) {
+        setCheck(JSON.parse(filters));
+      } else {
+        setCheck([]);
+      }
       if (!locPerm) {
         Alert.alert("Внимание",
           "Для автоматического определения города и отображения расстояния до автомойки необходимо включить определение геопозиции");
@@ -68,14 +80,15 @@ function CarFilters({ navigation, route }) {
   }
 
 
-  const sendFilters = () => {
+  const sendFilters = async () => {
+    await AsyncStorage.setItem("sorted", selectSort.toString());
+    await AsyncStorage.setItem("filters", JSON.stringify(check));
     navigation.dispatch(
       CommonActions.reset({
         index: 0,
         routes: [
           {
-            name: 'CarWashes',
-            params: { "sorted": selectSort, "filters": check },
+            name: 'CarWashes'
           },
         ],
       }));
@@ -85,11 +98,11 @@ function CarFilters({ navigation, route }) {
 
   return (
     <View style={styles.container}>
-      <StatusBar/>
+      <StatusBar />
       <Image blurRadius={91} style={[StyleSheet.absoluteFill, styles.image]} source={require('../assets/images/blur_background.png')} resizeMode='cover' />
       {/* <BlurView intensity={100} style={styles.blurContainer}> */}
       <View style={styles.blurContainer}>
-        
+
         {perm && Platform.OS === 'ios' ?
           <View>
             <LinearGradient
@@ -102,10 +115,10 @@ function CarFilters({ navigation, route }) {
                   <Text style={styles.text}>{sort[selectSort]}</Text>
                 </View>
               </TouchableOpacity>
-              </LinearGradient>
-              {bSort && 
+            </LinearGradient>
+            {bSort &&
               <View style={{
-                position:'absolute', top:50,left:0,right:0,
+                position: 'absolute', top: 50, left: 0, right: 0,
                 // zIndex: 11,
                 backgroundColor: '#6E7476', borderRadius: 5, shadowColor: "#000",
                 shadowOffset: {
@@ -115,66 +128,66 @@ function CarFilters({ navigation, route }) {
                 shadowOpacity: 0.8,
                 shadowRadius: 15,
               }}>
-              <Picker
-                selectedValue={selectSort}
-                itemStyle={{ height: 120 }}
-                onValueChange={(value, index) => {setSelectSort(value); setBSort(false); }}>
-                <Picker.Item color='#fff' label="Расстояние" value={0} />
-                <Picker.Item label="Рейтинг" color='#fff' value={1} />
-              </Picker>
+                <Picker
+                  selectedValue={selectSort}
+                  itemStyle={{ height: 120 }}
+                  onValueChange={(value, index) => { setSelectSort(value); setBSort(false); }}>
+                  <Picker.Item color='#fff' label="Расстояние" value={0} />
+                  <Picker.Item label="Рейтинг" color='#fff' value={1} />
+                </Picker>
               </View>
-              }</View>
-             :
+            }</View>
+          :
 
-            <LinearGradient
-              colors={['#01010199', '#35343499']}
-              start={[0, 1]}
-              style={styles.gradient_background} >
-              <Text style={styles.subtext}>сортировка</Text>
-              <Picker
-                style={{ color: '#fff', marginHorizontal: '-5%', marginBottom: '-5%' }}
-                selectedValue={selectSort}
-                onValueChange={(value, index) => setSelectSort(value)}>
-                <Picker.Item label="Расстояние" value={0} />
-                <Picker.Item label="Рейтинг" value={1} />
-              </Picker>
-            </LinearGradient>
-          }
-
-
-<View style={{zIndex:-1}}>
-        <LinearGradient
-          colors={['#01010199', '#35343499']}
-          start={[0, 1]}
-          style={styles.gradient_background} >
-          <View>
-            <Text style={styles.subtext}>фильтры</Text>
-            {filters.map((obj, id) => {
-              return (
-                <View key={id} style={styles.checkbox}>
-                  <CheckBox containerStyle={{ padding: 0, margin: 0, marginRight: 0, marginLeft: 0, backgroundColor:null }}
-                    checkedIcon={
-                      <Icon name="radio-button-checked" type="material" color="#7BCFD6" size={25} />
-                    }
-                    uncheckedIcon={
-                      <Icon name="radio-button-unchecked" type="material" color="#7BCFD6" size={25} />
-                    }
-                    checked={check.indexOf(obj.name) != -1}
-                    onPress={() => setFilterCheck(obj.name)}
-                  />
-                  <Text style={styles.text_check}>{obj.name}</Text>
-                </View>
-              )
-            })}
-          </View>
-        </LinearGradient>
+          <LinearGradient
+            colors={['#01010199', '#35343499']}
+            start={[0, 1]}
+            style={styles.gradient_background} >
+            <Text style={styles.subtext}>сортировка</Text>
+            <Picker
+              style={{ color: '#fff', marginHorizontal: '-5%', marginBottom: '-5%' }}
+              selectedValue={selectSort}
+              onValueChange={(value, index) => setSelectSort(value)}>
+              <Picker.Item label="Расстояние" value={0} />
+              <Picker.Item label="Рейтинг" value={1} />
+            </Picker>
+          </LinearGradient>
+        }
 
 
-        <TouchableOpacity activeOpacity={0.8} onPress={sendFilters} style={{ marginTop: '5%' }} >
-          <ImageBackground source={require('../assets/images/button.png')} resizeMode='stretch' style={styles.bg_img} >
-            <Text style={styles.text_btn} >Ок</Text>
-          </ImageBackground>
-        </TouchableOpacity>
+        <View style={{ zIndex: -1 }}>
+          <LinearGradient
+            colors={['#01010199', '#35343499']}
+            start={[0, 1]}
+            style={styles.gradient_background} >
+            <View>
+              <Text style={styles.subtext}>фильтры</Text>
+              {filters.map((obj, id) => {
+                return (
+                  <View key={id} style={styles.checkbox}>
+                    <CheckBox containerStyle={{ padding: 0, margin: 0, marginRight: 0, marginLeft: 0, backgroundColor: null }}
+                      checkedIcon={
+                        <Icon name="radio-button-checked" type="material" color="#7BCFD6" size={25} />
+                      }
+                      uncheckedIcon={
+                        <Icon name="radio-button-unchecked" type="material" color="#7BCFD6" size={25} />
+                      }
+                      checked={check.indexOf(obj.name) != -1}
+                      onPress={() => setFilterCheck(obj.name)}
+                    />
+                    <Text style={styles.text_check}>{obj.name}</Text>
+                  </View>
+                )
+              })}
+            </View>
+          </LinearGradient>
+
+
+          <TouchableOpacity activeOpacity={0.8} onPress={sendFilters} style={{ marginTop: '5%' }} >
+            <ImageBackground source={require('../assets/images/button.png')} resizeMode='stretch' style={styles.bg_img} >
+              <Text style={styles.text_btn} >Ок</Text>
+            </ImageBackground>
+          </TouchableOpacity>
 
         </View>
 

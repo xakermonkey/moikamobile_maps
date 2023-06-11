@@ -68,7 +68,7 @@ function MapScreen({ navigation, route }) {
         Alert.alert("Ошибка", "Необходимо включить определение геопозиции");
       }
       // console.log(route.params)
-      // if (route.params?.loc) {
+      // if (route.params?.loc) {ф
       //   
       // }
       // } else {

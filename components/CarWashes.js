@@ -114,12 +114,6 @@ function CarWashes({ navigation, route }) {
       )
     });
     (async () => {
-      if (route.params == undefined) { // если не переданы параметры
-        await navigation.setParams({
-          sorted: 0,
-          filters: []
-        });
-      }
       await checkCar();
       let { status } = await Location.getForegroundPermissionsAsync(); // проверка прав на геолокацию
       const col = await Location.getLastKnownPositionAsync(); // получение координат последнего местоположение
@@ -150,13 +144,15 @@ function CarWashes({ navigation, route }) {
         }
         let stocks = JSON.parse(await AsyncStorage.getItem("_stocks"));
         let washes = JSON.parse(await AsyncStorage.getItem("washeses"));
+        const sorted = await AsyncStorage.getItem("sorted");
+        const filters = await AsyncStorage.getItem("filters");
         if (stocks == null || washes == null) {
           const phone = await AsyncStorage.getItem("phone"); // получение телефона из хранилища
           const res = await axios.get(domain_web + "/get_catalog", // получение моек с фильтрами
             {
               params: {
-                filter: route.params == undefined ? [] : route.params.filters,
-                sorted: route.params == undefined ? 0 : route.params.sorted,
+                filter: JSON.parse(filters),
+                sorted: parseInt(sorted),
                 location: location == null ? countries[0] : location,
                 lat: col.coords.latitude,
                 lon: col.coords.longitude,
@@ -197,11 +193,13 @@ function CarWashes({ navigation, route }) {
       setLocation(countries[0]);
     }
     const phone = await AsyncStorage.getItem("phone");
+    const sorted = await AsyncStorage.getItem("sorted");
+    const filters = await AsyncStorage.getItem("filters");
     const res = await axios.get(domain_web + "/get_catalog", // получение моек с фильтрами
       {
         params: {
-          filter: route.params == undefined ? [] : route.params.filters,
-          sorted: route.params == undefined ? 0 : route.params.sorted,
+          filter: JSON.parse(filters),
+          sorted: parseInt(sorted),
           location: location == null ? countries[0] : location,
           lat: col.coords.latitude,
           lon: col.coords.longitude,
@@ -274,11 +272,13 @@ function CarWashes({ navigation, route }) {
     await AsyncStorage.setItem("location", value); // сохранение города в хранилище
     const phone = await AsyncStorage.getItem("phone"); // получение номера из хранилища
     const col = await Location.getLastKnownPositionAsync(); // получение координат последнего местоположения
+    const sorted = await AsyncStorage.getItem("sorted");
+    const filters = await AsyncStorage.getItem("filters");
     const res = await axios.get(domain_web + "/get_catalog",  // получение моек с фильтрами
       {
         params: {
-          filter: route.params == undefined ? [] : route.params.filters,
-          sorted: route.params == undefined ? 0 : route.params.sorted,
+          filter: JSON.parse(filters),
+          sorted: parseInt(sorted),
           location: value,
           lat: col.coords.latitude,
           lon: col.coords.longitude,
@@ -303,11 +303,13 @@ function CarWashes({ navigation, route }) {
     try {
       const phone = await AsyncStorage.getItem("phone"); // получение телефона из хранилища
       const col = await Location.getLastKnownPositionAsync(); // получние последнего местоположения
+      const sorted = await AsyncStorage.getItem("sorted");
+      const filters = await AsyncStorage.getItem("filters");
       const res = await axios.get(domain_web + "/get_catalog", // запрос на получение моек с фильтрами
         {
           params: {
-            filter: route.params == undefined ? [] : route.params.filters,
-            sorted: route.params == undefined ? 0 : route.params.sorted,
+            filter: JSON.parse(filters),
+            sorted: parseInt(sorted),
             lat: col.coords.latitude,
             lon: col.coords.longitude,
             location: location, // location из State

@@ -1,5 +1,5 @@
 import 'react-native-gesture-handler';
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useLayoutEffect, useRef } from 'react';
 import { Platform } from 'react-native';
 
 // import { NavigationContainer } from '@react-navigation/native';
@@ -19,6 +19,7 @@ import HowItWorksScreen from './screens/HowItWorksScreen';
 
 import * as Notifications from 'expo-notifications';
 import messaging from '@react-native-firebase/messaging';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 // import * as SplashScreen from "expo-splash-screen";
 
 const Stack = createNativeStackNavigator();
@@ -92,6 +93,12 @@ export default function App() {
   //     await SplashScreen.hideAsync();
   //   }, 2000);
   // }
+  useLayoutEffect(() => {
+    (async () => {
+      await AsyncStorage.setItem("sorted", "0");
+      await AsyncStorage.setItem("filters", "[]");
+    })();
+  }, [])
 
   return (
     <NavigationContainer
