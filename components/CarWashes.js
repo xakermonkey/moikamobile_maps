@@ -237,7 +237,7 @@ function CarWashes({ navigation, route }) {
 
 
 
-  const selectWasher = async (id, sale) => {
+  const selectWasher = async (item) => {
     if (countCar === 0) {
       Alert.alert("У вас еще нет машин!", "Для оформления заказа необходимо добавить машину у себя в профиле");
       return 0;
@@ -251,12 +251,14 @@ function CarWashes({ navigation, route }) {
     for (let i = 0; i < serv.length; i++) {
       await AsyncStorage.removeItem(serv[i]);
     }
-    await AsyncStorage.setItem("washer", id.toString());
-    await AsyncStorage.setItem("sale", sale.toString());
-    setLoading(true);
-    const res = await axios.get(domain_web + `/get_washer/${id}`);
-    await AsyncStorage.setItem("washer_data", JSON.stringify(res.data));
-    setLoading(false);
+    await AsyncStorage.setItem("washer", item.id.toString());
+    await AsyncStorage.setItem("sale", item.sale.toString());
+    await AsyncStorage.setItem("washer_phone", item.phone != null ? item.phone : "");
+    await AsyncStorage.setItem("washer_data", JSON.stringify(item));
+    // setLoading(true);
+    // const res = await axios.get(domain_web + `/get_washer/${id}`);
+    // await AsyncStorage.setItem("washer_data", JSON.stringify(res.data));
+    // setLoading(false);
     // navigation.("PointCarWash", {from: "catalog"});
     navigation.dispatch(
       CommonActions.reset({
@@ -356,7 +358,7 @@ function CarWashes({ navigation, route }) {
 
   const renderWashes = ({ item }) => { // рендеринг мойки
     return (
-      Platform.OS === 'ios' ? <TouchableOpacity onPress={() => selectWasher(item.id, item.sale)} activeOpacity={0.7} style={styles.mt_TouchOpac}>
+      Platform.OS === 'ios' ? <TouchableOpacity onPress={() => selectWasher(item)} activeOpacity={0.7} style={styles.mt_TouchOpac}>
         <LinearGradient
           colors={['#01010199', '#35343499']}
           start={[0, 1]}
@@ -377,7 +379,7 @@ function CarWashes({ navigation, route }) {
         </LinearGradient>
       </TouchableOpacity> :
 
-        <TouchableOpacity onPress={() => selectWasher(item.id, item.sale)} activeOpacity={0.7} style={styles.mt_TouchOpac}>
+        <TouchableOpacity onPress={() => selectWasher(item)} activeOpacity={0.7} style={styles.mt_TouchOpac}>
           <LinearGradient
             colors={['#01010199', '#35343499']}
             start={[0, 1]}

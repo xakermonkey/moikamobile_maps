@@ -14,7 +14,8 @@ const Drawer = createDrawerNavigator();
 export function DrawerContent(props) {
 
     const [isAuthenticated, setIsAuthenticated] = useState(false);
-    const [washer, setWasher] = useState(null)
+    const [phone, setPhone] = useState(null);
+    const [washer, setWasher] = useState(null);
 
     useLayoutEffect(() => {
         (async () => {
@@ -22,8 +23,8 @@ export function DrawerContent(props) {
             if (token != null) {
                 setIsAuthenticated(true);
             }
-            const washer = JSON.parse(await AsyncStorage.getItem("washer_data"));
-            setWasher(washer.washer);
+            setWasher(JSON.parse(await AsyncStorage.getItem("washer_data")))
+            setPhone(await AsyncStorage.getItem("washer_phone"));
             
         })();
     }, [props.navigation])
@@ -93,9 +94,9 @@ export function DrawerContent(props) {
                     </View>
                 )}
                 style={styles.mt}
-                label={'Тел.: ' + washer.phone}
+                label={'Тел.: ' + phone}
                 labelStyle={{ color: '#fff', fontSize: 14, fontFamily: 'Raleway_400Regular', textTransform: 'uppercase' }}
-                onPress={() => { Linking.openURL('tel:' + washer.phone) }}
+                onPress={() => { Linking.openURL('tel:' + phone) }}
             />
 
             {/* </DrawerContentScrollView> */}
