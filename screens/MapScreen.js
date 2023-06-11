@@ -61,34 +61,67 @@ function MapScreen({ navigation, route }) {
       setDrawer(false)
     }
     if (map.current) {
-      // let { status } = await Location.requestForegroundPermissionsAsync(); // запрос прав на определение геопозиции
-      // const loc = await Location.getLastKnownPositionAsync(); // получение последних известных координат
+      let { status } = await Location.requestForegroundPermissionsAsync(); // запрос прав на определение геопозиции
+      const loc = await Location.getLastKnownPositionAsync(); // получение последних известных координат
       // setBLocation(status === 'granted')
-      // if (status !== 'granted') {
-      // Alert.alert("Ошибка", "Необходимо включить определение геопозиции");
-      // }
-      // if (loc == null) { // если нет прав или не получилось получить координаты
-      // return;
-      // }
-      // console.log(route.params)
-      if (route.params?.loc) {
-        map.current.setCenter({ lon: route.params.loc.point.lon, lat: route.params.loc.point.lat }, route.params.loc.zoom, 0, 0, 1, Animation.SMOOTH); //координаты, зум, поворотом по азимуту и наклоном карты, длительность анимации, анимация
+      if (status !== 'granted') {
+        Alert.alert("Ошибка", "Необходимо включить определение геопозиции");
       }
+      // console.log(route.params)
+      // if (route.params?.loc) {
+      //   
+      // }
       // } else {
-      // console.log("initMap")
-      // map.current.setCenter({ lon: loc.coords.longitude, lat: loc.coords.latitude }, 16, 0, 0, 1, Animation.SMOOTH); //координаты, зум, поворотом по азимуту и наклоном карты, длительность анимации, анимация
+      console.log("initMap")
+      if (loc != null) {
+        map.current.setCenter({ lon: loc.coords.longitude, lat: loc.coords.latitude }, 16, 0, 0, 1, Animation.SMOOTH); //координаты, зум, поворотом по азимуту и наклоном карты, длительность анимации, анимация
+      }
       // }
     }
   }
 
+  const createRoute = async () => {
+    setDisable(true);
+    if (route.params?.washes != undefined) { // если есть адрес автомойки в которой открыт заказ
+
+
+      if (map.current) {
+        let { status } = await Location.getForegroundPermissionsAsync(); // проверка на наличие прав
+        if (status !== 'granted') { // если нет прав иил не получена геопозиция
+          Alert.alert("Ошибка", "Для построения маршрута необходимо включить определение геопозиции");
+          setDisable(false);
+          return;
+        }
+        const loc = await Location.getCurrentPositionAsync(); // получение ТОЧНОЙ позиции
+        Alert.alert("Приятной дороги", "Идет поиск самого короткого маршрута");
+        map.current.findDrivingRoutes([{ lon: loc.coords.longitude, lat: loc.coords.latitude }, { lon: parseFloat(route.params.washes.lon), lat: parseFloat(route.params.washes.lat) }], (event) => {
+          if (event.routes.length == 0) {
+            map.current.setCenter({ lon: loc.coords.longitude, lat: loc.coords.latitude }, 12, 0, 0, 1, Animation.SMOOTH);
+            return;
+          }
+          const len = event.routes[0].sections.length
+          let arr = new Array();
+          for (let i = 0; i < len; i++) {
+            arr = [...arr, ...event.routes[0].sections[i].points];
+          }
+          setRoute(arr);
+          setDisable(false);
+        })
+      }
+    }
+    setDisable(false);
+  }
+
   useLayoutEffect(() => {
     (async () => {
+      initMap();
       const loc = await getCity();
       getOrderWashes();
       setLoading(true);
       getWasheses(loc);
+      createRoute();
     })();
-  }, [route])
+  }, [])
 
   // useFocusEffect(useCallback(() => { // функция при попадании экрана в фокус
   //   (async () => {
@@ -284,7 +317,7 @@ function MapScreen({ navigation, route }) {
       }
     } else {
       Alert.alert("Внимание", "Чтобы построить маршрут, необходимо оформить заказ");
-    setDisable(false);
+      setDisable(false);
       return;
     }
   }
@@ -300,7 +333,7 @@ function MapScreen({ navigation, route }) {
       <YaMap
         ref={map}
         style={styles.container}>
-          {/* <Marker scale={0.3} point={{lat:59.925511, lon:30.319755,}}>
+        {/* <Marker scale={0.3} point={{lat:59.925511, lon:30.319755,}}>
           <Image source={require('../assets/images/location.png')} style={{ width: 60, resizeMode: 'contain' }} />
           </Marker> */}
         {washeses.map((obj, index) => (Platform.OS === "android" ?
@@ -418,15 +451,16 @@ function MapScreen({ navigation, route }) {
       }}>
         <View style={{ bottom: 20 }}>
           <TouchableOpacity activeOpacity={0.8} onPress={findRoute} disabled={disable} style={{}} >
-          <Image source={require('../assets/images/map_route.png')} style={styles.bg_img} />
-          {disable &&
-          <View style={{ position:'absolute', alignItems:'center', justifyContent:'center', height:'100%', width:'100%',
-          backgroundColor:'rgba(00, 00, 00, 0.7)',
-          borderRadius:5
-          }}>
-            <ActivityIndicator color="white" />
-           </View>
-          }
+            <Image source={require('../assets/images/map_route.png')} style={styles.bg_img} />
+            {disable &&
+              <View style={{
+                position: 'absolute', alignItems: 'center', justifyContent: 'center', height: '100%', width: '100%',
+                backgroundColor: 'rgba(00, 00, 00, 0.7)',
+                borderRadius: 5
+              }}>
+                <ActivityIndicator color="white" />
+              </View>
+            }
           </TouchableOpacity>
         </View>
         <View style={{ width: 60 }}>

@@ -83,7 +83,7 @@ function PointCarWash({ navigation, route }) {
 
   const nav = () => {
     if (route.params.from == "map") {
-      console.log("from point:", route.params.loc);
+      // console.log("from point:", route.params.loc);
       if (Platform.OS == 'android') {
         navigation.navigate('Map', { loc: route.params.loc });
         // navigation.dispatch(
@@ -147,6 +147,7 @@ function PointCarWash({ navigation, route }) {
       const washer = await AsyncStorage.getItem("washer");
       setWasher(washer);
       const res = await axios.get(domain_web + `/get_washer/${washer}`)
+      await AsyncStorage.setItem("washer_data", JSON.stringify(res.data.washer))
       setFilt(Object.keys(res.data.photo));
       setCurrentIndex(new Array(Object.keys(res.data.photo).length).fill(0));
       setPhoto(res.data.photo);

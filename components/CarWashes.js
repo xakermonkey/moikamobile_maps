@@ -28,62 +28,62 @@ function CarWashes({ navigation, route }) {
   const [bPicker, setBPicker] = useState(false); // Вкл/Выкл геолокация
 
 
-  const dist_sort = (a, b, coords) => { // функция сортировки моек по расстоянию 
-    if (getDistance({ latitude: coords.coords.latitude, longitude: coords.coords.longitude }, { latitude: parseFloat(a.lat), longitude: parseFloat(a.lon) }) < getDistance(coords, { latitude: parseFloat(b.lat), longitude: parseFloat(b.lon) })) {
-      return -1;
-    }
-    if (getDistance({ latitude: coords.coords.latitude, longitude: coords.coords.longitude }, { latitude: parseFloat(a.lat), longitude: parseFloat(a.lon) }) > getDistance(coords, { latitude: parseFloat(b.lat), longitude: parseFloat(b.lon) })) {
-      return 1;
-    }
-    return 0
-  }
+  // const dist_sort = (a, b, coords) => { // функция сортировки моек по расстоянию 
+  //   if (getDistance({ latitude: coords.coords.latitude, longitude: coords.coords.longitude }, { latitude: parseFloat(a.lat), longitude: parseFloat(a.lon) }) < getDistance(coords, { latitude: parseFloat(b.lat), longitude: parseFloat(b.lon) })) {
+  //     return -1;
+  //   }
+  //   if (getDistance({ latitude: coords.coords.latitude, longitude: coords.coords.longitude }, { latitude: parseFloat(a.lat), longitude: parseFloat(a.lon) }) > getDistance(coords, { latitude: parseFloat(b.lat), longitude: parseFloat(b.lon) })) {
+  //     return 1;
+  //   }
+  //   return 0
+  // }
 
 
-  const rate_sort = (a, b) => { // функция сортировки моек по рейтингу
-    if (a.rate.count_rate == 0) {
-      return 1;
-    }
-    if (b.rate.count_rate == 0) {
-      return -1;
-    }
-    if (a.rate.count_rate == 0 && b.rate.count_rate == 0) {
-      return 0;
-    }
-    if ((a.rate.mean_rate / a.rate.count_rate).toFixed(2) < (b.rate.mean_rate / b.rate.count_rate).toFixed(2)) {
-      return 1;
-    }
-    if ((a.rate.mean_rate / a.rate.count_rate).toFixed(2) > (b.rate.mean_rate / b.rate.count_rate).toFixed(2)) {
-      return -1;
-    }
-    return 0
+  // const rate_sort = (a, b) => { // функция сортировки моек по рейтингу
+  //   if (a.rate.count_rate == 0) {
+  //     return 1;
+  //   }
+  //   if (b.rate.count_rate == 0) {
+  //     return -1;
+  //   }
+  //   if (a.rate.count_rate == 0 && b.rate.count_rate == 0) {
+  //     return 0;
+  //   }
+  //   if ((a.rate.mean_rate / a.rate.count_rate).toFixed(2) < (b.rate.mean_rate / b.rate.count_rate).toFixed(2)) {
+  //     return 1;
+  //   }
+  //   if ((a.rate.mean_rate / a.rate.count_rate).toFixed(2) > (b.rate.mean_rate / b.rate.count_rate).toFixed(2)) {
+  //     return -1;
+  //   }
+  //   return 0
 
-  }
+  // }
 
-  const washesSorted = (washes, coord) => { // сортировка моек
-    if (route.params == undefined) { // если не переданы никакие параметры то сортируется по расстоянию
-      if (coord == null) { // если не переданы координаты, значит локация выключена
-        return washes;
-      } else {
-        console.log("sort");
-        return washes.sort((a, b) => dist_sort(a, b, coord)); // сортировка по расстоянию
-      }
-    }
-    if (route.params.sorted == 1) { // сортировка по рейтингу 
-      return washes.sort(rate_sort);;
-    }
-    else {
-      if (coord == null) {
-        return washes;
-      } else {
-        console.log("sort");
-        return washes.sort((a, b) => dist_sort(a, b, coord));
-      }
-    }
-  }
+  // const washesSorted = (washes, coord) => { // сортировка моек
+  //   if (route.params == undefined) { // если не переданы никакие параметры то сортируется по расстоянию
+  //     if (coord == null) { // если не переданы координаты, значит локация выключена
+  //       return washes;
+  //     } else {
+  //       console.log("sort");
+  //       return washes.sort((a, b) => dist_sort(a, b, coord)); // сортировка по расстоянию
+  //     }
+  //   }
+  //   if (route.params.sorted == 1) { // сортировка по рейтингу 
+  //     return washes.sort(rate_sort);;
+  //   }
+  //   else {
+  //     if (coord == null) {
+  //       return washes;
+  //     } else {
+  //       console.log("sort");
+  //       return washes.sort((a, b) => dist_sort(a, b, coord));
+  //     }
+  //   }
+  // }
 
-  const getCountry = async () => {
+  // const getCountry = async () => {
 
-  }
+  // }
 
 
   const checkCar = async () => {
@@ -170,7 +170,7 @@ function CarWashes({ navigation, route }) {
           AsyncStorage.setItem("washeses", JSON.stringify(washes));
         }
         setCoords(col); // сохранение полученных координат в State
-        setWashes(washesSorted(washes, col)); // сортировка моек и сохранение в State
+        setWashes(washes); // сортировка моек и сохранение в State
         setStock(stocks); // сохранение акций в State
         console.log("finish Layout");
 
@@ -203,11 +203,13 @@ function CarWashes({ navigation, route }) {
           filter: route.params == undefined ? [] : route.params.filters,
           sorted: route.params == undefined ? 0 : route.params.sorted,
           location: location == null ? countries[0] : location,
+          lat: col.coords.latitude,
+          lon: col.coords.longitude,
           phone: phone
         }
       }
     );
-    setWashes(washesSorted(res.data.washer, col)); // сортировка моек и сохранение в State
+    setWashes(res.data.washer); // сортировка моек и сохранение в State
     setStock(res.data.stock); // сохранение акций в State
     AsyncStorage.setItem("_stocks", JSON.stringify(res.data.stock));
     AsyncStorage.setItem("washeses", JSON.stringify(res.data.washer));
@@ -271,19 +273,22 @@ function CarWashes({ navigation, route }) {
     setLocation(value); // передаем в useState название города (локации)
     await AsyncStorage.setItem("location", value); // сохранение города в хранилище
     const phone = await AsyncStorage.getItem("phone"); // получение номера из хранилища
+    const col = await Location.getLastKnownPositionAsync(); // получение координат последнего местоположения
     const res = await axios.get(domain_web + "/get_catalog",  // получение моек с фильтрами
       {
         params: {
           filter: route.params == undefined ? [] : route.params.filters,
           sorted: route.params == undefined ? 0 : route.params.sorted,
           location: value,
+          lat: col.coords.latitude,
+          lon: col.coords.longitude,
           phone: phone
         }
       }
     );
-    const col = await Location.getLastKnownPositionAsync(); // получение координат последнего местоположения
+
     setCoords(col); // сохранение полученных координат в State
-    setWashes(washesSorted(res.data.washer, col)); // сортировка моек и занесение их в State
+    setWashes(res.data.washer); // сортировка моек и занесение их в State
     setStock(res.data.stock); // сохранение акций в State
     setLoading(false) // конец загрузки установка load в false
     AsyncStorage.setItem("_stocks", JSON.stringify(res.data.stock));
@@ -297,17 +302,19 @@ function CarWashes({ navigation, route }) {
     setRefresing(true); // установка загруки в true
     try {
       const phone = await AsyncStorage.getItem("phone"); // получение телефона из хранилища
+      const col = await Location.getLastKnownPositionAsync(); // получние последнего местоположения
       const res = await axios.get(domain_web + "/get_catalog", // запрос на получение моек с фильтрами
         {
           params: {
             filter: route.params == undefined ? [] : route.params.filters,
             sorted: route.params == undefined ? 0 : route.params.sorted,
+            lat: col.coords.latitude,
+            lon: col.coords.longitude,
             location: location, // location из State
             phone: phone
           }
         }
       );
-      const col = await Location.getLastKnownPositionAsync(); // получние последнего местоположения
       setCoords(col); // сохранение полученных координат в State
       setWashes(washesSorted(res.data.washer, col)); // сортировка моек и сохранение в State
       setStock(res.data.stock); // сохранение в State акций
@@ -353,12 +360,12 @@ function CarWashes({ navigation, route }) {
             <View style={{ width: '43%' }}>
               <Text style={styles.stocks}>{item.address}</Text>
               {item.phone &&
-              <Text onPress={() => { Linking.openURL('tel:' + item.phone); }} style={styles.text_in_item}>{item.phone}</Text>}
+                <Text onPress={() => { Linking.openURL('tel:' + item.phone); }} style={styles.text_in_item}>{item.phone}</Text>}
               <Text style={styles.text_in_item}>Скидка {item.sale}%</Text>
               <Text style={styles.text_in_item}>{coords != null && "В " + ConvertDistance(item) + " от вас"}</Text>
             </View>
             <LinearGradient colors={['#FFF73780', '#FFF97480']} start={[1, 0]} style={styles.rating} >
-              <Text style={styles.stocks}>{item.rate.count_rate == 0 ? "0.00" : (item.rate.mean_rate / item.rate.count_rate).toFixed(2)}</Text>
+              <Text style={styles.stocks}>{item.rate.toFixed(2)}</Text>
             </LinearGradient>
           </View>
         </LinearGradient>
@@ -378,7 +385,7 @@ function CarWashes({ navigation, route }) {
                 <Text style={styles.text_in_item}>{coords != null && "В " + ConvertDistance(item) + " от вас"}</Text>
               </View>
               <LinearGradient colors={['#FFF73780', '#FFF97480']} start={[1, 0]} style={styles.rating} >
-                <Text style={styles.stocks}>{item.rate.count_rate == 0 ? "0.00" : (item.rate.mean_rate / item.rate.count_rate).toFixed(2)}</Text>
+                <Text style={styles.stocks}>{item.rate.toFixed(2)}</Text>
               </LinearGradient>
             </View>
           </LinearGradient>

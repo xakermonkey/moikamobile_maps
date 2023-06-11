@@ -13,13 +13,13 @@ import { Skeleton, SkeletonGroup } from 'react-native-skeleton-loaders'
 
 function RatingAndReviews({ navigation }) {
 
-  const [comments, setcomments] = useState([{"name":"имя1", "rate":5, "comment":"zbs"}, {"name":"имя2", "rate":4, "comment":"zbs333"}]);
+  const [comments, setComments] = useState([]);
   const [loading, setLoading] = useState(true)
   const [rate, setRate] = useState(1);
 
   useLayoutEffect(() => {
     navigation.setOptions({
-      title: 'МОИ ЗАКАЗЫ',
+      title: 'РЕЙТИНГ И ОТЗЫВЫ',
         headerShadowVisible: false,
         headerStyle: {
           backgroundColor: '#6E7476',
@@ -34,17 +34,17 @@ function RatingAndReviews({ navigation }) {
             </TouchableOpacity>
         ),
     });
-    // (async () => {
-    //   const phone = await AsyncStorage.getItem("phone"); 
-    //   const res = await axios.get(domain_web + "/get_orders", {
-    //     params: {
-    //       phone: phone
-    //     }
-    //   })
-    //   console.log(res.data);
-    //   setOrders(res.data);
-    //   setLoading(false);
-    // })();
+    (async () => {
+      const washer = await AsyncStorage.getItem("washer")
+      const res = await axios.get(domain_web + "/get_washes_rating", {
+        params: {
+          washes: washer
+        }
+      });
+      console.log(res.data);
+      setComments(res.data);
+      setLoading(false);
+    })();
       setLoading(false);
 
   }, [navigation])
@@ -52,7 +52,7 @@ function RatingAndReviews({ navigation }) {
   const EmptyComponent = () => {
     return (
       <View style={{ marginTop:'10%' }}>
-        <Text style={{ textAlign: 'center', textTransform:'uppercase', color:'#fff', fontFamily:'Montserrat_700Bold' }}>У вас еще нет заказов</Text>
+        <Text style={{ textAlign: 'center', textTransform:'uppercase', color:'#fff', fontFamily:'Montserrat_700Bold' }}>У этой мойки еще нет отзывов</Text>
       </View>
     )
   }
@@ -69,14 +69,16 @@ function RatingAndReviews({ navigation }) {
             <View>
                 <Text style={styles.bold_text}>{item.name}</Text>
               <View style={{ marginTop: '4%' }}>
-                  <Text style={styles.text_white}>{item.comment}</Text>
+                  <Text style={styles.text_white}>{item.order.comment}</Text>
               </View>
             </View>
             
             <View style={styles.view_row}>
-          <FontAwesome name={'star'} size={18} color={'#FFF737'} style={{ marginRight: '2%' }} />
-          <FontAwesome name={'star'} size={18} color={'#FFF737'} style={{ marginRight: '2%' }} />
-          <FontAwesome name={'star'} size={18} color={'#FFF737'} style={{ marginRight: '2%' }} />
+          <FontAwesome name={'star'} size={18} color={item.rate > 0 ? '#FFF737': '#7C8183'} style={{ marginRight: '2%' }} />
+          <FontAwesome name={'star'} size={18} color={item.rate > 1 ? '#FFF737': '#7C8183'} style={{ marginRight: '2%' }} />
+          <FontAwesome name={'star'} size={18} color={item.rate > 2 ? '#FFF737': '#7C8183'} style={{ marginRight: '2%' }} />
+          <FontAwesome name={'star'} size={18} color={item.rate > 3 ? '#FFF737': '#7C8183'} style={{ marginRight: '2%' }} />
+          <FontAwesome name={'star'} size={18} color={item.rate > 4 ? '#FFF737': '#7C8183'} style={{ marginRight: '2%' }} />
           </View>
           </View>
         </View>

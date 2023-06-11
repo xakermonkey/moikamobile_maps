@@ -46,7 +46,7 @@ function CarFilters({ navigation, route }) {
       let { status } = await Location.requestForegroundPermissionsAsync();
       const locPerm = await Location.getLastKnownPositionAsync() != null;
       setPerm(locPerm);
-      setSelectSort(1);
+      setSelectSort(0);
       if (!locPerm) {
         Alert.alert("Внимание",
           "Для автоматического определения города и отображения расстояния до автомойки необходимо включить определение геопозиции");

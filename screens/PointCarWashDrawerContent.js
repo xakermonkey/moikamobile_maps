@@ -13,6 +13,7 @@ const Drawer = createDrawerNavigator();
 export function DrawerContent(props) {
 
     const [isAuthenticated, setIsAuthenticated] = useState(false);
+    const [washer, setWasher] = useState()
 
     useLayoutEffect(() => {
         (async () => {
@@ -20,6 +21,7 @@ export function DrawerContent(props) {
             if (token != null) {
                 setIsAuthenticated(true);
             }
+            setWasher(JSON.parse(await AsyncStorage.getItem("washer_data")));
         })();
     }, [props.navigation])
 
@@ -56,10 +58,11 @@ export function DrawerContent(props) {
                     label="Проложить маршрут"
                     labelStyle={{ color: '#fff', fontSize: 14, fontFamily: 'Raleway_400Regular', textTransform: 'uppercase' }}
                     onPress={() => { 
+                        console.log(washer);
                         props.navigation.dispatch(
                             CommonActions.reset({
                                 index: 0,
-                                routes: [{ name: "Map" }]
+                                routes: [{ name: "Map", params: {washes: {lat: washer.lat, lon: washer.lon}} }]
                             }));
                     }}
                 />

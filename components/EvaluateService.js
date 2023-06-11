@@ -6,6 +6,7 @@ import axios from 'axios';
 import { domain_web } from '../domain';
 import { CommonActions } from '@react-navigation/native';
 import { StatusBar } from 'expo-status-bar';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 function EvaluateService({ navigation, route }) {
   const [check4, setCheck4] = useState(false);
@@ -16,10 +17,12 @@ function EvaluateService({ navigation, route }) {
 
   const addComment = async () => {
     if (text != "") {
+      const name = await AsyncStorage.getItem("name");
       const res = await axios.post(domain_web + "/add_comment", {
         order: route.params.orderId,
         rate: rate,
-        comment: text
+        comment: text,
+        name: name
       })
       navigation.dispatch(
         CommonActions.reset({
