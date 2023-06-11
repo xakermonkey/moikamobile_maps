@@ -253,6 +253,10 @@ function CarWashes({ navigation, route }) {
     }
     await AsyncStorage.setItem("washer", id.toString());
     await AsyncStorage.setItem("sale", sale.toString());
+    setLoading(true);
+    const res = await axios.get(domain_web + `/get_washer/${id}`);
+    await AsyncStorage.setItem("washer_data", JSON.stringify(res.data));
+    setLoading(false);
     // navigation.("PointCarWash", {from: "catalog"});
     navigation.dispatch(
       CommonActions.reset({

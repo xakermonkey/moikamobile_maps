@@ -143,21 +143,19 @@ function PointCarWash({ navigation, route }) {
       )
     });
     (async () => {
-      const token = await AsyncStorage.getItem("token");
-      const washer = await AsyncStorage.getItem("washer");
-      setWasher(washer);
-      const res = await axios.get(domain_web + `/get_washer/${washer}`)
-      await AsyncStorage.setItem("washer_data", JSON.stringify(res.data.washer))
-      setFilt(Object.keys(res.data.photo));
-      setCurrentIndex(new Array(Object.keys(res.data.photo).length).fill(0));
-      setPhoto(res.data.photo);
+      const washer = JSON.parse(await AsyncStorage.getItem("washer_data"));
+      console.log(washer);
+      setWasher(washer.washer);
+      setFilt(Object.keys(washer.photo));
+      setCurrentIndex(new Array(Object.keys(washer.photo).length).fill(0));
+      setPhoto(washer.photo);
       navigation.setOptions({
         headerTitle: () => (
               <Text numberOfLines={1} style={{
                 textTransform: 'uppercase',
               fontSize: 20,
                 fontFamily: 'Raleway_700Bold', color: '#fff'
-              }}>{res.data.washer.name_washer}</Text>
+              }}>{washer.washer.name_washer}</Text>
         ),
       })
     })();
