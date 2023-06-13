@@ -78,13 +78,6 @@ function OrderСompletion({ navigation }) {
     })();
   }, [navigation])
 
-
-  useFocusEffect(useCallback(() => {
-    console.log("focus");
-    checkPayment();
-  }, []))
-
-
   const checkPayment = useCallback(() => {
     (async () => {
       console.log("check");

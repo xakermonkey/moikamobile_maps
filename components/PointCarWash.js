@@ -37,7 +37,7 @@ function PointCarWash({ navigation, route }) {
     } else {
       navigation.setOptions({
         headerRight: () => (
-          <TouchableOpacity style={{ right: 0 }} onPress={navigation.openDrawer()} activeOpacity={0.7}>
+          <TouchableOpacity style={{ right: 10 }} onPress={navigation.openDrawer()} activeOpacity={0.7}>
             <Ionicons name='menu-sharp' size={28} color={'#7CD0D7'} />
           </TouchableOpacity>
           // <TouchableOpacity style={{ right: 0 }} onPress={checkAccount} activeOpacity={0.7}>
@@ -135,7 +135,7 @@ function PointCarWash({ navigation, route }) {
       ),
       headerRight: () => (
         makeLoad ? <ActivityIndicator /> :
-        <TouchableOpacity style={{ right: 0 }} onPress={() => navigation.openDrawer()} activeOpacity={0.7}>
+        <TouchableOpacity style={{ right: 10 }} onPress={() => navigation.openDrawer()} activeOpacity={0.7}>
           <Ionicons name='menu-sharp' size={28} color={'#7CD0D7'} />
         </TouchableOpacity>
           // <TouchableOpacity style={{ right: Platform.OS == 'ios' ? 0 : 0 }} onPress={checkAccount} activeOpacity={0.7}>
