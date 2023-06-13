@@ -322,6 +322,15 @@ function MapScreen({ navigation, route }) {
     }
   }
 
+
+  const goToWasher = async (obj) => {
+    await AsyncStorage.setItem("washer", obj.id.toString());
+    await AsyncStorage.setItem("sale", obj.sale.toString());
+    await AsyncStorage.setItem("washer_phone", obj.phone != null ? obj.phone : "");
+    await AsyncStorage.setItem("washer_data", JSON.stringify(obj));
+    navigation.navigate('MakingOrder', { from: "map", loc: await getCurrentPosition() });
+  }
+
   return (
     <View style={styles.container}>
       <StatusBar />
@@ -341,14 +350,7 @@ function MapScreen({ navigation, route }) {
             lat: parseFloat(obj.lat),
             lon: parseFloat(obj.lon),
           }}
-            onPress={() => {
-              (async () => {
-                await AsyncStorage.setItem("washer", obj.id.toString());
-                await AsyncStorage.setItem("sale", obj.sale.toString());
-                navigation.navigate('MakingOrder', { from: "map", loc: await getCurrentPosition() });
-                // navigation.navigate('MakingOrder', { from: "map" });
-              })();
-            }}
+            onPress={() => goToWasher(obj)}
           ><Image source={require('../assets/images/location.png')} style={{ width: 60, resizeMode: 'contain' }} /></Marker>
           :
           <Marker scale={0.3} key={index} point={{
@@ -356,13 +358,7 @@ function MapScreen({ navigation, route }) {
             lon: parseFloat(obj.lon),
           }}
             source={require('../assets/images/location.png')}
-            onPress={() => {
-              (async () => {
-                await AsyncStorage.setItem("washer", obj.id.toString());
-                await AsyncStorage.setItem("sale", obj.sale.toString());
-                navigation.navigate('MakingOrder', { from: "map", loc: await getCurrentPosition() });
-              })();
-            }}
+            onPress={() => goToWasher(obj)}
           />
         ))}
         {routes != [] && <Polyline strokeWidth={7} strokeColor="#7CD0FF" points={routes} />}

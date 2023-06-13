@@ -83,17 +83,18 @@ function PointCarWash({ navigation, route }) {
 
   const nav = () => {
     if (route.params.from == "map") {
-      // console.log("from point:", route.params.loc);
-      if (Platform.OS == 'android') {
-        navigation.navigate('Map', { loc: route.params.loc });
-        // navigation.dispatch(
-        //   CommonActions.reset({
-        //     index: 0,
-        //     routes: [{ name: "Map", params: { loc: route.params.loc } }]
-        //   }));
-      } else {
-        navigation.navigate('Map', { loc: route.params.loc });
-      }
+      navigation.goBack();
+      // // console.log("from point:", route.params.loc);
+      // if (Platform.OS == 'android') {
+      //   navigation.navigate('Map', { loc: route.params.loc });
+      //   // navigation.dispatch(
+      //   //   CommonActions.reset({
+      //   //     index: 0,
+      //   //     routes: [{ name: "Map", params: { loc: route.params.loc } }]
+      //   //   }));
+      // } else {
+      //   navigation.navigate('Map', { loc: route.params.loc });
+      // }
 
     } else {
       goToCatalog();

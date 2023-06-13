@@ -1,4 +1,4 @@
-import React, { useLayoutEffect, useState } from 'react';
+import React, { useCallback, useLayoutEffect, useState } from 'react';
 import { View, StyleSheet, Text, SafeAreaView, TouchableOpacity, Linking, Platform } from 'react-native';
 import { DrawerContentScrollView, DrawerItem, createDrawerNavigator } from '@react-navigation/drawer';
 import { Ionicons, FontAwesome, FontAwesome5, MaterialIcons, Feather } from '@expo/vector-icons';
@@ -8,6 +8,7 @@ import { CommonActions } from '@react-navigation/native';
 import { StatusBar } from 'expo-status-bar';
 import axios from 'axios';
 import { domain_web } from '../domain';
+import { useFocusEffect } from '@react-navigation/native';
 
 const Drawer = createDrawerNavigator();
 
@@ -17,7 +18,7 @@ export function DrawerContent(props) {
     const [phone, setPhone] = useState(null);
     const [washer, setWasher] = useState(null);
 
-    useLayoutEffect(() => {
+    useFocusEffect(useCallback(() => {
         (async () => {
             const token = await AsyncStorage.getItem("token");
             if (token != null) {
@@ -27,11 +28,11 @@ export function DrawerContent(props) {
             setPhone(await AsyncStorage.getItem("washer_phone"));
             
         })();
-    }, [props.navigation])
+    }, [props.navigation]))
 
     if (washer == null){
         return (<View style={{ marginTop:'10%' }}>
-        <Text style={{ textAlign: 'center', textTransform:'uppercase', color:'#fff', fontFamily:'Montserrat_700Bold' }}>загрущка</Text>
+        <Text style={{ textAlign: 'center', textTransform:'uppercase', color:'#fff', fontFamily:'Montserrat_700Bold' }}>Загрузка</Text>
       </View>)
     }
 
