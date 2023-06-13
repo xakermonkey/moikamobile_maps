@@ -28,66 +28,95 @@ function CarWashes({ navigation, route }) {
   const [bPicker, setBPicker] = useState(false); // Вкл/Выкл геолокация
 
 
-  // const dist_sort = (a, b, coords) => { // функция сортировки моек по расстоянию 
-  //   if (getDistance({ latitude: coords.coords.latitude, longitude: coords.coords.longitude }, { latitude: parseFloat(a.lat), longitude: parseFloat(a.lon) }) < getDistance(coords, { latitude: parseFloat(b.lat), longitude: parseFloat(b.lon) })) {
-  //     return -1;
-  //   }
-  //   if (getDistance({ latitude: coords.coords.latitude, longitude: coords.coords.longitude }, { latitude: parseFloat(a.lat), longitude: parseFloat(a.lon) }) > getDistance(coords, { latitude: parseFloat(b.lat), longitude: parseFloat(b.lon) })) {
-  //     return 1;
-  //   }
-  //   return 0
-  // }
-
-
-  // const rate_sort = (a, b) => { // функция сортировки моек по рейтингу
-  //   if (a.rate.count_rate == 0) {
-  //     return 1;
-  //   }
-  //   if (b.rate.count_rate == 0) {
-  //     return -1;
-  //   }
-  //   if (a.rate.count_rate == 0 && b.rate.count_rate == 0) {
-  //     return 0;
-  //   }
-  //   if ((a.rate.mean_rate / a.rate.count_rate).toFixed(2) < (b.rate.mean_rate / b.rate.count_rate).toFixed(2)) {
-  //     return 1;
-  //   }
-  //   if ((a.rate.mean_rate / a.rate.count_rate).toFixed(2) > (b.rate.mean_rate / b.rate.count_rate).toFixed(2)) {
-  //     return -1;
-  //   }
-  //   return 0
-
-  // }
-
-  // const washesSorted = (washes, coord) => { // сортировка моек
-  //   if (route.params == undefined) { // если не переданы никакие параметры то сортируется по расстоянию
-  //     if (coord == null) { // если не переданы координаты, значит локация выключена
-  //       return washes;
-  //     } else {
-  //       console.log("sort");
-  //       return washes.sort((a, b) => dist_sort(a, b, coord)); // сортировка по расстоянию
-  //     }
-  //   }
-  //   if (route.params.sorted == 1) { // сортировка по рейтингу 
-  //     return washes.sort(rate_sort);;
-  //   }
-  //   else {
-  //     if (coord == null) {
-  //       return washes;
-  //     } else {
-  //       console.log("sort");
-  //       return washes.sort((a, b) => dist_sort(a, b, coord));
-  //     }
-  //   }
-  // }
-
-  // const getCountry = async () => {
-
-  // }
-
-
   const checkCar = async () => {
     setCountCar(parseFloat(await AsyncStorage.getItem("cars")));
+  }
+
+
+  const getGeoLocation = async () => {
+    console.log("get location");
+    const { status } = await Location.requestForegroundPermissionsAsync();
+    if (status !== "granted") {
+      const viewAlert = await AsyncStorage.getItem("viewAlert");
+      if (viewAlert == null) {
+        Alert.alert("Внимание",
+          "Для автоматического определения города и отображения расстояния до автомойки необходимо включить определение геопозиции");
+        await AsyncStorage.setItem("viewAlert", "true");
+      }
+      return null
+    }
+    const col = await Location.getLastKnownPositionAsync(); // получение координат последнего местоположение
+    setBLocation(col != null) // true если есть права иначе false
+    if (col == null) { // если нет прав на определение геолокации 
+      const viewAlert = await AsyncStorage.getItem("viewAlert");
+      if (viewAlert == null) {
+        Alert.alert("Внимание",
+          "Для автоматического определения города и отображения расстояния до автомойки необходимо включить определение геопозиции");
+        await AsyncStorage.setItem("viewAlert", "true");
+      }
+    }
+    setCoords(col); // сохранение полученных координат в State
+    return col;
+  }
+
+  const getCity = async () => {
+    console.log("get city");
+    let countries = JSON.parse(await AsyncStorage.getItem("countries"));
+    if (countries == null) {
+      const ret = await axios.get(domain_web + "/get_country") // получение всех городов
+      countries = ret.data.country
+      AsyncStorage.setItem("countries", JSON.stringify(ret.data.country))
+    }
+    setLocations(countries) // передача городов в useState
+    let location = await AsyncStorage.getItem("location"); // получение города из хранилища
+    if (location != null) { // если город есть, то передаем его в useState
+      setLocation(location)
+    }
+    else { // иначе берем первый город из ответа на запрос 
+      location = countries[0]
+      setLocation(countries[0]);
+    }
+    return location
+  }
+
+  const loadCatalogData = async (stocks, washes, location, loc) => {
+    console.log("load data");
+    if (stocks == null || washes == null) {
+      const phone = await AsyncStorage.getItem("phone"); // получение телефона из хранилища
+      const sorted = await AsyncStorage.getItem("sorted");
+      const filters = await AsyncStorage.getItem("filters");
+      const res = await axios.get(domain_web + "/get_catalog", // получение моек с фильтрами
+        {
+          params: {
+            filter: JSON.parse(filters),
+            sorted: parseInt(sorted),
+            location: location,
+            lat: loc?.coords.latitude,
+            lon: loc?.coords.longitude,
+            phone: phone
+          }
+        }
+      );
+      stocks = res.data.stock
+      washes = res.data.washer
+      setDataToStorage(stocks, washes);
+    }
+    setWashes(washes); // сортировка моек и сохранение в State
+    setStock(stocks); // сохранение акций в State
+    return { stocks, washes }
+  }
+
+  const getDataFromStorage = async () => {
+    console.log("get data");
+    let stocks = JSON.parse(await AsyncStorage.getItem("_stocks"));
+    let washes = JSON.parse(await AsyncStorage.getItem("washeses"));
+    return { stocks, washes }
+  }
+
+  const setDataToStorage = async (stocks, washes) => {
+    console.log("set data");
+    await AsyncStorage.setItem("_stocks", JSON.stringify(stocks));
+    await AsyncStorage.setItem("washeses", JSON.stringify(washes));
   }
 
 
@@ -113,125 +142,36 @@ function CarWashes({ navigation, route }) {
         </TouchableOpacity>
       )
     });
-    (async () => {
-      await checkCar();
-      let { status } = await Location.getForegroundPermissionsAsync(); // проверка прав на геолокацию
-      const col = await Location.getLastKnownPositionAsync(); // получение координат последнего местоположение
-      setBLocation(status === 'granted' && col != null) // true если есть права иначе false
-      if (status !== 'granted' || col == null) { // если нет прав на определение геолокации 
-        const viewAlert = await AsyncStorage.getItem("viewAlert");
-        if (viewAlert == null) {
-          Alert.alert("Внимание",
-            "Для автоматического определения города и отображения расстояния до автомойки необходимо включить определение геопозиции");
-          await AsyncStorage.setItem("viewAlert", "true");
-        }
-      }
-      try {
-        console.log("Start Layout");
-        let countries = JSON.parse(await AsyncStorage.getItem("countries"));
-        if (countries == null) {
-          const ret = await axios.get(domain_web + "/get_country") // получение всех городов
-          countries = ret.data.country
-          AsyncStorage.setItem("countries", JSON.stringify(ret.data.country))
-        }
-        setLocations(countries) // передача городов в useState   
-        const location = await AsyncStorage.getItem("location"); // получение города из хранилища
-        if (location != null) { // если город есть, то передаем его в useState
-          setLocation(location)
-        }
-        else { // иначе берем первый город из ответа на запрос 
-          setLocation(countries[0]);
-        }
-        let stocks = JSON.parse(await AsyncStorage.getItem("_stocks"));
-        let washes = JSON.parse(await AsyncStorage.getItem("washeses"));
-        const sorted = await AsyncStorage.getItem("sorted");
-        const filters = await AsyncStorage.getItem("filters");
-        if (stocks == null || washes == null) {
-          const phone = await AsyncStorage.getItem("phone"); // получение телефона из хранилища
-          const res = await axios.get(domain_web + "/get_catalog", // получение моек с фильтрами
-            {
-              params: {
-                filter: JSON.parse(filters),
-                sorted: parseInt(sorted),
-                location: location == null ? countries[0] : location,
-                lat: col.coords.latitude,
-                lon: col.coords.longitude,
-                phone: phone
-              }
-            }
-          );
-          stocks = res.data.stock
-          washes = res.data.washer
-          AsyncStorage.setItem("_stocks", JSON.stringify(stocks));
-          AsyncStorage.setItem("washeses", JSON.stringify(washes));
-        }
-        setCoords(col); // сохранение полученных координат в State
-        setWashes(washes); // сортировка моек и сохранение в State
-        setStock(stocks); // сохранение акций в State
-        console.log("finish Layout");
-
-      }
-      catch (err) {
-        console.log(err);
-      }
-    })();
   }, [navigation]);
 
 
-
   const checkUpdate = async () => {
-    setBPicker(true);
-    console.log("Start CheckUpdate");
-    await checkCar();
-    const col = await Location.getLastKnownPositionAsync();
-    const countries = JSON.parse(await AsyncStorage.getItem("countries"));
-    const location = await AsyncStorage.getItem("location"); // получение города из хранилища
-    if (location != null) { // если город есть, то передаем его в useState
-      setLocation(location)
+    const loc = await getGeoLocation();
+    try {
+      const location = await getCity();
+      await loadCatalogData(null, null, location, loc);
     }
-    else { // иначе берем первый город из ответа на запрос 
-      setLocation(countries[0]);
+    catch (err) {
+      console.log(err);
     }
-    const phone = await AsyncStorage.getItem("phone");
-    const sorted = await AsyncStorage.getItem("sorted");
-    const filters = await AsyncStorage.getItem("filters");
-    const res = await axios.get(domain_web + "/get_catalog", // получение моек с фильтрами
-      {
-        params: {
-          filter: JSON.parse(filters),
-          sorted: parseInt(sorted),
-          location: location == null ? countries[0] : location,
-          lat: col.coords.latitude,
-          lon: col.coords.longitude,
-          phone: phone
-        }
-      }
-    );
-    setWashes(res.data.washer); // сортировка моек и сохранение в State
-    setStock(res.data.stock); // сохранение акций в State
-    AsyncStorage.setItem("_stocks", JSON.stringify(res.data.stock));
-    AsyncStorage.setItem("washeses", JSON.stringify(res.data.washer));
-    setBPicker(false);
-    console.log("End CheckUpdate");
 
   }
 
 
   useFocusEffect(useCallback(() => { // вызывается при каждом переходе на экран
     (async () => {
-      let { status } = await Location.getForegroundPermissionsAsync(); // проверка прав на геолокацию
-      const col = await Location.getLastKnownPositionAsync(); // получение координат последнего местоположение
-      setBLocation(status === 'granted' && col != null) // true если есть права иначе false
-      if (status !== 'granted' || col == null) { // если нет прав на определение геолокации 
-        const viewAlert = await AsyncStorage.getItem("viewAlert");
-        if (viewAlert == null) {
-          Alert.alert("Внимание",
-            "Для автоматического определения города и отображения расстояния до автомойки необходимо включить определение геопозиции");
-          await AsyncStorage.setItem("viewAlert", "true");
-        }
+      setBPicker(true);
+      await checkCar();
+      const loc = await getGeoLocation();
+      try {
+        const location = await getCity();
+        let data = await getDataFromStorage();
+        await loadCatalogData(data.stocks, data.washes, location, loc);
       }
-      checkUpdate();
-      checkCar();
+      catch (err) {
+        console.log(err);
+      }
+      setBPicker(false);
     })();
   }, []))
 
@@ -272,63 +212,23 @@ function CarWashes({ navigation, route }) {
 
 
   const newLocation = async (value) => { // изменение города
-    console.log("start new loc");
     setLoading(true); // устанавливаем загрузку в true
     setLocation(value); // передаем в useState название города (локации)
     await AsyncStorage.setItem("location", value); // сохранение города в хранилище
-    const phone = await AsyncStorage.getItem("phone"); // получение номера из хранилища
-    const col = await Location.getLastKnownPositionAsync(); // получение координат последнего местоположения
-    const sorted = await AsyncStorage.getItem("sorted");
-    const filters = await AsyncStorage.getItem("filters");
-    const res = await axios.get(domain_web + "/get_catalog",  // получение моек с фильтрами
-      {
-        params: {
-          filter: JSON.parse(filters),
-          sorted: parseInt(sorted),
-          location: value,
-          lat: col.coords.latitude,
-          lon: col.coords.longitude,
-          phone: phone
-        }
-      }
-    );
-
-    setCoords(col); // сохранение полученных координат в State
-    setWashes(res.data.washer); // сортировка моек и занесение их в State
-    setStock(res.data.stock); // сохранение акций в State
+    const loc = await getGeoLocation();
+    await loadCatalogData(null, null, value, loc);
     setLoading(false) // конец загрузки установка load в false
-    AsyncStorage.setItem("_stocks", JSON.stringify(res.data.stock));
-    AsyncStorage.setItem("washeses", JSON.stringify(res.data.washer));
     setBVeiw(false)
-    console.log("end new loc")
   }
 
 
   const refresh = async () => { // функция при оттягивании списка вниз
     setRefresing(true); // установка загруки в true
     try {
-      const phone = await AsyncStorage.getItem("phone"); // получение телефона из хранилища
-      const col = await Location.getLastKnownPositionAsync(); // получние последнего местоположения
-      const sorted = await AsyncStorage.getItem("sorted");
-      const filters = await AsyncStorage.getItem("filters");
-      const res = await axios.get(domain_web + "/get_catalog", // запрос на получение моек с фильтрами
-        {
-          params: {
-            filter: JSON.parse(filters),
-            sorted: parseInt(sorted),
-            lat: col.coords.latitude,
-            lon: col.coords.longitude,
-            location: location, // location из State
-            phone: phone
-          }
-        }
-      );
-      setCoords(col); // сохранение полученных координат в State
-      setWashes(res.data.washer, col); // сортировка моек и сохранение в State
-      setStock(res.data.stock); // сохранение в State акций
-      AsyncStorage.setItem("_stocks", JSON.stringify(res.data.stock));
-      AsyncStorage.setItem("washeses", JSON.stringify(res.data.washer));
       checkCar();
+      const loc = await getGeoLocation();
+      const location = await getCity();
+      await loadCatalogData(null, null, location, loc);
       setRefresing(false) // конец обновления
     }
     catch (err) {
@@ -388,8 +288,8 @@ function CarWashes({ navigation, route }) {
               <Image source={{ uri: domain_web + item.avatar }} style={{ width: '28%', height: '100%', borderRadius: 5 }} width={95} height={95} resizeMode='center' />
               <View style={{ width: '50%' }}>
                 <Text style={styles.stocks}>{item.address}</Text>
-              {item.phone &&
-                <Text onPress={() => { Linking.openURL('tel:' + item.phone); }} style={styles.text_in_item}>{item.phone}</Text>}
+                {item.phone &&
+                  <Text onPress={() => { Linking.openURL('tel:' + item.phone); }} style={styles.text_in_item}>{item.phone}</Text>}
                 <Text style={styles.text_in_item}>Скидка {item.sale}%</Text>
                 <Text style={styles.text_in_item}>{coords != null && "В " + ConvertDistance(item) + " от вас"}</Text>
               </View>
@@ -424,7 +324,7 @@ function CarWashes({ navigation, route }) {
               <TouchableOpacity activeOpacity={0.7} disabled={bPicker} onPress={() => setBVeiw(!bView)}>
                 <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingHorizontal: '0%' }}>
                   <Text style={styles.city}>{location}</Text>
-                  {bPicker ? <ActivityIndicator /> : <Ionicons name='chevron-forward' size={24} style={{ color: '#7CD0D7' }} />}
+                  {bPicker || refreshing || loading ? <ActivityIndicator /> : <Ionicons name='chevron-forward' size={24} style={{ color: '#7CD0D7' }} />}
                 </View>
               </TouchableOpacity>
               {bView &&

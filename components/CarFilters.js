@@ -17,7 +17,7 @@ function CarFilters({ navigation, route }) {
 
 
   const [filters, setFilters] = useState([]);
-  const [sort, setSort] = useState(["По расстоянию", "По рейтингу"]);
+  const [sort, setSort] = useState(["Расстояние", "Рейтинг"]);
   const [bSort, setBSort] = useState(false);
   const [selectSort, setSelectSort] = useState();
   const [check, setCheck] = useState([]);
@@ -45,21 +45,26 @@ function CarFilters({ navigation, route }) {
     });
     (async () => {
       let { status } = await Location.requestForegroundPermissionsAsync();
-      const locPerm = await Location.getLastKnownPositionAsync() != null;
-      setPerm(locPerm);
-      const sorted = await AsyncStorage.getItem("sorted");
-      if (sorted != null) {
-        setSelectSort(parseInt(sorted));
-      } else {
+      setPerm(status === 'granted');
+      if (status === 'granted') {
+        const sorted = await AsyncStorage.getItem("sorted");
+        if (sorted != null) {
+          setSelectSort(parseInt(sorted));
+        } else {
+          setSelectSort(0);
+        }
+      }else{
+        setSort(["По рейтингу"]);
         setSelectSort(0);
       }
+
       const filters = await AsyncStorage.getItem("filters");
       if (filters != null) {
         setCheck(JSON.parse(filters));
       } else {
         setCheck([]);
       }
-      if (!locPerm) {
+      if (status !== 'granted') {
         Alert.alert("Внимание",
           "Для автоматического определения города и отображения расстояния до автомойки необходимо включить определение геопозиции");
       }
@@ -103,13 +108,13 @@ function CarFilters({ navigation, route }) {
       {/* <BlurView intensity={100} style={styles.blurContainer}> */}
       <View style={styles.blurContainer}>
 
-        {perm && Platform.OS === 'ios' ?
+        {Platform.OS === 'ios' ?
           <View>
             <LinearGradient
               colors={['#01010199', '#35343499']}
               start={[0, 1]}
               style={styles.gradient_background} >
-              <TouchableOpacity activeOpacity={0.7} onPress={() => { setBSort(!bSort) }} style={styles.mt_TouchOpac}>
+              <TouchableOpacity activeOpacity={0.7} disabled={!perm} onPress={() => { setBSort(!bSort) }} style={styles.mt_TouchOpac}>
                 <View >
                   <Text style={styles.subtext}>сортировка</Text>
                   <Text style={styles.text}>{sort[selectSort]}</Text>
@@ -132,13 +137,11 @@ function CarFilters({ navigation, route }) {
                   selectedValue={selectSort}
                   itemStyle={{ height: 120 }}
                   onValueChange={(value, index) => { setSelectSort(value); setBSort(false); }}>
-                  <Picker.Item color='#fff' label="Расстояние" value={0} />
-                  <Picker.Item label="Рейтинг" color='#fff' value={1} />
+                  {sort.map((obj, ind) => <Picker.Item color='#fff' label={obj} value={ind} />)}
                 </Picker>
               </View>
             }</View>
           :
-
           <LinearGradient
             colors={['#01010199', '#35343499']}
             start={[0, 1]}
@@ -148,8 +151,7 @@ function CarFilters({ navigation, route }) {
               style={{ color: '#fff', marginHorizontal: '-5%', marginBottom: '-5%' }}
               selectedValue={selectSort}
               onValueChange={(value, index) => setSelectSort(value)}>
-              <Picker.Item label="Расстояние" value={0} />
-              <Picker.Item label="Рейтинг" value={1} />
+              {sort.map((obj, ind) => <Picker.Item color='#fff' label={obj} value={ind} />)}
             </Picker>
           </LinearGradient>
         }

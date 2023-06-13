@@ -62,11 +62,13 @@ function MapScreen({ navigation, route }) {
     }
     if (map.current) {
       let { status } = await Location.requestForegroundPermissionsAsync(); // запрос прав на определение геопозиции
-      const loc = await Location.getLastKnownPositionAsync(); // получение последних известных координат
-      // setBLocation(status === 'granted')
       if (status !== 'granted') {
         Alert.alert("Ошибка", "Необходимо включить определение геопозиции");
+        return;
       }
+      const loc = await Location.getLastKnownPositionAsync(); // получение последних известных координат
+      // setBLocation(status === 'granted')
+      
       // console.log(route.params)
       // if (route.params?.loc) {
       //   
@@ -93,20 +95,23 @@ function MapScreen({ navigation, route }) {
           return;
         }
         const loc = await Location.getCurrentPositionAsync(); // получение ТОЧНОЙ позиции
-        Alert.alert("Маршрут построен", "Приятной дороги"); // Приятной дороги // Идет поиск самого короткого маршрута
-        map.current.findDrivingRoutes([{ lon: loc.coords.longitude, lat: loc.coords.latitude }, { lon: parseFloat(route.params.washes.lon), lat: parseFloat(route.params.washes.lat) }], (event) => {
-          if (event.routes.length == 0) {
-            map.current.setCenter({ lon: loc.coords.longitude, lat: loc.coords.latitude }, 12, 0, 0, 1, Animation.SMOOTH);
-            return;
-          }
-          const len = event.routes[0].sections.length
-          let arr = new Array();
-          for (let i = 0; i < len; i++) {
-            arr = [...arr, ...event.routes[0].sections[i].points];
-          }
-          setRoute(arr);
-          setDisable(false);
-        })
+        if (loc != null) {
+          Alert.alert("Маршрут построен", "Приятной дороги"); // Приятной дороги // Идет поиск самого короткого маршрута
+          map.current.findDrivingRoutes([{ lon: loc.coords.longitude, lat: loc.coords.latitude }, { lon: parseFloat(route.params.washes.lon), lat: parseFloat(route.params.washes.lat) }], (event) => {
+            if (event.routes.length == 0) {
+              map.current.setCenter({ lon: loc.coords.longitude, lat: loc.coords.latitude }, 12, 0, 0, 1, Animation.SMOOTH);
+              return;
+            }
+            const len = event.routes[0].sections.length
+            let arr = new Array();
+            for (let i = 0; i < len; i++) {
+              arr = [...arr, ...event.routes[0].sections[i].points];
+            }
+            setRoute(arr);
+            setDisable(false);
+          })
+        }
+
       }
     }
     setDisable(false);

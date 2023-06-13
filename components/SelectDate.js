@@ -7,6 +7,8 @@ import { domain_web } from '../domain';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Picker } from '@react-native-picker/picker';
 import { StatusBar } from 'expo-status-bar';
+import { CommonActions} from '@react-navigation/native';
+
 
 function SelectDate({ navigation }) {
   // const [check4, setCheck4] = useState(false);
@@ -33,7 +35,12 @@ function SelectDate({ navigation }) {
         setSelectTime(res.data[Object.keys(res.data)[0]][0]);
       } else {
         Alert.alert("Ошибка", "У данной автомойки еще нет графика работ");
-        navigation.navigate("CarWashes");
+        navigation.dispatch(
+          CommonActions.reset({
+            index: 0,
+            routes: [{ name: "Catalog" }]
+          }));
+          return;
       }
     })();
   }, [navigation])
@@ -79,7 +86,7 @@ function SelectDate({ navigation }) {
       //     <Text style={[styles.bold_text, { textAlign: 'center' }]}>Подбираем для вас время</Text>
       //   </View>
       // </View>
-      )
+    )
   }
   return (
     <View style={styles.container}>
