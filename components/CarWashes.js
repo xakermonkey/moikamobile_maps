@@ -37,7 +37,8 @@ function CarWashes({ navigation, route }) {
     console.log("get location");
     const { status } = await Location.requestForegroundPermissionsAsync();
     const service = await Location.hasServicesEnabledAsync();
-    if (status !== "granted" || !service) {
+    if (status !== "granted" ||
+     !service) {
       const viewAlert = await AsyncStorage.getItem("viewAlert");
       if (viewAlert == null) {
         Alert.alert("Внимание",
@@ -96,7 +97,7 @@ function CarWashes({ navigation, route }) {
         {
           params: {
             filter: JSON.parse(filters),
-            sorted: parseInt(sorted),
+            sorted: sorted,
             location: location,
             lat: loc?.coords.latitude,
             lon: loc?.coords.longitude,
