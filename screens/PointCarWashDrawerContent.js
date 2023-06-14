@@ -1,5 +1,5 @@
 import React, { useCallback, useLayoutEffect, useState } from 'react';
-import { View, StyleSheet, Text, SafeAreaView, TouchableOpacity, Linking, Platform } from 'react-native';
+import { View, StyleSheet, Text, SafeAreaView, TouchableOpacity, Linking, Platform, Alert } from 'react-native';
 import { DrawerContentScrollView, DrawerItem, createDrawerNavigator } from '@react-navigation/drawer';
 import { Ionicons, FontAwesome, FontAwesome5, MaterialIcons, Feather } from '@expo/vector-icons';
 import { DrawerActions } from '@react-navigation/native';
@@ -30,6 +30,23 @@ export function DrawerContent(props) {
         })();
     }, [props.navigation]))
 
+
+
+    const showAlert = () => {
+        if (isAuthenticated) { props.navigation.navigate('Feedback') } else {
+            Alert.alert('Внимаение', 'Вы не авторизованы', [{ 'text': 'Ок' }, {
+                'text': 'Войти', onPress: async () => {
+                    await AsyncStorage.multiRemove(await AsyncStorage.getAllKeys());
+                    props.navigation.dispatch(
+                        CommonActions.reset({
+                            index: 0,
+                            routes: [{ name: "Login" }]
+                        }));
+                }
+            }])
+        }
+    }
+
     if (washer == null){
         return (<View style={{ marginTop:'10%' }}>
         <Text style={{ textAlign: 'center', textTransform:'uppercase', color:'#fff', fontFamily:'Montserrat_700Bold' }}>Загрузка</Text>
@@ -57,7 +74,7 @@ export function DrawerContent(props) {
                 style={styles.mt}
                 label="Хочу помыть"
                 labelStyle={{ color: '#fff', fontSize: 14, fontFamily: 'Raleway_400Regular', textTransform: 'uppercase' }}
-                onPress={() => { props.navigation.navigate('MakingOrderModal') }}
+                onPress={() => isAuthenticated ? props.navigation.navigate('MakingOrderModal') : showAlert()}
             />
             <DrawerItem
                 icon={({ color, size }) => (
