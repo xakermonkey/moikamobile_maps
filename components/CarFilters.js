@@ -45,8 +45,9 @@ function CarFilters({ navigation, route }) {
     });
     (async () => {
       let { status } = await Location.requestForegroundPermissionsAsync();
-      setPerm(status === 'granted');
-      if (status === 'granted') {
+      const service = await Location.hasServicesEnabledAsync();
+      setPerm(status === 'granted' && service);
+      if (status === 'granted' && service) {
         const sorted = await AsyncStorage.getItem("sorted");
         if (sorted != null) {
           setSelectSort(parseInt(sorted));
@@ -54,7 +55,7 @@ function CarFilters({ navigation, route }) {
           setSelectSort(0);
         }
       }else{
-        setSort(["По рейтингу"]);
+        setSort(["Рейтинг"]);
         setSelectSort(0);
       }
 
@@ -137,7 +138,7 @@ function CarFilters({ navigation, route }) {
                   selectedValue={selectSort}
                   itemStyle={{ height: 120 }}
                   onValueChange={(value, index) => { setSelectSort(value); setBSort(false); }}>
-                  {sort.map((obj, ind) => <Picker.Item color='#fff' label={obj} value={ind} />)}
+                  {sort.map((obj, ind) => <Picker.Item color='#fff' key={ind} label={obj} value={ind} />)}
                 </Picker>
               </View>
             }</View>
@@ -151,7 +152,7 @@ function CarFilters({ navigation, route }) {
               style={{ color: '#fff', marginHorizontal: '-5%', marginBottom: '-5%' }}
               selectedValue={selectSort}
               onValueChange={(value, index) => setSelectSort(value)}>
-              {sort.map((obj, ind) => <Picker.Item color='#fff' label={obj} value={ind} />)}
+              {sort.map((obj, ind) => <Picker.Item color='#000' key={ind}  label={obj} value={ind} />)}
             </Picker>
           </LinearGradient>
         }

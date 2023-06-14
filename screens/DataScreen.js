@@ -57,11 +57,16 @@ function DataScreen({ navigation }) {
 
     const getLocation = async () => {
         const permiss = await Location.requestForegroundPermissionsAsync();
-        console.warn(permiss);
-        if (permiss.status == 'granted') {
+        const service = await Location.hasServicesEnabledAsync();
+        if (permiss.status == 'granted' && service) {
             let location = await Location.getLastKnownPositionAsync();
-            let geocod = await Location.reverseGeocodeAsync({ latitude: location.coords.latitude, longitude: location.coords.longitude });
-            setLocation(geocod[0].city)
+            if (location != null){
+                let geocod = await Location.reverseGeocodeAsync({ latitude: location.coords.latitude, longitude: location.coords.longitude });
+                setLocation(geocod[0].city)
+            }
+        }else{
+            Alert.alert("Внимание", "Необходимо включить определение геопозиции");
+            return;
         }
 
     }

@@ -270,8 +270,16 @@ function MapScreen({ navigation, route }) {
   };
   zoomToMe = async () => { // приближение к себе
     if (map.current) {
+      let { status } = await Location.requestForegroundPermissionsAsync(); // запрос прав на определение геопозиции
+      const service = await Location.hasServicesEnabledAsync();
+      if (status !== 'granted' || !service) {
+        Alert.alert("Внимание", "Необходимо включить определение геопозиции");
+        return;
+      }
       const loc = await Location.getLastKnownPositionAsync();
-      map.current.setCenter({ lon: loc.coords.longitude, lat: loc.coords.latitude }, 15, 0, 0, 1, Animation.SMOOTH); //координаты, зум, поворотом по азимуту и наклоном карты, длительность анимации, анимация
+      if (loc !== null) {
+        map.current.setCenter({ lon: loc.coords.longitude, lat: loc.coords.latitude }, 15, 0, 0, 1, Animation.SMOOTH); //координаты, зум, поворотом по азимуту и наклоном карты, длительность анимации, анимация
+      }
     }
   };
 

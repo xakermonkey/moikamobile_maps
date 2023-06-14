@@ -36,7 +36,8 @@ function CarWashes({ navigation, route }) {
   const getGeoLocation = async () => {
     console.log("get location");
     const { status } = await Location.requestForegroundPermissionsAsync();
-    if (status !== "granted") {
+    const service = await Location.hasServicesEnabledAsync();
+    if (status !== "granted" || !service) {
       const viewAlert = await AsyncStorage.getItem("viewAlert");
       if (viewAlert == null) {
         Alert.alert("Внимание",
