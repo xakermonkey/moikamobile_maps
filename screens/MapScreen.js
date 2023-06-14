@@ -68,7 +68,7 @@ function MapScreen({ navigation, route }) {
       }
       const loc = await Location.getLastKnownPositionAsync(); // получение последних известных координат
       // setBLocation(status === 'granted')
-      
+
       // console.log(route.params)
       // if (route.params?.loc) {
       //   
@@ -336,6 +336,27 @@ function MapScreen({ navigation, route }) {
     navigation.navigate('MakingOrder', { from: "map", loc: await getCurrentPosition() });
   }
 
+
+  const Markers = () => {
+    return washeses.map((obj, index) => Platform.OS === "android" ?
+      <Marker scale={0.3} key={index} point={{
+        lat: parseFloat(obj.lat),
+        lon: parseFloat(obj.lon),
+      }}
+        onPress={() => goToWasher(obj)}
+      ><Image source={require('../assets/images/location.png')} style={{ width: 60, resizeMode: 'contain' }} /></Marker>
+      :
+      <Marker scale={0.3} key={index} point={{
+        lat: parseFloat(obj.lat),
+        lon: parseFloat(obj.lon),
+      }}
+        source={require('../assets/images/location.png')}
+        onPress={() => goToWasher(obj)}
+      />
+    )
+
+  }
+
   return (
     <View style={styles.container}>
       <StatusBar />
@@ -347,72 +368,10 @@ function MapScreen({ navigation, route }) {
       <YaMap
         ref={map}
         style={styles.container}>
-        {/* <Marker scale={0.3} point={{lat:59.925511, lon:30.319755,}}>
-          <Image source={require('../assets/images/location.png')} style={{ width: 60, resizeMode: 'contain' }} />
-          </Marker> */}
-        {washeses.map((obj, index) => (Platform.OS === "android" ?
-          <Marker scale={0.3} key={index} point={{
-            lat: parseFloat(obj.lat),
-            lon: parseFloat(obj.lon),
-          }}
-            onPress={() => goToWasher(obj)}
-          ><Image source={require('../assets/images/location.png')} style={{ width: 60, resizeMode: 'contain' }} /></Marker>
-          :
-          <Marker scale={0.3} key={index} point={{
-            lat: parseFloat(obj.lat),
-            lon: parseFloat(obj.lon),
-          }}
-            source={require('../assets/images/location.png')}
-            onPress={() => goToWasher(obj)}
-          />
-        ))}
+        <Markers />
+
         {routes != [] && <Polyline strokeWidth={7} strokeColor="#7CD0FF" points={routes} />}
       </YaMap>
-      {/* <ClusteredYamap
-        ref={map}
-        style={styles.container}
-        clusterColor="blue"
-        clusteredMarkers={
-          washeses.map(obj => {
-            return ({
-              point: {
-                lat: parseFloat(obj.lat),
-                lon: parseFloat(obj.lon),
-              },
-              data: {
-                avatar: obj.avatar,
-                id: obj.id,
-                sale: obj.sale,
-              }
-            })
-          })
-        }
-        renderMarker={(obj, index) => (Platform.OS === "android" ?
-          <Marker scale={0.3} key={index} point={obj.point}
-            onPress={() => {
-              (async () => {
-                await AsyncStorage.setItem("washer", obj.data.id.toString());
-                await AsyncStorage.setItem("sale", obj.data.sale.toString());
-                navigation.navigate('MakingOrder', { from: "map", loc: await getCurrentPosition() });
-                // navigation.navigate('MakingOrder', { from: "map" });
-              })();
-            }}
-          ><Image source={require('../assets/images/location.png')} style={{ width: 60, resizeMode: 'contain' }} /></Marker>
-          :
-          <Marker scale={0.3} key={index} point={obj.point}
-            source={require('../assets/images/location.png')}
-            onPress={() => {
-              (async () => {
-                await AsyncStorage.setItem("washer", obj.data.id.toString());
-                await AsyncStorage.setItem("sale", obj.data.sale.toString());
-                navigation.navigate('MakingOrder', { from: "map", loc: await getCurrentPosition() });
-              })();
-            }}
-          />
-        )}
-      >
-      </ClusteredYamap> */}
-
       <View style={{
         position: 'absolute',
         top: Dimensions.get('window').height * 0.1,

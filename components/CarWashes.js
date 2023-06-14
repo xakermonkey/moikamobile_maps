@@ -63,11 +63,11 @@ function CarWashes({ navigation, route }) {
     console.log("get city");
     let countries = JSON.parse(await AsyncStorage.getItem("countries"));
     if (countries == null) {
+      console.log("null countries");
       const ret = await axios.get(domain_web + "/get_country") // получение всех городов
       countries = ret.data.country
       AsyncStorage.setItem("countries", JSON.stringify(ret.data.country))
     }
-    setLocations(countries) // передача городов в useState
     let location = await AsyncStorage.getItem("location"); // получение города из хранилища
     if (location != null) { // если город есть, то передаем его в useState
       setLocation(location)
@@ -76,11 +76,17 @@ function CarWashes({ navigation, route }) {
       location = countries[0]
       setLocation(countries[0]);
     }
+    const index = countries.indexOf(location);
+    countries.splice(index, 1);
+    countries = [location, ...countries];
+    setLocations(countries) // передача городов в useState
+    console.log("location from city", location);
     return location
   }
 
   const loadCatalogData = async (stocks, washes, location, loc) => {
     console.log("load data");
+    console.log("location from load data", location);
     if (stocks == null || washes == null) {
       const phone = await AsyncStorage.getItem("phone"); // получение телефона из хранилища
       const sorted = await AsyncStorage.getItem("sorted");
@@ -160,6 +166,7 @@ function CarWashes({ navigation, route }) {
 
   useFocusEffect(useCallback(() => { // вызывается при каждом переходе на экран
     (async () => {
+      console.log("use focus");
       setBPicker(true);
       await checkCar();
       const loc = await getGeoLocation();
@@ -212,6 +219,7 @@ function CarWashes({ navigation, route }) {
 
 
   const newLocation = async (value) => { // изменение города
+    console.log("new loc", value);
     setLoading(true); // устанавливаем загрузку в true
     setLocation(value); // передаем в useState название города (локации)
     await AsyncStorage.setItem("location", value); // сохранение города в хранилище
@@ -225,6 +233,7 @@ function CarWashes({ navigation, route }) {
   const refresh = async () => { // функция при оттягивании списка вниз
     setRefresing(true); // установка загруки в true
     try {
+      console.log("refresh");
       checkCar();
       const loc = await getGeoLocation();
       const location = await getCity();
@@ -313,6 +322,8 @@ function CarWashes({ navigation, route }) {
     )
   }
 
+
+
   return (
     <SafeAreaView style={styles.container} >
       <StatusBar />
@@ -321,7 +332,7 @@ function CarWashes({ navigation, route }) {
           <Text style={styles.subtext}>местоположение</Text>
           {Platform.OS === 'ios' ?
             <View>
-              <TouchableOpacity activeOpacity={0.7} disabled={bPicker} onPress={() => setBVeiw(!bView)}>
+              <TouchableOpacity activeOpacity={0.7} disabled={bPicker || refreshing || loading} onPress={() => setBVeiw(!bView)}>
                 <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingHorizontal: '0%' }}>
                   <Text style={styles.city}>{location}</Text>
                   {bPicker || refreshing || loading ? <ActivityIndicator /> : <Ionicons name='chevron-forward' size={24} style={{ color: '#7CD0D7' }} />}
@@ -339,6 +350,7 @@ function CarWashes({ navigation, route }) {
                   shadowOpacity: 0.8,
                   shadowRadius: 15,
                 }}>
+
                   <Picker
                     selectedValue={location}
                     itemStyle={{ height: 120 }}
@@ -356,15 +368,16 @@ function CarWashes({ navigation, route }) {
                 <Picker
                   dropdownIconColor={0x6E7476ff}
                   dropdownIconRippleColor={0x6E7476ff}
-                  enabled={!bPicker}
+                  enabled={(!bPicker) && (!refreshing) && (!loading)}
                   selectedValue={location}
-                  itemStyle={{}}
                   style={{ marginHorizontal: '-5%', color: '#fff' }}
                   onValueChange={(value, index) => newLocation(value)}>
-                  {locations.map(obj => <Picker.Item key={obj} label={obj} value={obj} />)}
+                  {locations.map(obj =>
+                    <Picker.Item key={obj} label={obj} value={obj} />
+                  )}
                 </Picker>
               </View>
-              {bPicker ? <ActivityIndicator /> : <Ionicons name='chevron-forward' size={24} style={{ color: '#7CD0D7' }} />}
+              {bPicker || refreshing || loading ? <ActivityIndicator /> : <Ionicons name='chevron-forward' size={24} style={{ color: '#7CD0D7' }} />}
             </View>
           }
           {!bView && <LinearGradient colors={['#00266F', '#7BCFD6']} start={[1, 0]} style={styles.gradient_line} />}
