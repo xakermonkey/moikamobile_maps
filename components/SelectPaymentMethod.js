@@ -44,7 +44,7 @@ function SelectPaymentMethod({ navigation }) {
       <StatusBar/>
       <Image blurRadius={91} style={[StyleSheet.absoluteFill, styles.image]} source={require('../assets/images/blur_background.png')} resizeMode='cover' />
       <View style={styles.blurContainer}>
-        <View style={[styles.row, { justifyContent: 'center', alignItems: "center", width: "100%", marginTop: '5%' }]}>
+        <View style={[styles.row, { justifyContent: 'center', alignItems: "center", width: "100%", marginTop: '10%' }]}>
           <TouchableOpacity style={{ flex: 1 }} onPress={() => navigation.navigate('SelectCar')} activeOpacity={0.7} >
             <Ionicons name='chevron-back' size={28} color={'#7CD0D7'} />
           </TouchableOpacity>

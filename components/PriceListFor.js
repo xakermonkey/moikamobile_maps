@@ -163,7 +163,7 @@ function PriceListFor({ navigation, route }) {
       <Image blurRadius={91} style={[StyleSheet.absoluteFill, styles.image]} source={require('../assets/images/blur_background.png')} resizeMode='cover' />
       <View style={styles.blurContainer}>
 
-        <View style={[styles.row, { justifyContent: 'center', marginTop: '5%', width: "100%" }]}>
+        <View style={[styles.row, { justifyContent: 'center', marginTop: '10%', width: "100%" }]}>
           <TouchableOpacity style={{ flex:1 }} onPress={() => navigation.navigate('GeneralPriceList')} activeOpacity={0.7}  >
             <Ionicons name='chevron-back' size={32} color={'#7CD0D7'} />
           </TouchableOpacity>

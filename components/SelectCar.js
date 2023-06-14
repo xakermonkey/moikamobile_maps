@@ -56,9 +56,9 @@ function SelectCar({ navigation }) {
       <StatusBar/>
       <Image blurRadius={91} style={[StyleSheet.absoluteFill, styles.image]} source={require('../assets/images/blur_background.png')} resizeMode='cover' />
       <View style={styles.blurContainer}>
-        <View style={[styles.row, { justifyContent: 'center', alignItems: "center", width: "100%", marginTop: '5%' }]}>
+        <View style={[styles.row, { justifyContent: 'center', alignItems: "center", width: "100%", marginTop: '10%' }]}>
           {/* <View style={styles.row}> */}
-          <TouchableOpacity style={{ flex:1 }} onPress={() => navigation.navigate('SelectDate')} activeOpacity={0.7} >
+          <TouchableOpacity style={{ flex:1 }} onPress={() => navigation.navigate('PriceListFor')} activeOpacity={0.7} >
             <Ionicons name='chevron-back' size={28} color={'#7CD0D7'} />
           </TouchableOpacity>
           {/* <TouchableOpacity onPress={() => navigation.navigate('AddCarInMakingOrder')} activeOpacity={0.7} style={{}}>

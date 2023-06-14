@@ -94,7 +94,7 @@ function SelectDate({ navigation }) {
       <Image blurRadius={91} style={[StyleSheet.absoluteFill, styles.image]} source={require('../assets/images/blur_background.png')} resizeMode='cover' />
       <View style={styles.blurContainer}>
         <TouchableWithoutFeedback onPress={() => { setBDay(false); setBTime(false) }} accessible={false} >
-          <View style={[styles.row, { alignItems: 'center', justifyContent: 'center', marginTop: '5%', width: "100%" }]}>
+          <View style={[styles.row, { alignItems: 'center', justifyContent: 'center', marginTop: '10%', width: "100%" }]}>
             <TouchableOpacity style={{ flex: 1 }} onPress={goBack} activeOpacity={0.7} >
               <Ionicons name='chevron-back' size={28} color={'#7CD0D7'} />
             </TouchableOpacity>

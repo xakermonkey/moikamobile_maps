@@ -43,7 +43,7 @@ function GeneralPriceList({ navigation }) {
       <Image blurRadius={91} style={[StyleSheet.absoluteFill, styles.image]} source={require('../assets/images/blur_background.png')} resizeMode='cover' />
       {/* <BlurView intensity={100} style={styles.blurContainer}> */}
       <View style={styles.blurContainer}>
-        <View style={[styles.row, { justifyContent: 'center', marginTop: '5%', width: "100%" }]}>
+        <View style={[styles.row, { justifyContent: 'center', marginTop: '10%', width: "100%" }]}>
           <TouchableOpacity style={{ flex:1 }} onPress={() => navigation.navigate('PointCarWash')} activeOpacity={0.7} >
             <Ionicons name='close' size={28} color={'#7CD0D7'} />
           </TouchableOpacity>
