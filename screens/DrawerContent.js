@@ -51,7 +51,8 @@ export function DrawerContent(props) {
                     style={styles.mt}
                     label=" Карта"
                     labelStyle={{ color: '#fff', fontSize: 14, fontFamily: 'Raleway_400Regular', textTransform: 'uppercase' }}
-                    onPress={() => { 
+                    onPress={ async () => { 
+                        await props.navigation.dispatch(DrawerActions.closeDrawer());
                         props.navigation.dispatch(
                             CommonActions.reset({
                                 index: 0,
