@@ -119,6 +119,7 @@ function MapScreen({ navigation, route }) {
 
   useLayoutEffect(() => {
     (async () => {
+      await navigation.dispatch(DrawerActions.closeDrawer());
       initMap();
       const loc = await getCity();
       getOrderWashes();
