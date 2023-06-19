@@ -1,5 +1,5 @@
 import 'react-native-gesture-handler';
-import React, { useEffect, useLayoutEffect, useRef } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { Platform } from 'react-native';
 
 // import { NavigationContainer } from '@react-navigation/native';
@@ -30,6 +30,7 @@ const Stack = createNativeStackNavigator();
 export default function App() {
 
   const notificationListener = useRef();
+  const [push, setPush] = useState(null);
 
   Notifications.setNotificationHandler({
     handleNotification: async () => ({
@@ -59,17 +60,37 @@ export default function App() {
         trigger: null, // Передайте null, чтобы уведомление было показано немедленно
       });
     });
+
     messaging().setBackgroundMessageHandler(async remoteMessage => {
       console.log('Message handled in the background!', remoteMessage);
+      setPush(remoteMessage);
+      return;
     });
 
-    notificationListener.current = Notifications.addNotificationReceivedListener(notification => {
-      // console.log('expo addNotificationReceivedListener');
-      // console.log(notification);
+    // messaging().onNotificationOpenedApp(remoteMessage => {
+    //   console.log(
+    //     'Notification caused app to open from background state:',
+    //     remoteMessage,
+    //   );
+    //   navigation.navigate("PersonalAccount");
+    //       navigation.navigate("MyOrders");
+    //       navigation.navigate('OrderDetails', { orderId: remoteMessage.notification.request.content.data.order });
+    //       navigation.navigate('EvaluateService', { orderId: remoteMessage.notification.request.content.data.order });
+    //       return;
+    // //   navigation.navigate(remoteMessage.data.type);
+    // });
+
+    notificationListener.current = Notifications.addNotificationReceivedListener(response => {
+      console.log(response);
     });
-    // notificationListener = firebase.notifications().onNotification((notification) => {
-    //   console.log('notification2');
-    //   console.log(notification);
+    // notificationListener = firebase.notifications().onNotification((response) => {
+    //   if (response.notification.request.content.data.category == "successful") {
+    //     navigation.navigate("PersonalAccount");
+    //     navigation.navigate("MyOrders");
+    //     navigation.navigate('OrderDetails', { orderId: response.notification.request.content.data.order });
+    //     navigation.navigate('EvaluateService', { orderId: response.notification.request.content.data.order });
+    //     return;
+    //   }
     // });
   }, []);
 
@@ -149,7 +170,7 @@ export default function App() {
           // ),
           // })
         }} />
-        <Stack.Screen name="MainMenu" component={MainMenuScreen} options={{
+        <Stack.Screen name="MainMenu" component={MainMenuScreen} initialParams={{push: push}} options={{
           headerShown: false,
         }} />
       </Stack.Navigator>

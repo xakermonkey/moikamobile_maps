@@ -9,7 +9,7 @@ import Carousel, { Pagination } from 'react-native-snap-carousel';
 import { StatusBar } from 'expo-status-bar';
 import FastImage from 'react-native-fast-image';
 import { Skeleton } from 'react-native-skeleton-loaders'
-import { log } from 'react-native-reanimated';
+// import { log } from 'react-native-reanimated';
 
 function PointCarWash({ navigation, route }) {
 
@@ -18,64 +18,66 @@ function PointCarWash({ navigation, route }) {
   const [selectImage, setSelectImage] = useState(0);
   const [selectFilt, setSelectFilt] = useState(0);
   const [currentIndex, setCurrentIndex] = useState([]);
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  // const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [washer, setWasher] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [makeLoad, setMakeLoad] = useState(false);
+  // const [makeLoad, setMakeLoad] = useState(false);
 
   const carouselRef = useRef()
 
-  const changeHeader = (bool) => {
-    if (bool) {
-      navigation.setOptions({
-        headerRight: () => (
-          <View style={{ right: Platform.OS == 'ios' ? 0 : 0 }}>
-            <ActivityIndicator />
-          </View>
-        )
-      })
-    } else {
-      navigation.setOptions({
-        headerRight: () => (
-          <TouchableOpacity style={{ right: 10 }} onPress={navigation.openDrawer()} activeOpacity={0.7}>
-            <Ionicons name='menu-sharp' size={28} color={'#7CD0D7'} />
-          </TouchableOpacity>
-          // <TouchableOpacity style={{ right: 0 }} onPress={checkAccount} activeOpacity={0.7}>
-          //   <Ionicons name='cart-outline' size={28} color={'#7CD0D7'} />
-          // </TouchableOpacity>
-        )
-      })
-    }
-  }
+  // const changeHeader = (bool) => {
+  //   if (bool) {
+  //     navigation.setOptions({
+  //       headerRight: () => (
+  //         <View style={{ right: Platform.OS == 'ios' ? 0 : 0 }}>
+  //           <ActivityIndicator />
+  //         </View>
+  //       )
+  //     })
+  //   } else {
+  //     navigation.setOptions({
+  //       headerRight: () => (
+  //         <TouchableOpacity style={{ right: 10 }} onPress={navigation.openDrawer()} activeOpacity={0.7}>
+  //           <Ionicons name='menu-sharp' size={28} color={'#7CD0D7'} />
+  //         </TouchableOpacity>
+  //         // <TouchableOpacity style={{ right: 0 }} onPress={checkAccount} activeOpacity={0.7}>
+  //         //   <Ionicons name='cart-outline' size={28} color={'#7CD0D7'} />
+  //         // </TouchableOpacity>
+  //       )
+  //     })
+  //   }
+  // }
 
-  const checkAccount = async () => {
-    changeHeader(true);
-    const token = await AsyncStorage.getItem("token");
-    if (token != null) {
-      const washer = await AsyncStorage.getItem("washer")
-      const res = await axios.get(domain_web + "/" + washer + "/get_work_time");
-      if (Object.keys(res.data).length != 0) {
-        // navigation.navigate('Modal', { screen: 'GeneralPriceList', presentation: 'modal' })
-        // navigation.navigate('Catalog');
-        navigation.navigate('MakingOrderModal');
-      } else {
-        changeHeader(false);
-        Alert.alert("Ошибка", "В данную автомойку нельзя записаться");
-      }
-    } else {
-      changeHeader(false);
-      Alert.alert('Внимаение', 'Вы не авторизованы', [{ 'text': 'Ок' }, {
-        'text': 'Войти', onPress: async () => {
-          await AsyncStorage.multiRemove((await AsyncStorage.getAllKeys()).filter(obj => obj != "first_join_app"));
-          navigation.dispatch(
-            CommonActions.reset({
-              index: 0,
-              routes: [{ name: "Login" }]
-            }));
-        }
-      }])
-    }
-  }
+  // const checkAccount = async () => {
+  //   // changeHeader(true);
+  //   const token = await AsyncStorage.getItem("token");
+  //   if (token != null) {
+  //     const washer = await AsyncStorage.getItem("washer")
+  //     const res = await axios.get(domain_web + "/" + washer + "/get_work_time");
+  //     if (Object.keys(res.data).length != 0) {
+  //       // navigation.navigate('Modal', { screen: 'GeneralPriceList', presentation: 'modal' })
+  //       // navigation.navigate('Catalog');
+  //       navigation.navigate('MakingOrderModal');
+  //     } else {
+  //       // changeHeader(false);
+  //       Alert.alert("Ошибка", "В данную автомойку нельзя записаться");
+  //     }
+  //   } else {
+  //     // changeHeader(false);
+  //     Alert.alert('Внимаение', 'Вы не авторизованы', [{ 'text': 'Ок' }, {
+  //       'text': 'Войти', onPress: async () => {
+  //         await AsyncStorage.multiRemove((await AsyncStorage.getAllKeys()).filter(obj => obj != "first_join_app"));
+  //         navigation.dispatch(
+  //           CommonActions.reset({
+  //             index: 0,
+  //             routes: [{ name: "Login" }]
+  //           }));
+  //       }
+  //     }])
+  //   }
+  // }
+
+
   const goToCatalog = () => {
     navigation.navigate("Catalog");
   }
@@ -134,7 +136,6 @@ function PointCarWash({ navigation, route }) {
         </TouchableOpacity >
       ),
       headerRight: () => (
-        makeLoad ? <ActivityIndicator /> :
         <TouchableOpacity style={{ right: 10 }} onPress={() => navigation.openDrawer()} activeOpacity={0.7}>
           <Ionicons name='menu-sharp' size={28} color={'#7CD0D7'} />
         </TouchableOpacity>
@@ -182,6 +183,7 @@ function PointCarWash({ navigation, route }) {
           width="97%"
           height="100%"
           onLoad={handleLoad}
+          resizeMode='contain'
           source={{
             uri: domain_web + item.photo,
             priority: index == 0 ? FastImage.priority.high : index == 1 ? FastImage.priority.normal : FastImage.priority.low
