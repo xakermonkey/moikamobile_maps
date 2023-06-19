@@ -11,6 +11,7 @@ import * as Device from 'expo-device';
 import * as Notifications from 'expo-notifications';
 import { StatusBar } from 'expo-status-bar';
 import { CommonActions } from '@react-navigation/native';
+import messaging from '@react-native-firebase/messaging';
 
 function MapScreen({ navigation, route }) {
 
@@ -118,6 +119,14 @@ function MapScreen({ navigation, route }) {
   }
 
   useLayoutEffect(() => {
+    if (route.params?.push) {
+      setTimeout(() => {
+        navigation.navigate("PersonalAccount");
+        navigation.navigate("MyOrders");
+        navigation.navigate('OrderDetails', { orderId: route.params.push.data.order });
+        navigation.navigate('EvaluateService', { orderId: route.params.push.data.order });
+      }, 1000);
+    }
     (async () => {
       await navigation.dispatch(DrawerActions.closeDrawer());
       initMap();
@@ -183,10 +192,19 @@ function MapScreen({ navigation, route }) {
 
     });
 
-    // return () => {
-    //   Notifications.removeNotificationSubscription(notificationListener.current);
-    //   Notifications.removeNotificationSubscription(responseListener.current);
-    // };
+    messaging().onNotificationOpenedApp(remoteMessage => {
+      console.log(
+        'Notification caused app to open from background state:',
+        remoteMessage,
+      );
+      navigation.navigate("PersonalAccount");
+          navigation.navigate("MyOrders");
+          navigation.navigate('OrderDetails', { orderId: remoteMessage.data.order });
+          navigation.navigate('EvaluateService', { orderId: remoteMessage.data.order });
+          return;
+    //   navigation.navigate(remoteMessage.data.type);
+    });
+
   }, []);
 
   const registerForPushNotificationsAsync = async () => {

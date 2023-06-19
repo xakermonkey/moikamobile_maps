@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { createDrawerNavigator } from '@react-navigation/drawer';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 
@@ -17,14 +17,13 @@ import CatalogScreen from './CatalogScreen';
 import SuccessfulOrder from './SuccessfulOrder';
 import MakingOrderScreen from '../components/MakingOrderScreen';
 
-
 const Drawer = createDrawerNavigator();
 const Stack = createNativeStackNavigator();
 
-function MainMenuScreen({ navigation }) {
-  const dimensions = useWindowDimensions();
+function MainMenuScreen({ navigation, route }) {
 
-  return (
+  const dimensions = useWindowDimensions();
+    return (
     <Drawer.Navigator drawerContent={props => <DrawerContent {...props} />} screenOptions={{
       drawerType: dimensions.width >= 768 ? 'permanent' : 'front',
       drawerStyle: {
@@ -36,7 +35,7 @@ function MainMenuScreen({ navigation }) {
       drawerInactiveTintColor: '#fff',
 
     }}>
-      <Drawer.Screen name="Map" component={MapScreen} options={{
+      <Drawer.Screen name="Map" component={MapScreen} initialParams={route.params} options={{
         headerShown: false,
       }} />
       <Drawer.Screen name="HowItWorks" component={HowItWorksScreen} options={{

@@ -126,7 +126,7 @@ function PersonalAccount({ navigation }) {
         </TouchableOpacity>
 
         <TouchableOpacity activeOpacity={0.8} onPress={() => {
-          Alert.alert('Внимаение', 'Вы действительно желаете удалить свою учетную запись? Все данные будут безвозвратно удалены!', [{ 'text': 'Нет' }, {
+          Alert.alert('Внимание', 'Вы действительно желаете удалить свою учетную запись? Все данные будут безвозвратно удалены!', [{ 'text': 'Нет' }, {
             'text': 'Да', onPress: DestroyAccount,
             style: 'destructive'
           }])
