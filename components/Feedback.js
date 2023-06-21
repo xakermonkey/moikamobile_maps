@@ -10,6 +10,9 @@ import { StatusBar } from 'expo-status-bar';
 import { Ionicons } from '@expo/vector-icons';
 import { DrawerActions } from '@react-navigation/native';
 
+import NetInfo from "@react-native-community/netinfo";
+import ErrorNetwork from '../components/ErrorNetwork';
+
 function Feedback({ navigation }) {
 
 
@@ -17,6 +20,10 @@ function Feedback({ navigation }) {
   const [text, setText] = useState("");
   const [permission, setPermission] = useState();
   const [loading, setLoading] = useState(true);
+
+  const [networkError, setNetworkError] = useState(false);
+  const [titleError, setTitleError] = useState("Пытаемся установить соединение с сервером");
+  const [repeatFunc, setRepeatFunc] = useState(null);
 
   const Documents = async () => {
     // console.log(permission);
@@ -50,7 +57,8 @@ function Feedback({ navigation }) {
     })();
   }), [navigation])
 
-  const Send = async () => {
+  const send = async () => {
+    setTitleError("Пытаемся отправить ваш отзыв");
     setLoading(false);
     if (text != "") {
       try {
@@ -67,18 +75,39 @@ function Feedback({ navigation }) {
               "Content-Type": 'multipart/form-data'
             }
           })
+        setNetworkError(false);
         Alert.alert("Уведомление", "Ваше письмо успешно отправлено. Мы обработаем запрос в ближайшее время");
         navigation.replace("MainMenu")
       }
       catch (err) {
-        setLoading(true);
-        Alert.alert("Ошибка", "Письмо не отправлено");
-        console.log(err);
+        setNetworkError(true);
+        setTitleError("Ошибка при отправке заявки. Проверьте интернет соединение.");
+        setRepeatFunc(checkInternet)
       }
     } else {
       setLoading(true);
       Alert.alert("Уведомление", "Пожалуйста, опишите Вашу проблему");
     }
+  }
+
+  const checkInternet = async () => {
+    setTitleError("Пытаемся установить соединение с сервером");
+    const state = await NetInfo.fetch();
+    if (!state.isConnected) {
+      setTitleError("Ошибка сети. Проверьте интернет соединение.");
+      setNetworkError(true);
+      setRepeatFunc(checkInternet);
+    } else {
+      setNetworkError(false);
+      send();
+    }
+  }
+
+
+  if (networkError) {
+    return (
+      <ErrorNetwork reconnectServer={repeatFunc} title={titleError} />
+    )
   }
 
 
@@ -128,7 +157,7 @@ function Feedback({ navigation }) {
           </LinearGradient>
 
           {!loading ? <ActivityIndicator /> :
-            <TouchableOpacity activeOpacity={0.8} onPress={Send} >
+            <TouchableOpacity activeOpacity={0.8} onPress={checkInternet} >
               <ImageBackground source={require('../assets/images/button.png')} resizeMode='stretch' style={styles.bg_img} >
                 <Text style={styles.text_btn} >Отправить</Text>
               </ImageBackground>

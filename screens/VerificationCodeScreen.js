@@ -7,7 +7,8 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { CommonActions } from '@react-navigation/native';
 import { StatusBar } from 'expo-status-bar';
 import { Ionicons } from '@expo/vector-icons';
-
+import NetInfo from "@react-native-community/netinfo";
+import ErrorNetwork from '../components/ErrorNetwork';
 
 function VerificationCodeScreen({ navigation, route }) {
     // const VerificationCodeScreen = ({ navigation }) => {
@@ -32,41 +33,58 @@ function VerificationCodeScreen({ navigation, route }) {
     const [code, setCode] = useState('');
     const [disable, setDisable] = useState(false);
 
-    const sendCode = async () => {
-        setDisable(true);
-        try {
-            const res = await axios.post(domain_mobile + "/api/set_code", { "number": route.params.number, "code": code });
-            await AsyncStorage.setItem("token", res.data.token);
-            await AsyncStorage.setItem("phone", route.params.number);
-            if (res.data.user.location.location != null) {
-                await AsyncStorage.setItem("location", res.data.user.location.location);
-            }
-            if (res.data.user.first_name != null) {
-                await AsyncStorage.setItem("name", res.data.user.first_name);
-            }
-            if (res.data.user.email != null) {
-                await AsyncStorage.setItem("email", res.data.user.email);
-            }
-            // if (res.data.first_join == true){
-            navigation.dispatch(
-                CommonActions.reset({
-                    index: 0,
-                    routes: [{ name: "Data" }]
-                }));
-            // }else{
-            //     navigation.dispatch(
-            //         CommonActions.reset({
-            //             index: 0,
-            //             routes: [{ name: "MainMenu" }]
-            //         }));
-            // }
+    const [networkError, setNetworkError] = useState(false);
+    const [titleError, setTitleError] = useState("Пытаемся установить соединение с сервером");
+    const [repeatFunc, setRepeatFunc] = useState(null);
 
-        }
-        catch (err) {
-            Alert.alert("Ошибка!", "Введен некорректный код доступа");
+    const sendCode = async () => {
+        setTitleError("Пытаемся установить соединение с сервером");
+        const state = await NetInfo.fetch();
+        if (!state.isConnected) {
+            setTitleError("Ошибка сети. Проверьте интернет соединение.");
+            setRepeatFunc(sendCode)
+            setNetworkError(true);
+        } else {
+            setDisable(true);
+            setNetworkError(false);
+            try {
+                const res = await axios.post(domain_mobile + "/api/set_code", { "number": route.params.number, "code": code });
+                if (res.data.status) {
+                    await AsyncStorage.setItem("token", res.data.token);
+                    await AsyncStorage.setItem("phone", route.params.number);
+                    if (res.data.user.location.location != null) {
+                        await AsyncStorage.setItem("location", res.data.user.location.location);
+                    }
+                    if (res.data.user.first_name != null) {
+                        await AsyncStorage.setItem("name", res.data.user.first_name);
+                    }
+                    if (res.data.user.email != null) {
+                        await AsyncStorage.setItem("email", res.data.user.email);
+                    }
+                    navigation.dispatch(
+                        CommonActions.reset({
+                            index: 0,
+                            routes: [{ name: "Data" }]
+                        }));
+
+                } else {
+                    Alert.alert("Ошибка!", "Введен некорректный код доступа");
+                    setDisable(false);
+                }
+            }
+            catch (err) {
+                setTitleError("Ошибка при отправке кода. Проверьте интернет соединение.");
+                setRepeatFunc(sendCode)
+                setNetworkError(true);
+            }
             setDisable(false);
         }
+    }
 
+    if (networkError) {
+        return (
+            <ErrorNetwork reconnectServer={repeatFunc} title={titleError} />
+        )
     }
 
 

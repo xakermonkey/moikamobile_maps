@@ -9,7 +9,8 @@ import { Picker } from '@react-native-picker/picker';
 import MaskInput from 'react-native-mask-input'
 import { CommonActions } from '@react-navigation/native';
 import { StatusBar } from 'expo-status-bar';
-
+import NetInfo from "@react-native-community/netinfo";
+import ErrorNetwork from '../components/ErrorNetwork';
 
 function AddEditCar({ navigation, route }) {
 
@@ -20,6 +21,40 @@ function AddEditCar({ navigation, route }) {
   const [bCar, setBCar] = useState(false);
   const [mask, setMask] = useState([/[А|В|Е|К|М|Н|О|Р|С|Т|У|Х]/, /\d/, /\d/, /\d/, /[А|В|Е|К|М|Н|О|Р|С|Т|У|Х]/, /[А|В|Е|К|М|Н|О|Р|С|Т|У|Х]/, /\d/, /\d/, /\d/]);
 
+
+
+  const [networkError, setNetworkError] = useState(false);
+  const [titleError, setTitleError] = useState("Пытаемся установить соединение с сервером");
+  const [repeatFunc, setRepeatFunc] = useState(null);
+
+  const getDataFromServer = async () => {
+    try {
+      setTitleError("Пытаемся установить соединение с сервером");
+      const res = await axios.get(domain_web + "/get_body");
+      setCarBody(res.data)
+      if (body == "") {
+        setBody(res.data[0].name);
+      }
+      setNetworkError(false);
+    } catch {
+      setTitleError("Ошибка при получении данных. Проверьте соединение.");
+      setRepeatFunc(checkInternet);
+      setNetworkError(true);
+    }
+
+  }
+  const checkInternet = async () => {
+    setTitleError("Пытаемся установить соединение с сервером");
+    const state = await NetInfo.fetch();
+    if (!state.isConnected) {
+      setTitleError("Ошибка сети. Проверьте интернет соединение.");
+      setRepeatFunc(checkInternet)
+      setNetworkError(true);
+    } else {
+      setNetworkError(false);
+      getDataFromServer();
+    }
+  }
 
   useLayoutEffect(() => {
     navigation.setOptions({
@@ -39,23 +74,20 @@ function AddEditCar({ navigation, route }) {
       ),
     });
     (async () => {
-      try {
-        const res = await axios.get(domain_web + "/get_body");
-        setCarBody(res.data)
-        if (body == "") {
-          setBody(res.data[0].name);
-        }
-      }
-      catch (err) {
-        console.log(err);
-      }
-
-
+      await checkInternet();
     })();
   }, [navigation]);
 
   const saveCar = async () => {
     try {
+      setTitleError("Пытаемся установить соединение с сервером");
+      const state = await NetInfo.fetch();
+      if (!state.isConnected) {
+        setTitleError("Ошибка сети. Проверьте интернет соединение.");
+        setRepeatFunc(saveCar)
+        setNetworkError(true);
+        return;
+      }
       if (number.length >= 8) {
         const token = await AsyncStorage.getItem("token");
         const res = await axios.post(domain_mobile + "/api/edit_car",
@@ -71,10 +103,11 @@ function AddEditCar({ navigation, route }) {
           }
         );
       }
-      if (route.params.id == null){
+      if (route.params.id == null) {
         const cars = await AsyncStorage.getItem("cars")
-        await AsyncStorage.setItem("cars", (parseFloat(cars)+1).toString());
+        await AsyncStorage.setItem("cars", (parseFloat(cars) + 1).toString());
       }
+      setNetworkError(false);
       navigation.dispatch(
         CommonActions.reset({
           index: 0,
@@ -82,16 +115,21 @@ function AddEditCar({ navigation, route }) {
         }));
     }
     catch (err) {
+      setNetworkError(false);
       Alert.alert("Ошибка", "У Вас уже есть автомобиль с таким номером");
       console.log(err);
     }
 
   }
 
-
+  if (networkError){
+    return(
+    <ErrorNetwork reconnectServer={repeatFunc} title={titleError} />
+    )
+  }
   return (
     <View style={styles.container}>
-      <StatusBar/>
+      <StatusBar />
       <Image blurRadius={91} style={[StyleSheet.absoluteFill, styles.image]} source={require('../assets/images/blur_background.png')} resizeMode='cover' />
       {/* <BlurView intensity={100} style={styles.blurContainer}> */}
       <View style={styles.blurContainer}>
@@ -151,7 +189,7 @@ function AddEditCar({ navigation, route }) {
 
             <View style={styles.mt}>
               <Text style={styles.subtext_android}>номер автомобиля</Text>
-              <MaskInput style={[styles.text, { width: '100%', color:'#fff', marginLeft:'5%' }]} placeholderTextColor='#fff' maxLength={9} autoCapitalize="characters" value={number} mask={mask} onChangeText={(masked, unmasked) => setNumber(masked)} />
+              <MaskInput style={[styles.text, { width: '100%', color: '#fff', marginLeft: '5%' }]} placeholderTextColor='#fff' maxLength={9} autoCapitalize="characters" value={number} mask={mask} onChangeText={(masked, unmasked) => setNumber(masked)} />
               <LinearGradient colors={['#00266F', '#7BCFD6']} start={[1, 0]} style={styles.gradient_line_android} />
             </View>
           </LinearGradient>
@@ -189,7 +227,7 @@ const styles = StyleSheet.create({
     borderRadius: 5,
   },
   gradient_line_android: {
-    marginHorizontal:'5%',
+    marginHorizontal: '5%',
     marginVertical: '5%',
     height: 2,
     borderRadius: 5,
@@ -225,8 +263,8 @@ const styles = StyleSheet.create({
     fontFamily: 'Montserrat_400Regular',
   },
   subtext_android: {
-    marginLeft:'5%',
-    marginTop:'5%',
+    marginLeft: '5%',
+    marginTop: '5%',
     fontSize: 11,
     color: '#B2B2B2',
     fontFamily: 'Montserrat_400Regular',
@@ -234,7 +272,7 @@ const styles = StyleSheet.create({
 
   text: {
     // marginLeft:'5%',
-    marginTop:'2%',
+    marginTop: '2%',
     fontSize: 14,
     color: '#fff',
     fontFamily: 'Montserrat_400Regular',

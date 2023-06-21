@@ -11,6 +11,8 @@ import * as WebBrowser from 'expo-web-browser';
 import * as Linking from "expo-linking";
 import { res } from 'react-email-validator';
 import { StatusBar } from 'expo-status-bar';
+import NetInfo from "@react-native-community/netinfo";
+import ErrorNetwork from '../components/ErrorNetwork';
 
 function OrderСompletion({ navigation }) {
 
@@ -29,41 +31,43 @@ function OrderСompletion({ navigation }) {
   const [token, setToken] = useState(null);
   const [linkListener, setLinkListener] = useState(null);
   const [payUri, setPayUri] = useState(null);
-  const [loading, setLoading] = useState(false)
+  const [loading, setLoading] = useState(false);
 
-  useLayoutEffect(() => {
-    (async () => {
-      setLoading(true);
-      const token = await AsyncStorage.getItem("token")
-      setToken(token);
-      const car = await AsyncStorage.getItem("car_name")
-      setCar(car);
-      const order_time = await AsyncStorage.getItem("order_time")
-      setTime(order_time);
-      const order_day = await AsyncStorage.getItem("order_day")
-      setDate(order_day);
-      const washer = await AsyncStorage.getItem("washer")
-      setWasher(washer);
-      const sale = await AsyncStorage.getItem("sale")
-      setSale(sale);
-      const payment = await AsyncStorage.getItem("payment");
-      setPayment(payment);
-      let params = new Object();
-      params["servise"] = new Array();
-      const keys = await (await AsyncStorage.getAllKeys()).filter(key => key.startsWith("servise"));
-      for (let i = 0; i < keys.length; i++) {
-        params.servise = [...params.servise, await AsyncStorage.getItem(keys[i])];
-      }
-      const body = await AsyncStorage.getItem("car")
-      setBody(body)
-      params["body"] = body;
+
+  const [networkError, setNetworkError] = useState(false);
+  const [titleError, setTitleError] = useState("Пытаемся установить соединение с сервером");
+  const [repeatFunc, setRepeatFunc] = useState(null);
+
+  const getDataFromServer = async () => {
+    setLoading(true);
+    const token = await AsyncStorage.getItem("token")
+    setToken(token);
+    const car = await AsyncStorage.getItem("car_name")
+    setCar(car);
+    const order_time = await AsyncStorage.getItem("order_time")
+    setTime(order_time);
+    const order_day = await AsyncStorage.getItem("order_day")
+    setDate(order_day);
+    const washer = await AsyncStorage.getItem("washer")
+    setWasher(washer);
+    const sale = await AsyncStorage.getItem("sale")
+    setSale(sale);
+    const payment = await AsyncStorage.getItem("payment");
+    setPayment(payment);
+    let params = new Object();
+    params["servise"] = new Array();
+    const keys = await (await AsyncStorage.getAllKeys()).filter(key => key.startsWith("servise"));
+    for (let i = 0; i < keys.length; i++) {
+      params.servise = [...params.servise, await AsyncStorage.getItem(keys[i])];
+    }
+    const body = await AsyncStorage.getItem("car")
+    setBody(body)
+    params["body"] = body;
+    try {
+      setTitleError("Пытаемся установить соединение с сервером");
       const res = await axios.get(domain_web + "/get_servise_order", {
         params: params
       });
-      setServise(res.data);
-      let totalPrice = 0;
-      res.data.map(obj => { if (obj.price != "Д/ц") { totalPrice += parseInt(obj.price) } });
-      setTotal(sale == 0 ? totalPrice : totalPrice * (1 - sale / 100));
       if (payment == "Безналичный расчёт") {
         Linking.createURL("payment", { queryParams: { "status": true } });
         const total = await AsyncStorage.getItem("total_price");
@@ -72,20 +76,62 @@ function OrderСompletion({ navigation }) {
         const { hostname, path, queryParams } = Linking.parse(res.data.uri);
         setUuid(queryParams.orderId);
         setPayUri(res.data.uri);
-
       }
-      setLoading(false);
+      setServise(res.data);
+      let totalPrice = 0;
+      res.data.map(obj => { if (obj.price != "Д/ц") { totalPrice += parseInt(obj.price) } });
+      setTotal(sale == 0 ? totalPrice : totalPrice * (1 - sale / 100));
+      setNetworkError(false);
+    } catch {
+      setTitleError("Ошибка при получении данных. Проверьте соединение.");
+      setRepeatFunc(checkInternet);
+      setNetworkError(true);
+      return;
+    }
+    setLoading(false);
+  }
+
+  const checkInternet = async () => {
+    setTitleError("Пытаемся установить соединение с сервером");
+    const state = await NetInfo.fetch();
+    if (!state.isConnected) {
+      setTitleError("Ошибка сети. Проверьте интернет соединение.");
+      setNetworkError(true);
+      setRepeatFunc(checkInternet);
+    } else {
+      setNetworkError(false);
+      getDataFromServer();
+    }
+  }
+
+  useLayoutEffect(() => {
+    (async () => {
+      checkInternet();
     })();
   }, [navigation])
 
   const checkPayment = useCallback(() => {
     (async () => {
-      console.log("check");
-      const res = await axios.post(domain_mobile + "/api/check_payment", { "uuid": uuid }, { headers: { "Authorization": "Token " + token } });
-      if (res.data.status) {
-        await createOrder(washer, time, date, body, sale, servise, payment, uuid);
+      setTitleError("Пытаемся установить соединение с сервером");
+      const state = await NetInfo.fetch();
+      if (!state.isConnected) {
+        setTitleError("Ошибка сети. Проверьте интернет соединение.");
+        setNetworkError(true);
+        setRepeatFunc(checkPayment);
       } else {
-        Alert.alert("Внимание!", "Оплата была незавершена или отменена");
+        try {
+          const res = await axios.post(domain_mobile + "/api/check_payment", { "uuid": uuid }, { headers: { "Authorization": "Token " + token } });
+        } catch {
+          setTitleError("Ошибка при проверке оплаты. Проверьте соединение.");
+          setRepeatFunc(checkInternet);
+          setNetworkError(true);
+          return;
+        }
+        if (res.data.status) {
+          await createOrder(washer, time, date, body, sale, servise, payment, uuid);
+        } else {
+          Alert.alert("Внимание!", "Оплата была незавершена или отменена");
+        }
       }
       setLoading(false);
     })();
@@ -98,11 +144,7 @@ function OrderСompletion({ navigation }) {
     if (Platform.OS == 'ios') {
       WebBrowser.dismissBrowser();
     }
-    try {
-      checkPayment();
-    } catch (err) {
-      console.log(err);
-    }
+    checkPayment();
   }, [uuid, token, loading])
 
 
@@ -129,60 +171,149 @@ function OrderСompletion({ navigation }) {
   }, [payUri, linkListener, washer, time, date, body, sale, servise, payment, uuid, loading])
 
 
+
+  const canselPayment = async () => {
+    const state = await NetInfo.fetch();
+    if (!state.isConnected) {
+      setTitleError("Ошибка сети. Проверьте интернет соединение.");
+      setNetworkError(true);
+      setRepeatFunc(canselPayment);
+    } else {
+      try {
+        await axios.post(domain_mobile + "/api/cancel_payment", { "uuid": uuid }, { headers: { "Authorization": "Token " + token } });
+      } catch {
+        setTitleError("Ошибка при отмене оплаты. Проверьте интернет соединение.");
+        setNetworkError(true);
+        setRepeatFunc(canselPayment);
+      }
+    }
+  }
+
+
+  const createOrderWeb = async (washer, time, date, body, sale, servise, payment, uuid) => {
+    const state = await NetInfo.fetch();
+    if (!state.isConnected) {
+      setTitleError("Ошибка сети. Проверьте интернет соединение.");
+      setNetworkError(true);
+      setRepeatFunc(createOrderWeb);
+    } else {
+      try {
+        const phone = await AsyncStorage.getItem("phone");
+        const res = await axios.post(domain_web + "/create_order",
+          {
+            washer: washer,
+            time: time,
+            date: date,
+            car: body,
+            sale: sale,
+            servise: servise.map(obj => obj.id),
+            payment: payment == "Юридическое лицо" ? "Юр. лицо" : payment,
+            phone: phone,
+            number: await AsyncStorage.getItem("car_number"),
+            payment_id: uuid
+          });
+        if (res.data.id == null) {
+          Alert.alert("Упс", "Даннное время уже забронировано");
+          if (payment == "Безналичный расчёт") {
+            await canselPayment();
+          }
+          navigation.dispatch(
+            CommonActions.reset({
+              index: 0,
+              routes: [{ name: "GeneralPriceList" }, { name: "PriceListFor" }, { name: "SelectDate" }]
+            }));
+          setDisable(false);
+          // navigation.navigate("SelectDate")
+          return;
+        }
+        await AsyncStorage.setItem("order_id", res.data.id.toString());
+        await createOrderMobile(res.data.id);
+      }
+      catch {
+        setTitleError("Ошибка при формировании заказа. Проверьте интернет соединение.");
+        setNetworkError(true);
+        setRepeatFunc(createOrderWeb);
+      }
+    }
+  }
+
+  const createOrderMobile = async (order_id) => {
+    const state = await NetInfo.fetch();
+    if (!state.isConnected) {
+      setTitleError("Ошибка сети. Проверьте интернет соединение.");
+      setNetworkError(true);
+      setRepeatFunc(createOrderMobile);
+    } else {
+      try {
+        const token = await AsyncStorage.getItem("token");
+        const create = await axios.post(domain_mobile + "/api/create_order",
+          {
+            id: order_id
+          },
+          {
+            headers: {
+              "Authorization": "Token " + token
+            }
+          });
+        if (payment == "Безналичный расчёт") {
+          await acceptPeyment();
+        }
+      }
+      catch {
+        setTitleError("Ошибка при формировании заказа №2. Проверьте интернет соединение.");
+        setNetworkError(true);
+        setRepeatFunc(createOrderMobile);
+      }
+    }
+  }
+
+
+  const acceptPeyment = async (uuid) => {
+    const state = await NetInfo.fetch();
+    if (!state.isConnected) {
+      setTitleError("Ошибка сети. Проверьте интернет соединение.");
+      setNetworkError(true);
+      setRepeatFunc(acceptPeyment);
+    } else {
+      try {
+        const token = await AsyncStorage.getItem("token");
+        await axios.post(domain_mobile + "/api/accept_payment", { "uuid": uuid }, { headers: { "Authorization": "Token " + token } });
+        let keys = await AsyncStorage.getAllKeys()
+        await AsyncStorage.multiRemove(keys.filter(key => key.startsWith("stock") || key.startsWith("servise_")))
+        setLoading(false);
+        navigation.navigate("PointCarWash");
+        setTimeout(() => navigation.navigate("Successful"), 1000)
+      }
+      catch {
+        setTitleError("Ошибка при подтверждении заказа. Проверьте интернет соединение.");
+        setNetworkError(true);
+        setRepeatFunc(acceptPeyment);
+        throw new Error("Network Error");
+      }
+    }
+  }
+
+
   const createOrder = async (washer, time, date, body, sale, servise, payment, uuid) => {
     setDisable(true);
     setLoading(true);
-    try {
-      const phone = await AsyncStorage.getItem("phone");
-      const res = await axios.post(domain_web + "/create_order",
-        {
-          washer: washer,
-          time: time,
-          date: date,
-          car: body,
-          sale: sale,
-          servise: servise.map(obj => obj.id),
-          payment: payment == "Юридическое лицо" ? "Юр. лицо" : payment,
-          phone: phone,
-          number: await AsyncStorage.getItem("car_number"),
-          payment_id: uuid
-        });
-      await AsyncStorage.setItem("order_id", res.data.id.toString());
-      const token = await AsyncStorage.getItem("token");
-      const create = await axios.post(domain_mobile + "/api/create_order",
-        {
-          id: res.data.id
-        },
-        {
-          headers: {
-            "Authorization": "Token " + token
-          }
-        });
-      let keys = await AsyncStorage.getAllKeys()
-      await AsyncStorage.multiRemove(keys.filter(key => key.startsWith("stock") || key.startsWith("servise_")))
-      if (payment == "Безналичный расчёт") {
-        await axios.post(domain_mobile + "/api/accept_payment", { "uuid": uuid }, { headers: { "Authorization": "Token " + token } });
-      }
-      setLoading(false);
-      navigation.navigate("PointCarWash");
-      setTimeout(() => navigation.navigate("Successful"), 1000)
-    } catch (err) {
-      console.log(err);
-      Alert.alert("Упс", "Даннное время уже забронировано");
-      if (payment == "Безналичный расчёт") {
-        await axios.post(domain_mobile + "/api/cancel_payment", { "uuid": uuid }, { headers: { "Authorization": "Token " + token } });
-      }
-      navigation.dispatch(
-        CommonActions.reset({
-          index: 0,
-          routes: [{ name: "GeneralPriceList" }, { name: "PriceListFor" }, { name: "SelectDate" }]
-        }));
-      setDisable(false);
-      // navigation.navigate("SelectDate")
-      return;
+    setTitleError("Пытаемся установить соединение с сервером");
+    const state = await NetInfo.fetch();
+    if (!state.isConnected) {
+      setTitleError("Ошибка сети. Проверьте интернет соединение.");
+      setNetworkError(true);
+      setRepeatFunc(createOrder);
+    } else {
+      await createOrderWeb(washer, time, date, body, sale, servise, payment, uuid);
     }
-
   };
+
+
+  if (networkError) {
+    return (
+      <ErrorNetwork reconnectServer={repeatFunc} title={titleError} />
+    )
+  }
 
   if (loading) {
     return (
@@ -206,7 +337,7 @@ function OrderСompletion({ navigation }) {
       <Image blurRadius={91} style={[StyleSheet.absoluteFill, styles.image]} source={require('../assets/images/blur_background.png')} resizeMode='cover' />
       <View style={styles.blurContainer}>
         <View style={[styles.row, { justifyContent: 'center', alignItems: "center", width: "100%", marginTop: '10%' }]}>
-          <TouchableOpacity style={{ flex: 1 }} onPress={() => {checkPayment(); navigation.navigate('SelectPaymentMethod')}} activeOpacity={0.7} >
+          <TouchableOpacity style={{ flex: 1 }} onPress={() => { checkPayment(); navigation.navigate('SelectPaymentMethod') }} activeOpacity={0.7} >
             <Ionicons name='chevron-back' size={28} color={'#7CD0D7'} />
           </TouchableOpacity>
           <Text style={[styles.bold_text, { flex: 4 }]}>Завершение заказа</Text>

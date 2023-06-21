@@ -7,7 +7,8 @@ import { domain_web } from '../domain';
 import { CommonActions } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
 import { StatusBar } from 'expo-status-bar';
-
+import NetInfo from "@react-native-community/netinfo";
+import ErrorNetwork from '../components/ErrorNetwork';
 
 function OrderDetails({ navigation, route }) {
 
@@ -16,40 +17,96 @@ function OrderDetails({ navigation, route }) {
   const [servise, setServise] = useState([]);
   const [loading, setLoading] = useState(false);
 
+  const [networkError, setNetworkError] = useState(false);
+  const [titleError, setTitleError] = useState("Пытаемся установить соединение с сервером");
+  const [repeatFunc, setRepeatFunc] = useState(null);
+
+
+  const getDataFromServer = async () => {
+    try {
+      setTitleError("Пытаемся установить соединение с сервером");
+      const res = await axios.get(domain_web + "/get_detail_order_" + route.params.orderId)
+      setOrder(res.data.order);
+      setServise(res.data.servise);
+      setNetworkError(false);
+    } catch {
+      setTitleError("Ошибка при получении данных. Проверьте соединение.");
+      setRepeatFunc(checkInternet);
+      setNetworkError(true);
+      return;
+    }
+
+  }
+
+  const checkInternet = async () => {
+    setTitleError("Пытаемся установить соединение с сервером");
+    const state = await NetInfo.fetch();
+    if (!state.isConnected) {
+      setTitleError("Ошибка сети. Проверьте интернет соединение.");
+      setNetworkError(true);
+      setRepeatFunc(checkInternet);
+    } else {
+      setNetworkError(false);
+      getDataFromServer();
+    }
+  }
+
   useLayoutEffect(() => {
     navigation.setOptions({
       title: 'ПОДРОБНОСТИ ЗАКАЗА',
-        headerShadowVisible: false,
-        headerStyle: {
-          backgroundColor: '#6E7476',
-        },
-        headerTitleStyle: {
-          color: '#fff',
-          textTransform: 'uppercase',
-        },
-        headerLeft: () => (
-          <TouchableOpacity style={{left:0}} onPress={() => navigation.navigate('MyOrders')} activeOpacity={0.7}>
-            <Ionicons name='chevron-back' size={32} color={'#7CD0D7'} />
-            </TouchableOpacity>
-        ),
+      headerShadowVisible: false,
+      headerStyle: {
+        backgroundColor: '#6E7476',
+      },
+      headerTitleStyle: {
+        color: '#fff',
+        textTransform: 'uppercase',
+      },
+      headerLeft: () => (
+        <TouchableOpacity style={{ left: 0 }} onPress={() => navigation.navigate('MyOrders')} activeOpacity={0.7}>
+          <Ionicons name='chevron-back' size={32} color={'#7CD0D7'} />
+        </TouchableOpacity>
+      ),
     });
     (async () => {
-      const res = await axios.get(domain_web + "/get_detail_order_" + route.params.orderId)
-      
-      setOrder(res.data.order);
-      setServise(res.data.servise);
+      await checkInternet();
     })();
   }, [navigation])
 
   const deleteOrder = async () => {
-    setLoading(true);
-    const res = await axios.get(domain_web + "/delete_order_" + route.params.orderId)
-    setLoading(false);
-    navigation.dispatch(
-      CommonActions.reset({
-          index: 0,
-          routes: [{name: "PersonalAccountScreen"},{ name: "MyOrders" }]
-      }));
+    setTitleError("Пытаемся установить соединение с сервером");
+    const state = await NetInfo.fetch();
+    if (!state.isConnected) {
+      setTitleError("Ошибка сети. Проверьте интернет соединение.");
+      setNetworkError(true);
+      setRepeatFunc(deleteOrder);
+    } else {
+      setLoading(true);
+      try {
+        const res = await axios.get(domain_web + "/delete_order_" + route.params.orderId);
+        navigation.dispatch(
+          CommonActions.reset({
+            index: 0,
+            routes: [{ name: "PersonalAccountScreen" }, { name: "MyOrders" }]
+          }));
+      }
+      catch {
+        setTitleError("Ошибка при удалении заказа. Проверьте соединение.");
+        setRepeatFunc(deleteOrder);
+        setNetworkError(true);
+      }
+      setLoading(false);
+    }
+
+
+
+  }
+
+
+  if (networkError) {
+    return (
+      <ErrorNetwork reconnectServer={repeatFunc} title={titleError} />
+    )
   }
 
 
@@ -63,7 +120,7 @@ function OrderDetails({ navigation, route }) {
 
   return (
     <SafeAreaView style={styles.container} >
-      <StatusBar/>
+      <StatusBar />
       <ScrollView style={styles.main}>
 
         <LinearGradient

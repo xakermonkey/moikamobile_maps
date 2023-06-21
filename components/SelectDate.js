@@ -7,8 +7,9 @@ import { domain_web } from '../domain';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Picker } from '@react-native-picker/picker';
 import { StatusBar } from 'expo-status-bar';
-import { CommonActions} from '@react-navigation/native';
-
+import { CommonActions } from '@react-navigation/native';
+import NetInfo from "@react-native-community/netinfo";
+import ErrorNetwork from '../components/ErrorNetwork';
 
 function SelectDate({ navigation }) {
   // const [check4, setCheck4] = useState(false);
@@ -18,10 +19,15 @@ function SelectDate({ navigation }) {
   const [bDay, setBDay] = useState(false);
   const [bTime, setBTime] = useState(false);
 
-  useLayoutEffect(() => {
-    (async () => {
-      const washer = await AsyncStorage.getItem("washer");
-      const number = await AsyncStorage.getItem("car_number");
+  const [networkError, setNetworkError] = useState(false);
+  const [titleError, setTitleError] = useState("Пытаемся установить соединение с сервером");
+  const [repeatFunc, setRepeatFunc] = useState(null);
+
+  const getDataFromServer = async () => {
+    const washer = await AsyncStorage.getItem("washer");
+    const number = await AsyncStorage.getItem("car_number");
+    try {
+      setTitleError("Пытаемся установить соединение с сервером");
       const res = await axios.get(domain_web + "/" + washer + "/get_work_time",
         {
           params: {
@@ -29,6 +35,7 @@ function SelectDate({ navigation }) {
           }
         }
       );
+      setNetworkError(false);
       setData(res.data);
       if (Object.keys(res.data).length != 0) {
         setSelectDay(Object.keys(res.data)[0]);
@@ -40,8 +47,32 @@ function SelectDate({ navigation }) {
             index: 0,
             routes: [{ name: "Catalog" }]
           }));
-          return;
+        return;
       }
+    } catch {
+      setTitleError("Ошибка при получении данных. Проверьте соединение.");
+      setRepeatFunc(checkInternet);
+      setNetworkError(true);
+    }
+
+  }
+  const checkInternet = async () => {
+    setTitleError("Пытаемся установить соединение с сервером");
+    const state = await NetInfo.fetch();
+    if (!state.isConnected) {
+      setTitleError("Ошибка сети. Проверьте интернет соединение.");
+      setRepeatFunc(checkInternet)
+      setNetworkError(true);
+    } else {
+      setNetworkError(false);
+      getDataFromServer();
+    }
+  }
+
+
+  useLayoutEffect(() => {
+    (async () => {
+      await checkInternet();
     })();
   }, [navigation])
 
@@ -66,6 +97,12 @@ function SelectDate({ navigation }) {
   const timeSelector = async (value) => {
     setSelectTime(value);
     setBTime(false)
+  }
+
+  if (networkError) {
+    return (
+      <ErrorNetwork reconnectServer={repeatFunc} title={titleError} />
+    )
   }
 
   if (selectDay == undefined) {

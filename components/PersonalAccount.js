@@ -8,6 +8,8 @@ import { DrawerActions } from '@react-navigation/native';
 import { StatusBar } from 'expo-status-bar';
 import axios from 'axios';
 import { domain_mobile } from '../domain';
+import NetInfo from "@react-native-community/netinfo";
+import ErrorNetwork from '../components/ErrorNetwork';
 
 function PersonalAccount({ navigation }) {
 
@@ -15,6 +17,10 @@ function PersonalAccount({ navigation }) {
   const [phone, setPhone] = useState("");
   const [email, setEmail] = useState("");
   const [disable, setDisable] = useState(false);
+
+  const [networkError, setNetworkError] = useState(false);
+  const [titleError, setTitleError] = useState("Пытаемся установить соединение с сервером");
+  const [repeatFunc, setRepeatFunc] = useState(null);
 
   useLayoutEffect(() => {
     navigation.setOptions({
@@ -38,7 +44,7 @@ function PersonalAccount({ navigation }) {
       const name = await AsyncStorage.getItem("name");
       const phone = await AsyncStorage.getItem("phone");
       const email = await AsyncStorage.getItem("email");
-      setName(name  == null ? "" : name);
+      setName(name == null ? "" : name);
       setPhone(phone == null ? "" : phone);
       setEmail(email == null ? "" : email);
     })();
@@ -46,25 +52,40 @@ function PersonalAccount({ navigation }) {
 
   const Logout = async () => {
     setDisable(true);
-    const token = await AsyncStorage.getItem("token");
-    const pushToken = await AsyncStorage.getItem("pushToken");
-    try {
-      const res = await axios.delete(domain_mobile + '/api/set_push_token', { headers: { "Authorization": "Token " + token }, params: { "push_token": pushToken } })
+    setTitleError("Пытаемся установить соединение с сервером");
+    const state = await NetInfo.fetch();
+    if (!state.isConnected) {
+      setTitleError("Ошибка сети. Проверьте интернет соединение.");
+      setNetworkError(true);
+      setRepeatFunc(Logout);
+    } else {
+      const token = await AsyncStorage.getItem("token");
+      const pushToken = await AsyncStorage.getItem("pushToken");
+      try {
+        const res = await axios.delete(domain_mobile + '/api/set_push_token', { headers: { "Authorization": "Token " + token }, params: { "push_token": pushToken } });
+        await AsyncStorage.multiRemove((await AsyncStorage.getAllKeys()).filter(obj => obj != "first_join_app"));
+        navigation.dispatch(
+          CommonActions.reset({
+            index: 0,
+            routes: [{ name: "Login" }]
+          }));
+      } catch (err) {
+        setTitleError("Ошибка при выходе из аккаунта. Проверьте соединение.");
+        setRepeatFunc(checkUpdate);
+        setNetworkError(true);
+      }
     }
-    catch(err){
-      console.log(err);
-    }
-      await AsyncStorage.multiRemove((await AsyncStorage.getAllKeys()).filter(obj => obj != "first_join_app"));
-    navigation.dispatch(
-      CommonActions.reset({
-        index: 0,
-        routes: [{ name: "Login" }]
-      }));
   }
 
   const DestroyAccount = () => {
     Alert.alert('Информация', 'Заявка на удаление учетной записи отправлена. В течении 24 часов Вы можете отменить данное действие повторной авторизацией')
     Logout();
+  }
+
+  if (networkError) {
+    return (
+      <ErrorNetwork reconnectServer={repeatFunc} title={titleError} />
+    )
   }
 
   return (
@@ -121,7 +142,7 @@ function PersonalAccount({ navigation }) {
 
         <TouchableOpacity activeOpacity={0.8} onPress={Logout} disabled={disable} style={[styles.mt_TouchOpac, { marginTop: '10%' }]} >
           <ImageBackground source={require('../assets/images/button.png')} resizeMode='stretch' style={styles.bg_img} >
-          {disable ? <ActivityIndicator style={{paddingVertical:'5%'}} color="white" /> : <Text style={styles.text_btn} >Выйти</Text>}
+            {disable ? <ActivityIndicator style={{ paddingVertical: '5%' }} color="white" /> : <Text style={styles.text_btn} >Выйти</Text>}
           </ImageBackground>
         </TouchableOpacity>
 
@@ -214,7 +235,7 @@ const styles = StyleSheet.create({
   },
   bg_img: {
     alignItems: 'center',
-    height:52
+    height: 52
   },
   // конец кнопки выйти
 

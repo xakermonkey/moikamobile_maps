@@ -10,7 +10,8 @@ import { Picker } from '@react-native-picker/picker';
 import { validate } from 'react-email-validator';
 import { StatusBar } from 'expo-status-bar';
 import { CommonActions } from '@react-navigation/native';
-
+import NetInfo from "@react-native-community/netinfo";
+import ErrorNetwork from '../components/ErrorNetwork';
 
 function DataScreen({ navigation }) {
 
@@ -21,36 +22,53 @@ function DataScreen({ navigation }) {
     const [bView, setBView] = useState(false);
     const [disable, setDisable] = useState(false);
 
+
+    const [networkError, setNetworkError] = useState(false);
+    const [titleError, setTitleError] = useState("Пытаемся установить соединение с сервером");
+    const [repeatFunc, setRepeatFunc] = useState(null);
+
+    const getDataFromServer = async () => {
+        const first_name = await AsyncStorage.getItem("name");
+        const email = await AsyncStorage.getItem("email");
+        const location = await AsyncStorage.getItem("location");
+        try {
+            setTitleError("Пытаемся установить соединение с сервером");
+            const ret = await axios.get(domain_web + "/get_country");
+            // console.warn(ret);
+            setCountry(ret.data.country);
+            setName(first_name);
+            setEmail(email);
+            if (location != null) {
+                setLocation(location);
+            }
+            setNetworkError(false);
+        } catch {
+            setTitleError("Ошибка при получении данных. Проверьте соединение.");
+            setRepeatFunc(checkInternet);
+            setNetworkError(true);
+        }
+
+    }
+    const checkInternet = async () => {
+        setTitleError("Пытаемся установить соединение с сервером");
+        const state = await NetInfo.fetch();
+        if (!state.isConnected) {
+            setTitleError("Ошибка сети. Проверьте интернет соединение.");
+            setRepeatFunc(checkInternet)
+            setNetworkError(true);
+        } else {
+            setNetworkError(false);
+            getDataFromServer();
+        }
+    }
+
     useLayoutEffect(() => {
         (async () => {
             let { status } = await Location.requestForegroundPermissionsAsync();
             if (status !== 'granted') {
                 console.log("Not location");
             }
-            try {
-                const first_name = await AsyncStorage.getItem("name");
-                const email = await AsyncStorage.getItem("email");
-                const location = await AsyncStorage.getItem("location");
-                // const token = await AsyncStorage.getItem("token");
-                // const res = await axios.get(domain_mobile + "/api/get_user", {
-                //     headers: {
-                //         "Authorization": 'Token ' + token
-                //     }
-                // });
-                const ret = await axios.get(domain_web + "/get_country");
-                // console.warn(ret);
-                setCountry(ret.data.country);
-                setName(first_name);
-                setEmail(email);
-                if (location != null) {
-                    setLocation(location);
-                }
-
-            }
-            catch (err) {
-                console.log(err);
-            }
-
+            await checkInternet();
         })();
     }, [navigation])
 
@@ -60,54 +78,70 @@ function DataScreen({ navigation }) {
         const service = await Location.hasServicesEnabledAsync();
         if (permiss.status == 'granted' && service) {
             let location = await Location.getLastKnownPositionAsync();
-            if (location != null){
+            if (location != null) {
                 let geocod = await Location.reverseGeocodeAsync({ latitude: location.coords.latitude, longitude: location.coords.longitude });
                 setLocation(geocod[0].city)
             }
-        }else{
+        } else {
             Alert.alert("Внимание", "Необходимо включить определение геопозиции");
             return;
         }
-
     }
 
 
     const sendData = async () => {
         setDisable(true);
-        try {
+        setTitleError("Пытаемся установить соединение с сервером");
+        const state = await NetInfo.fetch();
+        if (!state.isConnected) {
+            setTitleError("Ошибка сети. Проверьте интернет соединение.");
+            setRepeatFunc(sendData)
+            setNetworkError(true);
+        } else {
+
             if (validate(email) || email === "") {
                 const token = await AsyncStorage.getItem('token');
-                const res = await axios.post(domain_mobile + "/api/send_user_info",
-                    {
-                        'name': name,
-                        'email': email,
-                        'location': location
-                    },
-                    {
-                        headers: {
-                            "Authorization": "Token " + token
-                        }
-                    })
-                await AsyncStorage.setItem("location", location);
-                await AsyncStorage.setItem("name", name);
-                await AsyncStorage.setItem("email", email);
-                await AsyncStorage.setItem("cars", res.data.cars.toString());
-                navigation.dispatch(
-                    CommonActions.reset({
-                        index: 0,
-                        routes: [{ name: "MainMenu" }]
-                    }));
-                // navigation.navigate('MainMenu');
+                try {
+                    const res = await axios.post(domain_mobile + "/api/send_user_info",
+                        {
+                            'name': name,
+                            'email': email,
+                            'location': location
+                        },
+                        {
+                            headers: {
+                                "Authorization": "Token " + token
+                            }
+                        })
+                    await AsyncStorage.setItem("location", location);
+                    await AsyncStorage.setItem("name", name);
+                    await AsyncStorage.setItem("email", email);
+                    await AsyncStorage.setItem("cars", res.data.cars.toString());
+                    navigation.dispatch(
+                        CommonActions.reset({
+                            index: 0,
+                            routes: [{ name: "MainMenu" }]
+                        }));
+                }
+                catch (err) {
+                    setTitleError("Ошибка при отправке данных. Проверьте интернет соединение.");
+                    setRepeatFunc(sendData)
+                    setNetworkError(true);
+                }
             } else {
                 Alert.alert("Ошибка", "Введен неверный формат почты");
-            setDisable(false);
+                setDisable(false);
             }
 
         }
-        catch (err) {
-            console.log(err);
-            setDisable(false);
-        }
+        setDisable(false);
+
+    }
+
+    if (networkError) {
+        return (
+            <ErrorNetwork reconnectServer={repeatFunc} title={titleError} />
+        )
     }
 
 
@@ -156,16 +190,16 @@ function DataScreen({ navigation }) {
                     <LinearGradient colors={['#7BCFD6', '#FFF737']} start={[1, 0]} style={styles.gradient_btn} >
                         <View style={styles.text_with_background_android}>
                             <Text style={styles.subtext_android}>местоположение</Text>
-                            <View style={{flexDirection: 'row', alignItems: 'center'}}>
-                            <Picker
-                                selectedValue={location}
-                                style={{ color: '#fff', width: '85%' }}
-                                onValueChange={(value, index) => setLocation(value)}>
-                                {country.map(obj => <Picker.Item key={obj} label={obj} value={obj} />)}
-                            </Picker>
-                            <TouchableOpacity onPress={getLocation} activeOpacity={0.8} style={{  }} >
-                                <FontAwesome5 name='location-arrow' size={24} style={{ color: '#7CD0D7' }} />
-                            </TouchableOpacity>
+                            <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                                <Picker
+                                    selectedValue={location}
+                                    style={{ color: '#fff', width: '85%' }}
+                                    onValueChange={(value, index) => setLocation(value)}>
+                                    {country.map(obj => <Picker.Item key={obj} label={obj} value={obj} />)}
+                                </Picker>
+                                <TouchableOpacity onPress={getLocation} activeOpacity={0.8} style={{}} >
+                                    <FontAwesome5 name='location-arrow' size={24} style={{ color: '#7CD0D7' }} />
+                                </TouchableOpacity>
                             </View>
                         </View>
                     </LinearGradient>}
@@ -173,7 +207,7 @@ function DataScreen({ navigation }) {
 
                 <TouchableOpacity activeOpacity={0.8} onPress={sendData} disabled={disable} style={styles.mt} >
                     <ImageBackground source={require('../assets/images/button.png')} resizeMode='stretch' style={styles.bg_img} >
-                    {disable ? <ActivityIndicator style={{paddingVertical:'5%'}} color="white" /> : <Text style={styles.text_btn} >Ок</Text>}
+                        {disable ? <ActivityIndicator style={{ paddingVertical: '5%' }} color="white" /> : <Text style={styles.text_btn} >Ок</Text>}
                     </ImageBackground>
                 </TouchableOpacity>
 
@@ -281,7 +315,7 @@ const styles = StyleSheet.create({
     },
     bg_img: {
         alignItems: 'center',
-        height:52
+        height: 52
     },
     // конец кнопки
 

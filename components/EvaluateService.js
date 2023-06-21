@@ -7,46 +7,67 @@ import { domain_web } from '../domain';
 import { CommonActions } from '@react-navigation/native';
 import { StatusBar } from 'expo-status-bar';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import NetInfo from "@react-native-community/netinfo";
+import ErrorNetwork from '../components/ErrorNetwork';
 
 function EvaluateService({ navigation, route }) {
   const [check4, setCheck4] = useState(false);
 
-  const [rate, setRate] = useState(1);
+  const [rate, setRate] = useState(5);
   const [text, setText] = useState("");
   const [disable, setDisable] = useState(false);
 
 
+  const [networkError, setNetworkError] = useState(false);
+  const [titleError, setTitleError] = useState("Пытаемся установить соединение с сервером");
+  const [repeatFunc, setRepeatFunc] = useState(null);
+
   const addComment = async () => {
-    if (text != "") {
-    setDisable(true);
-    try {
-      const name = await AsyncStorage.getItem("name");
-      const res = await axios.post(domain_web + "/add_comment", {
-        order: route.params.orderId,
-        rate: rate,
-        comment: text,
-        name: name
-      })
-      Alert.alert("Успешно", "Спасибо за Ваш отзыв!");
-      navigation.dispatch(
-        CommonActions.reset({
-          index: 0,
-          routes: [{ name: "PersonalAccountScreen" }, { name: "MyOrders" }]
-        }));
-      } catch (err) {
-        setLoading(false);
-          Alert.alert("Ошибка", "Что то пошло не так");
-          console.log(err);
-        }
+    setTitleError("Пытаемся установить соединение с сервером");
+    const state = await NetInfo.fetch();
+    if (!state.isConnected) {
+      setTitleError("Ошибка сети. Проверьте интернет соединение.");
+      setNetworkError(true);
+      setRepeatFunc(addComment);
     } else {
-    setDisable(false);
-      Alert.alert("Уведомление", "Пожалуйста, оставьте комментарий. Нам важно Ваше мнение");
+      if (text != "") {
+        setDisable(true);
+        try {
+          const name = await AsyncStorage.getItem("name");
+          const res = await axios.post(domain_web + "/add_comment", {
+            order: route.params.orderId,
+            rate: rate,
+            comment: text,
+            name: name
+          })
+          Alert.alert("Успешно", "Спасибо за Ваш отзыв!");
+          setNetworkError(false);
+          navigation.dispatch(
+            CommonActions.reset({
+              index: 0,
+              routes: [{ name: "PersonalAccountScreen" }, { name: "MyOrders" }]
+            }));
+        } catch (err) {
+          setTitleError("Ошибка при отправке комментария. Проверьте соединение.");
+          setRepeatFunc(addComment);
+          setNetworkError(true);
+        }
+      } else {
+        setDisable(false);
+        Alert.alert("Уведомление", "Пожалуйста, оставьте комментарий. Нам важно Ваше мнение");
+      }
     }
+  }
+
+  if (networkError) {
+    return (
+      <ErrorNetwork reconnectServer={repeatFunc} title={titleError} />
+    )
   }
 
   return (
     <View style={styles.container}>
-      <StatusBar/>
+      <StatusBar />
       <Image blurRadius={91} style={[StyleSheet.absoluteFill, styles.image]} source={require('../assets/images/blur_background.png')} resizeMode='cover' />
       {/* <BlurView intensity={100} style={styles.blurContainer}> */}
       <View style={styles.blurContainer}>
@@ -54,7 +75,7 @@ function EvaluateService({ navigation, route }) {
           <TouchableOpacity style={{ flex: 1 }} onPress={() => navigation.navigate('OrderDetails')} activeOpacity={0.7} >
             <Ionicons name='close' size={28} color={'#7CD0D7'} />
           </TouchableOpacity>
-          <View style={{ alignItems: 'center', flex:9 }}>
+          <View style={{ alignItems: 'center', flex: 9 }}>
             <Text style={styles.bold_text}>Насколько вы довольны{'\n'}качеством обслуживания?</Text>
           </View>
           <View style={{ flex: 1 }}></View>
@@ -82,7 +103,7 @@ function EvaluateService({ navigation, route }) {
 
         <TouchableOpacity activeOpacity={0.8} onPress={addComment} style={{ marginTop: '5%' }} >
           <ImageBackground source={require('../assets/images/button.png')} resizeMode='stretch' style={styles.bg_img} >
-          {disable ? <ActivityIndicator style={{paddingVertical:'5%'}} color="white" /> : <Text style={styles.text_btn} >Ок</Text>}
+            {disable ? <ActivityIndicator style={{ paddingVertical: '5%' }} color="white" /> : <Text style={styles.text_btn} >Ок</Text>}
           </ImageBackground>
         </TouchableOpacity>
         {/* </BlurView> */}
@@ -118,7 +139,7 @@ const styles = StyleSheet.create({
     color: '#fff',
     fontFamily: 'Raleway_700Bold',
     textTransform: 'uppercase',
-    textAlign:'center'
+    textAlign: 'center'
   },
   gradient_background: {
     marginTop: '5%',
@@ -149,7 +170,7 @@ const styles = StyleSheet.create({
   },
   bg_img: {
     alignItems: 'center',
-    height:52
+    height: 52
   },
   // конец кнопки ок
 });

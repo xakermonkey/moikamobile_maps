@@ -9,7 +9,8 @@ import Carousel, { Pagination } from 'react-native-snap-carousel';
 import { StatusBar } from 'expo-status-bar';
 import FastImage from 'react-native-fast-image';
 import { Skeleton } from 'react-native-skeleton-loaders'
-// import { log } from 'react-native-reanimated';
+import NetInfo from "@react-native-community/netinfo";
+import ErrorNetwork from '../components/ErrorNetwork';
 
 function PointCarWash({ navigation, route }) {
 
@@ -18,65 +19,13 @@ function PointCarWash({ navigation, route }) {
   const [selectImage, setSelectImage] = useState(0);
   const [selectFilt, setSelectFilt] = useState(0);
   const [currentIndex, setCurrentIndex] = useState([]);
-  // const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [washer, setWasher] = useState(null);
   const [loading, setLoading] = useState(true);
-  // const [makeLoad, setMakeLoad] = useState(false);
+  const [networkError, setNetworkError] = useState(false);
+  const [titleError, setTitleError] = useState("Пытаемся установить соединение с сервером");
+  const [repeatFunc, setRepeatFunc] = useState(null);
 
   const carouselRef = useRef()
-
-  // const changeHeader = (bool) => {
-  //   if (bool) {
-  //     navigation.setOptions({
-  //       headerRight: () => (
-  //         <View style={{ right: Platform.OS == 'ios' ? 0 : 0 }}>
-  //           <ActivityIndicator />
-  //         </View>
-  //       )
-  //     })
-  //   } else {
-  //     navigation.setOptions({
-  //       headerRight: () => (
-  //         <TouchableOpacity style={{ right: 10 }} onPress={navigation.openDrawer()} activeOpacity={0.7}>
-  //           <Ionicons name='menu-sharp' size={28} color={'#7CD0D7'} />
-  //         </TouchableOpacity>
-  //         // <TouchableOpacity style={{ right: 0 }} onPress={checkAccount} activeOpacity={0.7}>
-  //         //   <Ionicons name='cart-outline' size={28} color={'#7CD0D7'} />
-  //         // </TouchableOpacity>
-  //       )
-  //     })
-  //   }
-  // }
-
-  // const checkAccount = async () => {
-  //   // changeHeader(true);
-  //   const token = await AsyncStorage.getItem("token");
-  //   if (token != null) {
-  //     const washer = await AsyncStorage.getItem("washer")
-  //     const res = await axios.get(domain_web + "/" + washer + "/get_work_time");
-  //     if (Object.keys(res.data).length != 0) {
-  //       // navigation.navigate('Modal', { screen: 'GeneralPriceList', presentation: 'modal' })
-  //       // navigation.navigate('Catalog');
-  //       navigation.navigate('MakingOrderModal');
-  //     } else {
-  //       // changeHeader(false);
-  //       Alert.alert("Ошибка", "В данную автомойку нельзя записаться");
-  //     }
-  //   } else {
-  //     // changeHeader(false);
-  //     Alert.alert('Внимаение', 'Вы не авторизованы', [{ 'text': 'Ок' }, {
-  //       'text': 'Войти', onPress: async () => {
-  //         await AsyncStorage.multiRemove((await AsyncStorage.getAllKeys()).filter(obj => obj != "first_join_app"));
-  //         navigation.dispatch(
-  //           CommonActions.reset({
-  //             index: 0,
-  //             routes: [{ name: "Login" }]
-  //           }));
-  //       }
-  //     }])
-  //   }
-  // }
-
 
   const goToCatalog = () => {
     navigation.navigate("Catalog");
@@ -86,20 +35,47 @@ function PointCarWash({ navigation, route }) {
   const nav = () => {
     if (route.params.from == "map") {
       navigation.goBack();
-      // // console.log("from point:", route.params.loc);
-      // if (Platform.OS == 'android') {
-      //   navigation.navigate('Map', { loc: route.params.loc });
-      //   // navigation.dispatch(
-      //   //   CommonActions.reset({
-      //   //     index: 0,
-      //   //     routes: [{ name: "Map", params: { loc: route.params.loc } }]
-      //   //   }));
-      // } else {
-      //   navigation.navigate('Map', { loc: route.params.loc });
-      // }
-
     } else {
       goToCatalog();
+    }
+  }
+
+  const getDataFromServer = async () => {
+    try {
+      setTitleError("Пытаемся установить соединение с сервером");
+      const id = await AsyncStorage.getItem("washer")
+      const res = await axios.get(domain_web + `/get_washer/${id}`);
+      setWasher(res.data.washer);
+      setFilt(Object.keys(res.data.photo));
+      setCurrentIndex(new Array(Object.keys(res.data.photo).length).fill(0));
+      setPhoto(res.data.photo);
+      navigation.setOptions({
+        headerTitle: () => (
+          <Text numberOfLines={1} style={{
+            textTransform: 'uppercase',
+            fontSize: 20,
+            fontFamily: 'Raleway_700Bold', color: '#fff'
+          }}>{res.data.washer.name_washer}</Text>
+        ),
+      })
+      setNetworkError(false);
+    } catch {
+      setTitleError("Ошибка при получении данных. Проверьте соединение.");
+      setRepeatFunc(checkInternet);
+      setNetworkError(true);
+    }
+
+  }
+  const checkInternet = async () => {
+    setTitleError("Пытаемся установить соединение с сервером");
+    const state = await NetInfo.fetch();
+    if (!state.isConnected) {
+      setTitleError("Ошибка сети. Проверьте интернет соединение.");
+      setRepeatFunc(checkInternet);
+      setNetworkError(true);
+    } else {
+      setNetworkError(false);
+      getDataFromServer();
     }
   }
 
@@ -123,11 +99,11 @@ function PointCarWash({ navigation, route }) {
         fontFamily: 'Raleway_700Bold',
       },
       headerTitle: () => (
-            <Text numberOfLines={1} style={{
-              textTransform: 'uppercase',
-              fontSize: 20,
-              fontFamily: 'Raleway_700Bold', color: '#fff'
-            }}>ЗАГРУЗКА...</Text>
+        <Text numberOfLines={1} style={{
+          textTransform: 'uppercase',
+          fontSize: 20,
+          fontFamily: 'Raleway_700Bold', color: '#fff'
+        }}>ЗАГРУЗКА...</Text>
       ),
 
       headerLeft: () => (
@@ -139,29 +115,23 @@ function PointCarWash({ navigation, route }) {
         <TouchableOpacity style={{ right: 10 }} onPress={() => navigation.openDrawer()} activeOpacity={0.7}>
           <Ionicons name='menu-sharp' size={28} color={'#7CD0D7'} />
         </TouchableOpacity>
-          // <TouchableOpacity style={{ right: Platform.OS == 'ios' ? 0 : 0 }} onPress={checkAccount} activeOpacity={0.7}>
-          //   <Ionicons name='cart-outline' size={28} color={'#7CD0D7'} />
-          // </TouchableOpacity>
+        // <TouchableOpacity style={{ right: Platform.OS == 'ios' ? 0 : 0 }} onPress={checkAccount} activeOpacity={0.7}>
+        //   <Ionicons name='cart-outline' size={28} color={'#7CD0D7'} />
+        // </TouchableOpacity>
       )
     });
     (async () => {
-      const id = await AsyncStorage.getItem("washer")
-      const res = await axios.get(domain_web + `/get_washer/${id}`);
-      setWasher(res.data.washer);
-      setFilt(Object.keys(res.data.photo));
-      setCurrentIndex(new Array(Object.keys(res.data.photo).length).fill(0));
-      setPhoto(res.data.photo);
-      navigation.setOptions({
-        headerTitle: () => (
-              <Text numberOfLines={1} style={{
-                textTransform: 'uppercase',
-              fontSize: 20,
-                fontFamily: 'Raleway_700Bold', color: '#fff'
-              }}>{res.data.washer.name_washer}</Text>
-        ),
-      })
+      await checkInternet();
     })();
   }, []));
+
+
+
+  if (networkError) {
+    return (
+      <ErrorNetwork reconnectServer={repeatFunc} title={titleError} />
+    )
+  }
 
   if (photo === null) {
     return (

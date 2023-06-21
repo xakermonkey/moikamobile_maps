@@ -8,7 +8,8 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import MaskInput from 'react-native-mask-input';
 import { Picker } from '@react-native-picker/picker';
 import { StatusBar } from 'expo-status-bar';
-import { log } from 'react-native-reanimated';
+import NetInfo from "@react-native-community/netinfo";
+import ErrorNetwork from '../components/ErrorNetwork';
 
 function LoginScreen({ navigation }) {
 
@@ -22,24 +23,17 @@ function LoginScreen({ navigation }) {
     const [bReg, setBReg] = useState(false);
 
     const [mask, setMask] = useState(['(', /\d/, /\d/, /\d/, ')', ' ', /\d/, /\d/, /\d/, '-', /\d/, /\d/, /\d/, /\d/]);
-    const [showElement, setShowElement] = useState(false);
 
 
-    useLayoutEffect(() => {
-        (async () => {
-            // await AsyncStorage.removeItem("token");
-            // await AsyncStorage.removeItem("first_join_app");
+    const [networkError, setNetworkError] = useState(false);
+    const [titleError, setTitleError] = useState("Пытаемся установить соединение с сервером");
+    const [repeatFunc, setRepeatFunc] = useState(null);
+
+
+    const getDataFromServer = async () => {
+        try {
+            setTitleError("Пытаемся установить соединение с сервером");
             const token = await AsyncStorage.getItem("token");
-            // let lastStock = await AsyncStorage.getAllKeys()
-            // lastStock = lastStock.filter(key => key.startsWith("stock_"))
-            // let lastServise = await AsyncStorage.getAllKeys()
-            // lastServise = lastServise.filter(key => key.startsWith("servise_"))
-            // for (let i = 0; i<lastStock.length; i++){
-            //     await AsyncStorage.removeItem(lastStock[i]);
-            // }
-            // for (let i = 0; i<lastServise.length; i++){
-            //     await AsyncStorage.removeItem(lastServise[i]);
-            // }
             if (token != null) {
                 navigation.replace("MainMenu");
                 return;
@@ -53,57 +47,63 @@ function LoginScreen({ navigation }) {
             if (first_join_app == null) {
                 navigation.navigate("how_it_works");
             }
-        })()
+            setNetworkError(false);
+        } catch {
+            setTitleError("Ошибка при отправке данных. Проверьте соединение.");
+            setRepeatFunc(checkInternet);
+            setNetworkError(true);
+        }
+
+    }
+
+
+    const checkInternet = async () =>{
+        setTitleError("Пытаемся установить соединение с сервером");
+        const state = await NetInfo.fetch();
+        if (!state.isConnected) {
+            setTitleError("Ошибка сети. Проверьте интернет соединение.");
+            setNetworkError(true);
+            setRepeatFunc(checkInternet);
+        }else{
+            setNetworkError(false);
+            getDataFromServer();
+        }
+    }
+
+    useLayoutEffect(() => {
+        (async () => {
+            const state = await NetInfo.fetch();
+            if (!state.isConnected) {
+                setTitleError("Ошибка сети. Проверьте интернет соединение.");
+                setNetworkError(true);
+                setRepeatFunc(checkInternet);
+            }
+            await getDataFromServer();
+        })();
 
     }, [navigation])
 
-    // useEffect(() => {
-    //     (async () => {
-    //         await SplashScreen.hideAsync();
-    //         const first_join_app = await AsyncStorage.getItem("first_join_app");
-    //         console.warn('dd')
-    //         if (first_join_app == null) {
-    //             navigation.navigate("how_it_works");
-    //         }
-    //     })
-    // }, [navigation])
 
 
     const setCode = async () => {
         setDisable(true);
-        console.log("clock");
         if (num.length < 14) {
             Alert.alert('Внимание', 'Неверный формат номера телефона');
             setDisable(false);
         } else {
-            const res = await axios.post(domain_mobile + "/api/login", { "number": regions[selectReg].code + num });
-            navigation.navigate('VerificationCode', { "number": regions[selectReg].code + num });
-            setDisable(false);
+            try {
+                const res = await axios.post(domain_mobile + "/api/login", { "number": regions[selectReg].code + num });
+                setNetworkError(false);
+                navigation.navigate('VerificationCode', { "number": regions[selectReg].code + num });
+                setDisable(false);
+            } catch {
+                setTitleError("Ошибка при отправке данных. Проверьте соединение.");
+                setRepeatFunc(setCode);
+                setNetworkError(true);
+            }
+
         }
     }
-
-    const reconnectServer = async () => {
-        const token = await AsyncStorage.getItem("token");
-        if (token != null) {
-            navigation.replace("MainMenu");
-            return;
-        }
-        const res = await axios.get(domain_web + "/get_code_region");
-        setRegions(res.data);
-        setSelectReg(0)
-        const first_join_app = await AsyncStorage.getItem("first_join_app");
-        if (first_join_app == null) {
-            navigation.navigate("how_it_works");
-        }
-    }
-
-    useEffect(() => {
-        const timeout = setTimeout(() => {
-          setShowElement(true);
-        }, 5000);
-    
-        return () => clearTimeout(timeout); // Очистка таймера при размонтировании компонента
-      }, []);
 
 
     const noAuthNavigate = async () => {
@@ -111,22 +111,9 @@ function LoginScreen({ navigation }) {
         navigation.navigate('MainMenu')
     }
 
-    if (regions == null) {
+    if (regions == null || networkError) {
         return (
-            <View style={styles.container}>
-                <StatusBar />
-                <View style={{ justifyContent: 'center', alignItems: 'center', flex: 1, padding: '5%' }}>
-                    <Image source={require('../assets/images/logo_succes.png')} />
-                    <Text style={[styles.bold_text, { textAlign: 'center' }]}>Пытаемся установить соединение с сервером</Text>
-                <View style={{width:'100%', marginTop: '20%'}}>
-                {showElement && <TouchableOpacity activeOpacity={0.8} onPress={reconnectServer} disabled={disable} style={{}} >
-                    <ImageBackground source={require('../assets/images/button.png')} resizeMode='stretch' style={styles.bg_img} >
-                        <Text style={styles.text_btn} >Повторить</Text>
-                    </ImageBackground>
-                </TouchableOpacity>}
-                </View>
-                </View>
-            </View>
+            <ErrorNetwork reconnectServer={repeatFunc} title={titleError} />
         )
     }
 
@@ -192,7 +179,7 @@ function LoginScreen({ navigation }) {
 
                 <TouchableOpacity activeOpacity={0.8} onPress={setCode} disabled={disable} style={styles.mt} >
                     <ImageBackground source={require('../assets/images/button.png')} resizeMode='stretch' style={styles.bg_img} >
-                        {disable ? <ActivityIndicator style={{paddingVertical:'5%'}} color="white" /> : <Text style={styles.text_btn} >Ок</Text>}
+                        {disable ? <ActivityIndicator style={{ paddingVertical: '5%' }} color="white" /> : <Text style={styles.text_btn} >Ок</Text>}
                     </ImageBackground>
                 </TouchableOpacity>
 
@@ -362,7 +349,7 @@ const styles = StyleSheet.create({
     },
     bg_img: {
         alignItems: 'center',
-        height:52
+        height: 52
     },
     // конец кнопки
 

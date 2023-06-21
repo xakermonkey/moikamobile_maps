@@ -7,7 +7,8 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios from 'axios';
 import { domain_web } from '../domain';
 import { StatusBar } from 'expo-status-bar';
-
+import NetInfo from "@react-native-community/netinfo";
+import ErrorNetwork from '../components/ErrorNetwork';
 function PriceListFor({ navigation, route }) {
 
   const [body, setBody] = useState("");
@@ -18,23 +19,52 @@ function PriceListFor({ navigation, route }) {
   const [dcPrice, setDcPrice] = useState([]);
   const [total, setTotal] = useState(0);
 
-  useLayoutEffect(() => {
-    (async () => {
-      setBody(await AsyncStorage.getItem("car_name"));
-      const washer = await AsyncStorage.getItem("washer");
-      const car = await AsyncStorage.getItem("car");
+  const [networkError, setNetworkError] = useState(false);
+  const [titleError, setTitleError] = useState("Пытаемся установить соединение с сервером");
+  const [repeatFunc, setRepeatFunc] = useState(null);
+
+  const getDataFromServer = async () => {
+    setBody(await AsyncStorage.getItem("car_name"));
+    const washer = await AsyncStorage.getItem("washer");
+    const car = await AsyncStorage.getItem("car");
+    try {
+      setTitleError("Пытаемся установить соединение с сервером");
       const st = await axios.get(domain_web + '/get_stock');
       setStock(st.data);
       const res = await axios.get(domain_web + `/${washer}/get_servise/${car}`);
       setServise(res.data);
       const keys = Object.keys(res.data);
-      for (let i=0; i<keys.length; i++){
-        for (let j=0; j<res.data[keys[i]].length; j++){
-          if (res.data[keys[i]][j].price == "Д/ц"){
+      for (let i = 0; i < keys.length; i++) {
+        for (let j = 0; j < res.data[keys[i]].length; j++) {
+          if (res.data[keys[i]][j].price == "Д/ц") {
             setDcPrice([...dcPrice, res.data[keys[i]][j].id])
           }
         }
       }
+      setNetworkError(false);
+    } catch {
+      setTitleError("Ошибка при получении данных. Проверьте соединение.");
+      setRepeatFunc(checkInternet);
+      setNetworkError(true);
+    }
+
+  }
+  const checkInternet = async () => {
+    setTitleError("Пытаемся установить соединение с сервером");
+    const state = await NetInfo.fetch();
+    if (!state.isConnected) {
+      setTitleError("Ошибка сети. Проверьте интернет соединение.");
+      setRepeatFunc(checkInternet)
+      setNetworkError(true);
+    } else {
+      setNetworkError(false);
+      getDataFromServer();
+    }
+  }
+
+  useLayoutEffect(() => {
+    (async () => {
+      await checkInternet();
     })();
   }, [navigation])
 
@@ -42,12 +72,12 @@ function PriceListFor({ navigation, route }) {
   const clickServise = (obj) => {
     if (selectServise.indexOf(obj.id) == -1) {
       setSelectServise([...selectServise, obj.id]);
-      if (obj.price != "Д/ц"){
+      if (obj.price != "Д/ц") {
         setTotal(total + parseInt(obj.price))
       }
     } else {
       setSelectServise(selectServise.filter(item => item != obj.id));
-      if (obj.price != "Д/ц"){
+      if (obj.price != "Д/ц") {
         setTotal(total - parseInt(obj.price))
       }
     }
@@ -68,7 +98,7 @@ function PriceListFor({ navigation, route }) {
   const NextStep = async () => {
     if (selectServise.length != 0) {
       await AsyncStorage.setItem("uncache", "true");
-      if (selectStock.length != 0){
+      if (selectStock.length != 0) {
         await AsyncStorage.setItem("uncache", "false");
         for (let i = 0; i < selectStock.length; i++) {
           await AsyncStorage.setItem(`stock_${i}`, selectStock[i].toString());
@@ -76,7 +106,7 @@ function PriceListFor({ navigation, route }) {
       }
       for (let i = 0; i < selectServise.length; i++) {
         await AsyncStorage.setItem(`servise_${i}`, selectServise[i].toString());
-        if(dcPrice.indexOf(selectServise[i]) != -1){
+        if (dcPrice.indexOf(selectServise[i]) != -1) {
           await AsyncStorage.setItem("uncache", "false");
         }
       }
@@ -98,7 +128,7 @@ function PriceListFor({ navigation, route }) {
               <TouchableOpacity activeOpacity={0.7} onPress={() => clickStock(obj.id)} style={styles.margin_TouchOpac}>
                 <View style={styles.row}>
                   <Text style={styles.service_text}>{obj.text}</Text>
-                  {selectStock.indexOf(obj.id) != -1 && <FontAwesome5 name='check' size={28} color={'#7CD0D7'} style={{height:28}} />}
+                  {selectStock.indexOf(obj.id) != -1 && <FontAwesome5 name='check' size={28} color={'#7CD0D7'} style={{ height: 28 }} />}
                 </View>
               </TouchableOpacity>
               <LinearGradient colors={['#00266F', '#7BCFD6']} start={[1, 0]} style={styles.gradient_line} />
@@ -156,19 +186,24 @@ function PriceListFor({ navigation, route }) {
     })
     )
   }
+  if (networkError) {
+    return (
+      <ErrorNetwork reconnectServer={repeatFunc} title={titleError} />
+    )
+  }
 
   return (
     <View style={styles.container}>
-      <StatusBar/>
+      <StatusBar />
       <Image blurRadius={91} style={[StyleSheet.absoluteFill, styles.image]} source={require('../assets/images/blur_background.png')} resizeMode='cover' />
       <View style={styles.blurContainer}>
 
         <View style={[styles.row, { justifyContent: 'center', marginTop: '10%', width: "100%" }]}>
-          <TouchableOpacity style={{ flex:1 }} onPress={() => navigation.navigate('GeneralPriceList')} activeOpacity={0.7}  >
+          <TouchableOpacity style={{ flex: 1 }} onPress={() => navigation.navigate('GeneralPriceList')} activeOpacity={0.7}  >
             <Ionicons name='chevron-back' size={32} color={'#7CD0D7'} />
           </TouchableOpacity>
-          <Text style={[styles.bold_text, {flex:5}]}>Прайс-лист "{body}"</Text>
-          <View style={{flex:1}}></View>
+          <Text style={[styles.bold_text, { flex: 5 }]}>Прайс-лист "{body}"</Text>
+          <View style={{ flex: 1 }}></View>
         </View>
 
         <ScrollView showsVerticalScrollIndicator={false}>
@@ -259,7 +294,7 @@ const styles = StyleSheet.create({
 
   margin_TouchOpac: {
     marginRight: '5%', marginTop: '5%',
-    height:28
+    height: 28
   },
 
   text_btn: {

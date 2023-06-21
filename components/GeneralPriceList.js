@@ -7,26 +7,52 @@ import axios from 'axios';
 import { domain_mobile, domain_web } from '../domain';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { StatusBar } from 'expo-status-bar';
-
+import NetInfo from "@react-native-community/netinfo";
+import ErrorNetwork from '../components/ErrorNetwork';
 
 function GeneralPriceList({ navigation }) {
 
   const [cars, setCars] = useState([]);
   const [myCars, setMyCars] = useState([]);
 
+  const [networkError, setNetworkError] = useState(false);
+  const [titleError, setTitleError] = useState("Пытаемся установить соединение с сервером");
+  const [repeatFunc, setRepeatFunc] = useState(null);
+
+  const getDataFromServer = async () => {
+    try {
+      setTitleError("Пытаемся установить соединение с сервером");
+      const washer = await AsyncStorage.getItem("washer")
+      const res = await axios.get(domain_web + `/get_body/${washer}`);
+      setCars(res.data);
+      const token = await AsyncStorage.getItem("token");
+      const ret = await axios.get(domain_mobile + "/api/get_cars", { headers: { "Authorization": "Token " + token } });
+      setMyCars(ret.data.map(obj => obj.body))
+      setNetworkError(false);
+    } catch {
+      setTitleError("Ошибка при получении данных. Проверьте соединение.");
+      setRepeatFunc(checkInternet);
+      setNetworkError(true);
+      return;
+    }
+  }
+
+  const checkInternet = async () => {
+    setTitleError("Пытаемся установить соединение с сервером");
+    const state = await NetInfo.fetch();
+    if (!state.isConnected) {
+      setTitleError("Ошибка сети. Проверьте интернет соединение.");
+      setNetworkError(true);
+      setRepeatFunc(checkInternet);
+    } else {
+      setNetworkError(false);
+      getDataFromServer();
+    }
+  }
+
   useLayoutEffect(() => {
     (async () => {
-      try {
-        const washer = await AsyncStorage.getItem("washer")
-        const res = await axios.get(domain_web + `/get_body/${washer}`);
-        setCars(res.data);
-        const token = await AsyncStorage.getItem("token");
-        const ret = await axios.get(domain_mobile + "/api/get_cars", {headers: {"Authorization": "Token " + token}});
-        setMyCars(ret.data.map(obj => obj.body))
-      }
-      catch (err) {
-        console.log(err);
-      }
+      await checkInternet();
     })();
   }, [navigation]);
 
@@ -37,18 +63,25 @@ function GeneralPriceList({ navigation }) {
     navigation.navigate('PriceListFor');
   }
 
+  if (networkError) {
+    return (
+      <ErrorNetwork reconnectServer={repeatFunc} title={titleError} />
+    )
+  }
+
+
   return (
     <View style={styles.container}>
-      <StatusBar/>
+      <StatusBar />
       <Image blurRadius={91} style={[StyleSheet.absoluteFill, styles.image]} source={require('../assets/images/blur_background.png')} resizeMode='cover' />
       {/* <BlurView intensity={100} style={styles.blurContainer}> */}
       <View style={styles.blurContainer}>
         <View style={[styles.row, { justifyContent: 'center', marginTop: '10%', width: "100%" }]}>
-          <TouchableOpacity style={{ flex:1 }} onPress={() => navigation.navigate('PointCarWash')} activeOpacity={0.7} >
+          <TouchableOpacity style={{ flex: 1 }} onPress={() => navigation.navigate('PointCarWash')} activeOpacity={0.7} >
             <Ionicons name='close' size={28} color={'#7CD0D7'} />
           </TouchableOpacity>
-          <Text style={[styles.bold_text, {flex:4}]}>ТИП КУЗОВА</Text>
-          <View style={{ flex:1 }}></View>
+          <Text style={[styles.bold_text, { flex: 4 }]}>ТИП КУЗОВА</Text>
+          <View style={{ flex: 1 }}></View>
         </View>
 
         <ScrollView style={styles.mt}>

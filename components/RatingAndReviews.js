@@ -9,13 +9,51 @@ import { domain_web } from '../domain';
 import { FlatList } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import { Skeleton, SkeletonGroup } from 'react-native-skeleton-loaders'
-
+import NetInfo from "@react-native-community/netinfo";
+import ErrorNetwork from '../components/ErrorNetwork';
 
 function RatingAndReviews({ navigation }) {
 
   const [comments, setComments] = useState([]);
   const [loading, setLoading] = useState(true)
   const [rate, setRate] = useState(1);
+
+
+  const [networkError, setNetworkError] = useState(false);
+  const [titleError, setTitleError] = useState("Пытаемся установить соединение с сервером");
+  const [repeatFunc, setRepeatFunc] = useState(null);
+
+  const getDataFromServer = async () => {
+    const washer = await AsyncStorage.getItem("washer")
+    try {
+      setTitleError("Пытаемся установить соединение с сервером");
+      const res = await axios.get(domain_web + "/get_washes_rating", {
+        params: {
+          washes: washer
+        }
+      });
+      setComments(res.data);
+      setNetworkError(false);
+    } catch {
+      setTitleError("Ошибка при получении отзывов. Проверьте соединение.");
+      setRepeatFunc(checkInternet);
+      setNetworkError(true);
+    }
+    setLoading(false);
+  }
+  const checkInternet = async () => {
+    setLoading(true);
+    setTitleError("Пытаемся установить соединение с сервером");
+    const state = await NetInfo.fetch();
+    if (!state.isConnected) {
+      setTitleError("Ошибка сети. Проверьте интернет соединение.");
+      setRepeatFunc(checkInternet)
+      setNetworkError(true);
+    } else {
+      setNetworkError(false);
+      getDataFromServer();
+    }
+  }
 
   useLayoutEffect(() => {
     navigation.setOptions({
@@ -35,18 +73,8 @@ function RatingAndReviews({ navigation }) {
         ),
     });
     (async () => {
-      const washer = await AsyncStorage.getItem("washer")
-      const res = await axios.get(domain_web + "/get_washes_rating", {
-        params: {
-          washes: washer
-        }
-      });
-      console.log(res.data);
-      setComments(res.data);
-      setLoading(false);
+      await checkInternet();
     })();
-      setLoading(false);
-
   }, [navigation])
 
   const EmptyComponent = () => {
@@ -84,6 +112,12 @@ function RatingAndReviews({ navigation }) {
         </View>
       </LinearGradient>
       )
+  }
+
+  if (networkError){
+    return(
+    <ErrorNetwork reconnectServer={repeatFunc} title={titleError} />
+    )
   }
 
   if (loading){

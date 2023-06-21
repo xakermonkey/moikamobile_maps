@@ -14,9 +14,6 @@ function SelectPaymentMethod({ navigation }) {
   const [uncache, setUncache] = useState(true);
   const [token, setToken] = useState(null);
 
-  
-
-
   useLayoutEffect(() => {
     (async () => {
       const token = await AsyncStorage.getItem("token");

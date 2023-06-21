@@ -9,36 +9,22 @@ import { domain_web } from '../domain';
 import { FlatList } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import { Skeleton, SkeletonGroup } from 'react-native-skeleton-loaders'
-
+import NetInfo from "@react-native-community/netinfo";
+import ErrorNetwork from '../components/ErrorNetwork';
 
 function MyOrders({ navigation }) {
 
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true)
 
-  useLayoutEffect(() => {
-    navigation.setOptions({
-      title: 'МОИ ЗАКАЗЫ',
-        headerShadowVisible: false,
-        headerStyle: {
-          backgroundColor: '#6E7476',
-        },
-        headerTitleStyle: {
-          color: '#fff',
-          textTransform: 'uppercase',
-        },
-        headerLeft: () => (
-          <TouchableOpacity style={{left: Platform.OS == 'ios' ? 0 : 0}} onPress={() => navigation.navigate('PersonalAccountScreen')} activeOpacity={0.7}>
-            <Ionicons name='chevron-back' size={32} color={'#7CD0D7'} />
-            </TouchableOpacity>
-        ),
-        headerRight: () => (
-          <TouchableOpacity style={{right: Platform.OS == 'ios' ? 0 : 0}} onPress={() => navigation.navigate('Catalog')} activeOpacity={0.7}>
-            <AntDesign name='pluscircleo' size={28} color={'#7CD0D7'} />
-            </TouchableOpacity>
-        ),
-    });
-    (async () => {
+  const [networkError, setNetworkError] = useState(false);
+  const [titleError, setTitleError] = useState("Пытаемся установить соединение с сервером");
+  const [repeatFunc, setRepeatFunc] = useState(null);
+
+
+  const getDataFromServer = async () => {
+    try {
+      setTitleError("Пытаемся установить соединение с сервером");
       const phone = await AsyncStorage.getItem("phone");
       const res = await axios.get(domain_web + "/get_orders", {
         params: {
@@ -48,20 +34,67 @@ function MyOrders({ navigation }) {
       console.log(res.data);
       setOrders(res.data);
       setLoading(false);
+      setNetworkError(false);
+    } catch {
+      setTitleError("Ошибка при получении данных. Проверьте соединение.");
+      setRepeatFunc(checkInternet);
+      setNetworkError(true);
+      return;
+    }
+
+  }
+
+  const checkInternet = async () => {
+    setTitleError("Пытаемся установить соединение с сервером");
+    const state = await NetInfo.fetch();
+    if (!state.isConnected) {
+      setTitleError("Ошибка сети. Проверьте интернет соединение.");
+      setNetworkError(true);
+      setRepeatFunc(checkInternet);
+    } else {
+      setNetworkError(false);
+      getDataFromServer();
+    }
+  }
+
+  useLayoutEffect(() => {
+    navigation.setOptions({
+      title: 'МОИ ЗАКАЗЫ',
+      headerShadowVisible: false,
+      headerStyle: {
+        backgroundColor: '#6E7476',
+      },
+      headerTitleStyle: {
+        color: '#fff',
+        textTransform: 'uppercase',
+      },
+      headerLeft: () => (
+        <TouchableOpacity style={{ left: Platform.OS == 'ios' ? 0 : 0 }} onPress={() => navigation.navigate('PersonalAccountScreen')} activeOpacity={0.7}>
+          <Ionicons name='chevron-back' size={32} color={'#7CD0D7'} />
+        </TouchableOpacity>
+      ),
+      headerRight: () => (
+        <TouchableOpacity style={{ right: Platform.OS == 'ios' ? 0 : 0 }} onPress={() => navigation.navigate('Catalog')} activeOpacity={0.7}>
+          <AntDesign name='pluscircleo' size={28} color={'#7CD0D7'} />
+        </TouchableOpacity>
+      ),
+    });
+    (async () => {
+      await checkInternet();
     })();
   }, [navigation])
 
   const EmptyComponent = () => {
     return (
-      <View style={{ marginTop:'10%' }}>
-        <Text style={{ textAlign: 'center', textTransform:'uppercase', color:'#fff', fontFamily:'Montserrat_700Bold' }}>У вас еще нет заказов</Text>
+      <View style={{ marginTop: '10%' }}>
+        <Text style={{ textAlign: 'center', textTransform: 'uppercase', color: '#fff', fontFamily: 'Montserrat_700Bold' }}>У вас еще нет заказов</Text>
       </View>
     )
   }
 
 
   const orderRender = ({ item }) => {
-    return (<TouchableOpacity onPress={() => navigation.navigate('OrderDetails', {orderId: item.id})} activeOpacity={0.7} style={styles.mb_TouchOpac}>
+    return (<TouchableOpacity onPress={() => navigation.navigate('OrderDetails', { orderId: item.id })} activeOpacity={0.7} style={styles.mb_TouchOpac}>
       <LinearGradient
         colors={['#01010199', '#35343499']}
         start={[0, 1]}
@@ -95,25 +128,31 @@ function MyOrders({ navigation }) {
     </TouchableOpacity>)
   }
 
-  if (loading){
-    return(<View style={styles.container}>
+  if (networkError) {
+    return (
+      <ErrorNetwork reconnectServer={repeatFunc} title={titleError} />
+    )
+  }
+
+  if (loading) {
+    return (<View style={styles.container}>
       <View style={styles.main}>
-      <SkeletonGroup numberOfItems={5} direction="column" stagger={{ delay: 1 }}>
-            <Skeleton color='#7C8183' w={'100%'} h={150} />
-      </SkeletonGroup>
+        <SkeletonGroup numberOfItems={5} direction="column" stagger={{ delay: 1 }}>
+          <Skeleton color='#7C8183' w={'100%'} h={150} />
+        </SkeletonGroup>
       </View>
-      </View>)
+    </View>)
   }
   return (
     <SafeAreaView style={styles.container} >
-      <StatusBar/>
+      <StatusBar />
       <View style={styles.main}>
-      <FlatList 
-        data={orders}
-        keyExtractor={item => item.id}
-        renderItem={orderRender}
-        ListEmptyComponent={<EmptyComponent />}
-        showsVerticalScrollIndicator={false}
+        <FlatList
+          data={orders}
+          keyExtractor={item => item.id}
+          renderItem={orderRender}
+          ListEmptyComponent={<EmptyComponent />}
+          showsVerticalScrollIndicator={false}
         />
 
       </View>

@@ -13,6 +13,8 @@ import { StatusBar } from 'expo-status-bar';
 import { Platform } from 'react-native';
 import { Skeleton, SkeletonGroup } from 'react-native-skeleton-loaders'
 import { CommonActions } from '@react-navigation/native';
+import NetInfo from "@react-native-community/netinfo";
+import ErrorNetwork from '../components/ErrorNetwork';
 
 function CarWashes({ navigation, route }) {
 
@@ -27,6 +29,10 @@ function CarWashes({ navigation, route }) {
   const [bLocation, setBLocation] = useState(false); // Вкл/Выкл геолокация
   const [bPicker, setBPicker] = useState(false); // Вкл/Выкл геолокация
 
+  const [networkError, setNetworkError] = useState(false);
+  const [titleError, setTitleError] = useState("Пытаемся установить соединение с сервером");
+  const [repeatFunc, setRepeatFunc] = useState(null);
+
 
   const checkCar = async () => {
     setCountCar(parseFloat(await AsyncStorage.getItem("cars")));
@@ -38,7 +44,7 @@ function CarWashes({ navigation, route }) {
     const { status } = await Location.requestForegroundPermissionsAsync();
     const service = await Location.hasServicesEnabledAsync();
     if (status !== "granted" ||
-     !service) {
+      !service) {
       const viewAlert = await AsyncStorage.getItem("viewAlert");
       if (viewAlert == null) {
         Alert.alert("Внимание",
@@ -152,35 +158,67 @@ function CarWashes({ navigation, route }) {
     });
   }, [navigation]);
 
-
-  const checkUpdate = async () => {
+  const getDataFromServer = async () => {
+    console.log("use focus");
+    setBPicker(true);
+    await checkCar();
     const loc = await getGeoLocation();
     try {
+      setTitleError("Пытаемся установить соединение с сервером");
       const location = await getCity();
-      await loadCatalogData(null, null, location, loc);
+      let data = await getDataFromStorage();
+      await loadCatalogData(data.stocks, data.washes, location, loc);
+      setNetworkError(false);
+    } catch {
+      setTitleError("Ошибка при получении данных. Проверьте соединение.");
+      setRepeatFunc(checkInternet);
+      setNetworkError(true);
+      return;
     }
-    catch (err) {
-      console.log(err);
-    }
+    setBPicker(false);
 
+  }
+
+  const checkInternet = async () => {
+    setTitleError("Пытаемся установить соединение с сервером");
+    const state = await NetInfo.fetch();
+    if (!state.isConnected) {
+      setTitleError("Ошибка сети. Проверьте интернет соединение.");
+      setNetworkError(true);
+      setRepeatFunc(checkInternet);
+    } else {
+      setNetworkError(false);
+      getDataFromServer();
+    }
+  }
+
+
+  const checkUpdate = async () => {
+    setTitleError("Пытаемся установить соединение с сервером");
+    const state = await NetInfo.fetch();
+    if (!state.isConnected) {
+      setTitleError("Ошибка сети. Проверьте интернет соединение.");
+      setNetworkError(true);
+      setRepeatFunc(checkUpdate);
+    } else {
+      const loc = await getGeoLocation();
+      try {
+        const location = await getCity();
+        await loadCatalogData(null, null, location, loc);
+        setNetworkError(false)
+      }
+      catch (err) {
+        setTitleError("Ошибка при обновлении данных. Проверьте соединение.");
+        setRepeatFunc(checkUpdate);
+        setNetworkError(true);
+      }
+    }
   }
 
 
   useFocusEffect(useCallback(() => { // вызывается при каждом переходе на экран
     (async () => {
-      console.log("use focus");
-      setBPicker(true);
-      await checkCar();
-      const loc = await getGeoLocation();
-      try {
-        const location = await getCity();
-        let data = await getDataFromStorage();
-        await loadCatalogData(data.stocks, data.washes, location, loc);
-      }
-      catch (err) {
-        console.log(err);
-      }
-      setBPicker(false);
+      await checkInternet();
     })();
   }, []))
 
@@ -221,29 +259,56 @@ function CarWashes({ navigation, route }) {
 
 
   const newLocation = async (value) => { // изменение города
-    console.log("new loc", value);
-    setLoading(true); // устанавливаем загрузку в true
-    setLocation(value); // передаем в useState название города (локации)
-    await AsyncStorage.setItem("location", value); // сохранение города в хранилище
-    const loc = await getGeoLocation();
-    await loadCatalogData(null, null, value, loc);
-    setLoading(false) // конец загрузки установка load в false
-    setBVeiw(false)
+    setTitleError("Пытаемся установить соединение с сервером");
+    const state = await NetInfo.fetch();
+    if (!state.isConnected) {
+      setTitleError("Ошибка сети. Проверьте интернет соединение.");
+      setNetworkError(true);
+      setRepeatFunc(() => newLocation(value));
+    } else {
+      console.log("new loc", value);
+      setLoading(true); // устанавливаем загрузку в true
+      const loc = await getGeoLocation();
+      try {
+        await loadCatalogData(null, null, value, loc);
+        setNetworkError(false)
+        setLocation(value); // передаем в useState название города (локации)
+        await AsyncStorage.setItem("location", value); // сохранение города в хранилище
+        setLoading(false) // конец загрузки установка load в false
+        setBVeiw(false)
+      }
+      catch (err) {
+        setTitleError("Ошибка при изменении местоположения. Проверьте соединение.");
+        setRepeatFunc(() => newLocation(value));
+        setNetworkError(true);
+      }
+    }
   }
 
 
   const refresh = async () => { // функция при оттягивании списка вниз
-    setRefresing(true); // установка загруки в true
-    try {
-      console.log("refresh");
-      checkCar();
-      const loc = await getGeoLocation();
-      const location = await getCity();
-      await loadCatalogData(null, null, location, loc);
-      setRefresing(false) // конец обновления
-    }
-    catch (err) {
-      console.warn(err);
+    setTitleError("Пытаемся установить соединение с сервером");
+    const state = await NetInfo.fetch();
+    if (!state.isConnected) {
+      setTitleError("Ошибка сети. Проверьте интернет соединение.");
+      setNetworkError(true);
+      setRepeatFunc(refresh);
+    } else {
+      setRefresing(true); // установка загруки в true
+      try {
+        console.log("refresh");
+        checkCar();
+        const loc = await getGeoLocation();
+        const location = await getCity();
+        await loadCatalogData(null, null, location, loc);
+        setRefresing(false) // конец обновления
+        setNetworkError(false);
+      }
+      catch (err) {
+        setTitleError("Ошибка при обновлении. Проверьте соединение.");
+        setRepeatFunc(refresh);
+        setNetworkError(true);
+      }
     }
   }
 
@@ -324,6 +389,11 @@ function CarWashes({ navigation, route }) {
     )
   }
 
+  if (networkError) {
+    return (
+      <ErrorNetwork reconnectServer={repeatFunc} title={titleError} />
+    )
+  }
 
 
   return (

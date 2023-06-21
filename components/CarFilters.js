@@ -11,7 +11,8 @@ import { CommonActions } from '@react-navigation/native';
 import * as Location from "expo-location";
 import { StatusBar } from 'expo-status-bar';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-
+import NetInfo from "@react-native-community/netinfo";
+import ErrorNetwork from '../components/ErrorNetwork';
 
 function CarFilters({ navigation, route }) {
 
@@ -22,6 +23,38 @@ function CarFilters({ navigation, route }) {
   const [selectSort, setSelectSort] = useState();
   const [check, setCheck] = useState([]);
   const [perm, setPerm] = useState(true);
+
+  const [networkError, setNetworkError] = useState(false);
+  const [titleError, setTitleError] = useState("Пытаемся установить соединение с сервером");
+  const [repeatFunc, setRepeatFunc] = useState(null);
+
+
+  const getDataFromServer = async () => {
+    try {
+      setTitleError("Пытаемся установить соединение с сервером");
+      const res = await axios.get(domain_web + "/get_filter");
+      setFilters([...res.data, { name: "Безналичный расчет" }, { name: "Наличный расчет" }])
+      setNetworkError(false);
+    } catch {
+      setTitleError("Ошибка при отправке данных. Проверьте соединение.");
+      setRepeatFunc(checkInternet);
+      setNetworkError(true);
+    }
+
+  }
+
+  const checkInternet = async () =>{
+    setTitleError("Пытаемся установить соединение с сервером");
+    const state = await NetInfo.fetch();
+    if (!state.isConnected) {
+        setTitleError("Ошибка сети. Проверьте интернет соединение.");
+        setNetworkError(true);
+        setRepeatFunc(checkInternet);
+    }else{
+        setNetworkError(false);
+        getDataFromServer();
+    }
+}
 
   useLayoutEffect(() => {
     navigation.setOptions({
@@ -54,7 +87,7 @@ function CarFilters({ navigation, route }) {
         } else {
           setSelectSort(0);
         }
-      }else{
+      } else {
         setSort(["Рейтинг"]);
         setSelectSort(0);
       }
@@ -69,8 +102,7 @@ function CarFilters({ navigation, route }) {
         Alert.alert("Внимание",
           "Для автоматического определения города и отображения расстояния до автомойки необходимо включить определение геопозиции");
       }
-      const res = await axios.get(domain_web + "/get_filter");
-      setFilters([...res.data, { name: "Безналичный расчет" }, { name: "Наличный расчет" }])
+      await checkInternet();
     })();
   }, [navigation])
 
@@ -101,6 +133,12 @@ function CarFilters({ navigation, route }) {
     // navigation.replace("CarWashes", { "sorted": selectSort, "filters": check })
   }
 
+
+  if (networkError){
+    return (
+      <ErrorNetwork reconnectServer={repeatFunc} title={titleError} />
+    )
+  }
 
   return (
     <View style={styles.container}>
@@ -152,7 +190,7 @@ function CarFilters({ navigation, route }) {
               style={{ color: '#fff', marginHorizontal: '-5%', marginBottom: '-5%' }}
               selectedValue={selectSort}
               onValueChange={(value, index) => setSelectSort(value)}>
-              {sort.map((obj, ind) => <Picker.Item color='#000' key={ind}  label={obj} value={ind} />)}
+              {sort.map((obj, ind) => <Picker.Item color='#000' key={ind} label={obj} value={ind} />)}
             </Picker>
           </LinearGradient>
         }

@@ -8,6 +8,8 @@ import { LinearGradient } from 'expo-linear-gradient';
 import axios from 'axios';
 import { domain_web } from "../domain";
 import { StatusBar } from 'expo-status-bar';
+import NetInfo from "@react-native-community/netinfo";
+import ErrorNetwork from '../components/ErrorNetwork';
 
 const Stack = createNativeStackNavigator();
 
@@ -16,40 +18,74 @@ function FaQ({ navigation }) {
   const [faq, setFAQ] = useState([]);
   const [select, setSelect] = useState([]);
 
-  useLayoutEffect(() => {
-    axios.get(domain_web + "/get_faq")
-      .then(res => {
-        setFAQ(res.data);
-      })
-  }, [navigation]);
 
-  const selectAnswer = (ind) => {
-    if (select.indexOf(ind) == -1){
-      setSelect([...select, ind])
-    }else{
-      const index = select.indexOf(ind);
-      setSelect([...select.slice(0,index), ...select.slice(index + 1, )])
+  const [networkError, setNetworkError] = useState(false);
+  const [titleError, setTitleError] = useState("Пытаемся установить соединение с сервером");
+  const [repeatFunc, setRepeatFunc] = useState(null);
+
+  const getDataFromServer = async () => {
+    try {
+      setTitleError("Пытаемся установить соединение с сервером");
+      const res = await axios.get(domain_web + "/get_faq")
+      setFAQ(res.data);
+      setNetworkError(false);
+    } catch {
+      setTitleError("Ошибка при получении данных. Проверьте соединение.");
+      setRepeatFunc(checkInternet);
+      setNetworkError(true);
+    }
+
+  }
+  const checkInternet = async () => {
+    setTitleError("Пытаемся установить соединение с сервером");
+    const state = await NetInfo.fetch();
+    if (!state.isConnected) {
+      setTitleError("Ошибка сети. Проверьте интернет соединение.");
+      setRepeatFunc(checkInternet)
+      setNetworkError(true);
+    } else {
+      setNetworkError(false);
+      getDataFromServer();
     }
   }
 
-  const Answer = ({obj, ind}) => {
+  useLayoutEffect(() => {
+    checkInternet();
+  }, [navigation]);
+
+  const selectAnswer = (ind) => {
+    if (select.indexOf(ind) == -1) {
+      setSelect([...select, ind])
+    } else {
+      const index = select.indexOf(ind);
+      setSelect([...select.slice(0, index), ...select.slice(index + 1,)])
+    }
+  }
+
+  const Answer = ({ obj, ind }) => {
     return (<View >
       <TouchableOpacity activeOpacity={0.7} onPress={() => selectAnswer(ind)} >
         <View style={styles.row}>
           <Text style={styles.city}>{obj.question}</Text>
-          <AntDesign name={select.indexOf(ind) == -1 ? 'plus' : "minus" } size={28} style={{ color: '#7CD0D7', width:'10%' }} />
+          <AntDesign name={select.indexOf(ind) == -1 ? 'plus' : "minus"} size={28} style={{ color: '#7CD0D7', width: '10%' }} />
         </View>
       </TouchableOpacity>
       {select.indexOf(ind) != -1 && <View style={{ marginLeft: "5%", marginHorizontal: "3%" }} ><Text style={styles.city}>{obj.answer}</Text></View>}
       <LinearGradient colors={['#00266F', '#7BCFD6']} start={[1, 0]} style={styles.gradient_line} />
-      
+
     </View>);
   }
 
 
+  if (networkError) {
+    return (
+      <ErrorNetwork reconnectServer={repeatFunc} title={titleError} />
+    )
+  }
+
   return (
     <SafeAreaView style={styles.container} >
-      <StatusBar/>
+      <StatusBar />
       <View showsVerticalScrollIndicator='false' style={styles.main}>
         {faq.map((obj, ind) => {
           return (<Answer key={ind} obj={obj} ind={ind} />)
@@ -75,7 +111,7 @@ function FaQScreen({ navigation }) {
           fontFamily: 'Raleway_700Bold',
         },
         headerLeft: () => (
-          <TouchableOpacity style={{ left:Platform.OS == 'ios' ? 0 : 0 }} onPress={() => navigation.dispatch(DrawerActions.openDrawer())} activeOpacity={0.7} >
+          <TouchableOpacity style={{ left: Platform.OS == 'ios' ? 0 : 0 }} onPress={() => navigation.dispatch(DrawerActions.openDrawer())} activeOpacity={0.7} >
             <Ionicons name='chevron-back' size={32} color={'#7CD0D7'} />
           </TouchableOpacity>
         ),
@@ -106,7 +142,7 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: '#fff',
     fontFamily: 'Raleway_400Regular',
-    width:'90%'
+    width: '90%'
   },
   gradient_line: {
     marginTop: '3%',
