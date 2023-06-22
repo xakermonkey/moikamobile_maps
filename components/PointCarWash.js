@@ -168,6 +168,8 @@ function PointCarWash({ navigation, route }) {
     return ( // Внутрянняя
       <View style={{ width: "100%", height: "87%" }} >
         <Carousel
+        enableMomentum={true}
+        decelerationRate={0.9}
           data={photo[item]}
           renderItem={renderPhoto}
           sliderWidth={Dimensions.get("window").width * 0.9}
@@ -199,6 +201,8 @@ function PointCarWash({ navigation, route }) {
       />
       <View style={{ alignItems: 'flex-end', width: "100%" }}>
         <Carousel
+        enableMomentum={true}
+        decelerationRate={0.9}
           ref={carouselRef}
           data={filt}
           renderItem={horizontalCarousel}

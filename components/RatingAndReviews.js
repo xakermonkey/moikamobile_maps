@@ -58,19 +58,19 @@ function RatingAndReviews({ navigation }) {
   useLayoutEffect(() => {
     navigation.setOptions({
       title: 'РЕЙТИНГ И ОТЗЫВЫ',
-        headerShadowVisible: false,
-        headerStyle: {
-          backgroundColor: '#6E7476',
-        },
-        headerTitleStyle: {
-          color: '#fff',
-          textTransform: 'uppercase',
-        },
-        headerLeft: () => (
-          <TouchableOpacity onPress={() => navigation.goBack()} activeOpacity={0.7}>
-            <Ionicons name='chevron-back' size={32} color={'#7CD0D7'} />
-            </TouchableOpacity>
-        ),
+      headerShadowVisible: false,
+      headerStyle: {
+        backgroundColor: '#6E7476',
+      },
+      headerTitleStyle: {
+        color: '#fff',
+        textTransform: 'uppercase',
+      },
+      headerLeft: () => (
+        <TouchableOpacity onPress={() => navigation.goBack()} activeOpacity={0.7}>
+          <Ionicons name='chevron-back' size={32} color={'#7CD0D7'} />
+        </TouchableOpacity>
+      ),
     });
     (async () => {
       await checkInternet();
@@ -79,8 +79,8 @@ function RatingAndReviews({ navigation }) {
 
   const EmptyComponent = () => {
     return (
-      <View style={{ marginTop:'10%' }}>
-        <Text style={{ textAlign: 'center', textTransform:'uppercase', color:'#fff', fontFamily:'Montserrat_700Bold' }}>У этой мойки еще нет отзывов</Text>
+      <View style={{ marginTop: '10%' }}>
+        <Text style={{ textAlign: 'center', textTransform: 'uppercase', color: '#fff', fontFamily: 'Montserrat_700Bold' }}>У этой мойки еще нет отзывов</Text>
       </View>
     )
   }
@@ -94,51 +94,50 @@ function RatingAndReviews({ navigation }) {
         style={styles.gradient_background} >
         <View style={styles.gradient_background_padding}>
           <View style={styles.view_row_between}>
-            <View>
-                <Text style={styles.bold_text}>{item.name}</Text>
-              <View style={{ marginTop: '4%' }}>
-                  <Text style={styles.text_white}>{item.order.comment}</Text>
+            <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
+              <Text style={[styles.bold_text, {width:'60%'}]}>{item.name}</Text>
+              <View style={[styles.view_row, {width:'40%'}]}>
+                <FontAwesome name={'star'} size={18} color={item.rate > 0 ? '#FFF737' : '#7C8183'} style={{ marginRight: '2%' }} />
+                <FontAwesome name={'star'} size={18} color={item.rate > 1 ? '#FFF737' : '#7C8183'} style={{ marginRight: '2%' }} />
+                <FontAwesome name={'star'} size={18} color={item.rate > 2 ? '#FFF737' : '#7C8183'} style={{ marginRight: '2%' }} />
+                <FontAwesome name={'star'} size={18} color={item.rate > 3 ? '#FFF737' : '#7C8183'} style={{ marginRight: '2%' }} />
+                <FontAwesome name={'star'} size={18} color={item.rate > 4 ? '#FFF737' : '#7C8183'} style={{ marginRight: '2%' }} />
               </View>
             </View>
-            
-            <View style={styles.view_row}>
-          <FontAwesome name={'star'} size={18} color={item.rate > 0 ? '#FFF737': '#7C8183'} style={{ marginRight: '2%' }} />
-          <FontAwesome name={'star'} size={18} color={item.rate > 1 ? '#FFF737': '#7C8183'} style={{ marginRight: '2%' }} />
-          <FontAwesome name={'star'} size={18} color={item.rate > 2 ? '#FFF737': '#7C8183'} style={{ marginRight: '2%' }} />
-          <FontAwesome name={'star'} size={18} color={item.rate > 3 ? '#FFF737': '#7C8183'} style={{ marginRight: '2%' }} />
-          <FontAwesome name={'star'} size={18} color={item.rate > 4 ? '#FFF737': '#7C8183'} style={{ marginRight: '2%' }} />
           </View>
+          <View style={{ marginTop: '4%' }}>
+            <Text style={styles.text_white}>{item.order.comment}</Text>
           </View>
         </View>
       </LinearGradient>
-      )
-  }
-
-  if (networkError){
-    return(
-    <ErrorNetwork reconnectServer={repeatFunc} title={titleError} />
     )
   }
 
-  if (loading){
-    return(<View style={styles.container}>
+  if (networkError) {
+    return (
+      <ErrorNetwork reconnectServer={repeatFunc} title={titleError} />
+    )
+  }
+
+  if (loading) {
+    return (<View style={styles.container}>
       <View style={styles.main}>
-      <SkeletonGroup numberOfItems={5} direction="column" stagger={{ delay: 1 }}>
-            <Skeleton color='#7C8183' w={'100%'} h={150} />
-      </SkeletonGroup>
+        <SkeletonGroup numberOfItems={5} direction="column" stagger={{ delay: 1 }}>
+          <Skeleton color='#7C8183' w={'100%'} h={150} />
+        </SkeletonGroup>
       </View>
-      </View>)
+    </View>)
   }
   return (
     <SafeAreaView style={styles.container} >
-      <StatusBar/>
+      <StatusBar />
       <View style={styles.main}>
-      <FlatList 
-        data={comments}
-        keyExtractor={item => item.id}
-        renderItem={commentsRender}
-        ListEmptyComponent={<EmptyComponent />}
-        showsVerticalScrollIndicator={false}
+        <FlatList
+          data={comments}
+          keyExtractor={item => item.id}
+          renderItem={commentsRender}
+          ListEmptyComponent={<EmptyComponent />}
+          showsVerticalScrollIndicator={false}
         />
 
       </View>

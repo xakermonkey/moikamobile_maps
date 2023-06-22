@@ -62,6 +62,7 @@ function PointCarWashDrawer({ navigation }) {
         initialParams={route.params}
         />
       <Drawer.Screen name="MakingOrderModal" component={MakingOrderModal} options={{
+        swipeEnabled: false,
         headerShown: false,
       }} />
       <Drawer.Screen name="RatingAndReviews" component={RatingAndReviews} options={{

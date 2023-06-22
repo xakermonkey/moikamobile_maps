@@ -5,11 +5,27 @@ import { ButtonGroup } from '@rneui/themed';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
 import { StatusBar } from 'expo-status-bar';
+import * as Notifications from 'expo-notifications';
 
 
 function ApplicationSettings({ navigation }) {
-  const [isEnabled, setIsEnabled] = useState(false);
-  const toggleSwitch = () => setIsEnabled(previousState => !previousState);
+  const [isEnabled, setIsEnabled] = useState(async () => {
+    if (await Notifications.getPermissionsAsync() == 'granted') {
+      return true;
+    } else {
+      return false;
+    }
+  });
+
+  const toggleSwitch = async () => {
+    const { status: existingStatus } = await Notifications.getPermissionsAsync();
+    if (existingStatus == 'granted') {
+      setIsEnabled(true);
+    } else {
+      await Notifications.requestPermissionsAsync();
+      setIsEnabled(false);
+    }
+  }
 
   const [selectedIndex, setSelectedIndex] = useState(0);
   const [selectedIndexes, setSelectedIndexes] = useState([0, 2, 3]);
