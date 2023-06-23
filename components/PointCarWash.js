@@ -21,6 +21,7 @@ function PointCarWash({ navigation, route }) {
   const [currentIndex, setCurrentIndex] = useState([]);
   const [washer, setWasher] = useState(null);
   const [loading, setLoading] = useState(true);
+
   const [networkError, setNetworkError] = useState(false);
   const [titleError, setTitleError] = useState("Пытаемся установить соединение с сервером");
   const [repeatFunc, setRepeatFunc] = useState(null);
@@ -61,7 +62,7 @@ function PointCarWash({ navigation, route }) {
       setNetworkError(false);
     } catch {
       setTitleError("Ошибка при получении данных. Проверьте соединение.");
-      setRepeatFunc(checkInternet);
+      setRepeatFunc(() => checkInternet);
       setNetworkError(true);
     }
 
@@ -71,7 +72,7 @@ function PointCarWash({ navigation, route }) {
     const state = await NetInfo.fetch();
     if (!state.isConnected) {
       setTitleError("Ошибка сети. Проверьте интернет соединение.");
-      setRepeatFunc(checkInternet);
+      setRepeatFunc(() => checkInternet);
       setNetworkError(true);
     } else {
       setNetworkError(false);

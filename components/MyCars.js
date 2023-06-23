@@ -30,7 +30,7 @@ function MyCars({ navigation }) {
       setNetworkError(false);
     } catch {
       setTitleError("Ошибка при получении данных. Проверьте соединение.");
-      setRepeatFunc(checkInternet);
+      setRepeatFunc(() => checkInternet);
       setNetworkError(true);
       return;
     }
@@ -42,7 +42,7 @@ function MyCars({ navigation }) {
     if (!state.isConnected) {
       setTitleError("Ошибка сети. Проверьте интернет соединение.");
       setNetworkError(true);
-      setRepeatFunc(checkInternet);
+      setRepeatFunc(() => checkInternet);
     } else {
       setNetworkError(false);
       getDataFromServer();
@@ -83,7 +83,7 @@ function MyCars({ navigation }) {
     if (!state.isConnected) {
       setTitleError("Ошибка сети. Проверьте интернет соединение.");
       setNetworkError(true);
-      setRepeatFunc(deleteCar);
+      setRepeatFunc(() => deleteCar);
     } else {
       try {
         const token = await AsyncStorage.getItem("token");
@@ -100,7 +100,7 @@ function MyCars({ navigation }) {
         setCars([...cars.slice(0, carIndex), ...cars.slice(carIndex + 1,)]);
       } catch (err) {
         setTitleError("Ошибка при удалении машины. Проверьте соединение.");
-        setRepeatFunc(deleteCar);
+        setRepeatFunc(() => deleteCar);
         setNetworkError(true);
       }
     }

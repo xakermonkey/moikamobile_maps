@@ -50,7 +50,7 @@ function LoginScreen({ navigation }) {
             setNetworkError(false);
         } catch {
             setTitleError("Ошибка при отправке данных. Проверьте соединение.");
-            setRepeatFunc(checkInternet);
+            setRepeatFunc(() => checkInternet);
             setNetworkError(true);
         }
 
@@ -63,7 +63,7 @@ function LoginScreen({ navigation }) {
         if (!state.isConnected) {
             setTitleError("Ошибка сети. Проверьте интернет соединение.");
             setNetworkError(true);
-            setRepeatFunc(checkInternet);
+            setRepeatFunc(() => checkInternet);
         }else{
             setNetworkError(false);
             getDataFromServer();
@@ -72,13 +72,7 @@ function LoginScreen({ navigation }) {
 
     useLayoutEffect(() => {
         (async () => {
-            const state = await NetInfo.fetch();
-            if (!state.isConnected) {
-                setTitleError("Ошибка сети. Проверьте интернет соединение.");
-                setNetworkError(true);
-                setRepeatFunc(checkInternet);
-            }
-            await getDataFromServer();
+            await checkInternet();
         })();
 
     }, [navigation])
@@ -98,7 +92,7 @@ function LoginScreen({ navigation }) {
                 setDisable(false);
             } catch {
                 setTitleError("Ошибка при отправке данных. Проверьте соединение.");
-                setRepeatFunc(setCode);
+                setRepeatFunc(() => setCode);
                 setNetworkError(true);
             }
 

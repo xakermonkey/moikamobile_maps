@@ -7,6 +7,7 @@ const ErrorNetwork = ({reconnectServer, title}) => {
 
     const [showElement, setShowElement] = useState(false);
 
+    console.log(reconnectServer);
 
     useEffect(() => {
         const timeout = setTimeout(() => {
@@ -16,6 +17,12 @@ const ErrorNetwork = ({reconnectServer, title}) => {
         return () => clearTimeout(timeout); // Очистка таймера при размонтировании компонента
       }, []);
 
+
+    const clickOutside = () => {
+
+        reconnectServer();
+    }
+
     return (
         <View style={styles.container}>
             <StatusBar />
@@ -23,7 +30,7 @@ const ErrorNetwork = ({reconnectServer, title}) => {
                 <Image source={require('../assets/images/logo_succes.png')} />
                 <Text style={[styles.bold_text, { textAlign: 'center' }]}>{title}</Text>
                 <View style={{ width: '100%', marginTop: '20%' }}>
-                    {showElement && <TouchableOpacity activeOpacity={0.8} onPress={reconnectServer} style={{}} >
+                    {showElement && <TouchableOpacity activeOpacity={0.8} onPress={clickOutside} style={{}} >
                         <ImageBackground source={require('../assets/images/button.png')} resizeMode='stretch' style={styles.bg_img} >
                             <Text style={styles.text_btn} >Повторить</Text>
                         </ImageBackground>

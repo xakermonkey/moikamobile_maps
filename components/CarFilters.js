@@ -37,24 +37,24 @@ function CarFilters({ navigation, route }) {
       setNetworkError(false);
     } catch {
       setTitleError("Ошибка при отправке данных. Проверьте соединение.");
-      setRepeatFunc(checkInternet);
+      setRepeatFunc(() => checkInternet);
       setNetworkError(true);
     }
 
   }
 
-  const checkInternet = async () =>{
+  const checkInternet = async () => {
     setTitleError("Пытаемся установить соединение с сервером");
     const state = await NetInfo.fetch();
     if (!state.isConnected) {
-        setTitleError("Ошибка сети. Проверьте интернет соединение.");
-        setNetworkError(true);
-        setRepeatFunc(checkInternet);
-    }else{
-        setNetworkError(false);
-        getDataFromServer();
+      setTitleError("Ошибка сети. Проверьте интернет соединение.");
+      setNetworkError(true);
+      setRepeatFunc(() => checkInternet);
+    } else {
+      setNetworkError(false);
+      getDataFromServer();
     }
-}
+  }
 
   useLayoutEffect(() => {
     navigation.setOptions({
@@ -119,22 +119,41 @@ function CarFilters({ navigation, route }) {
 
 
   const sendFilters = async () => {
-    await AsyncStorage.setItem("sorted", selectSort.toString());
-    await AsyncStorage.setItem("filters", JSON.stringify(check));
-    navigation.dispatch(
-      CommonActions.reset({
-        index: 0,
-        routes: [
-          {
-            name: 'CarWashes'
-          },
-        ],
-      }));
+    const prev_sroted = await AsyncStorage.getItem("sorted");
+    const prev_filters = await AsyncStorage.getItem("filters");
+    const new_sorted = selectSort.toString();
+    const new_filters = JSON.stringify(check);
+    if (prev_sroted != new_sorted || prev_filters != new_filters) {
+      await AsyncStorage.setItem("sorted", new_sorted);
+      await AsyncStorage.setItem("filters", new_filters);
+      navigation.dispatch(
+        CommonActions.reset({
+          index: 0,
+          routes: [
+            {
+              name: 'CarWashes',
+              params: {change_filters: true}
+            },
+          ],
+        }));
+    }else{
+      navigation.dispatch(
+        CommonActions.reset({
+          index: 0,
+          routes: [
+            {
+              name: 'CarWashes',
+            },
+          ],
+        }));
+    }
+
+    
     // navigation.replace("CarWashes", { "sorted": selectSort, "filters": check })
   }
 
 
-  if (networkError){
+  if (networkError) {
     return (
       <ErrorNetwork reconnectServer={repeatFunc} title={titleError} />
     )

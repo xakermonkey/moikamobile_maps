@@ -12,6 +12,9 @@ import * as Notifications from 'expo-notifications';
 import { StatusBar } from 'expo-status-bar';
 import { CommonActions } from '@react-navigation/native';
 import messaging from '@react-native-firebase/messaging';
+import NetInfo from "@react-native-community/netinfo";
+import ErrorNetwork from '../components/ErrorNetwork';
+
 
 function MapScreen({ navigation, route }) {
 
@@ -26,15 +29,37 @@ function MapScreen({ navigation, route }) {
   const responseListener = useRef();
   const [disable, setDisable] = useState(false);
 
+  const [networkError, setNetworkError] = useState(false);
+  const [titleError, setTitleError] = useState("Пытаемся установить соединение с сервером");
+  const [repeatFunc, setRepeatFunc] = useState(null);
+
   YaMap.init('b5f1cf2d-be55-4198-9e5d-66f0be967a30');
   YaMap.setLocale('ru_RU');
 
   map = React.createRef()
 
+
   const getOrderWashes = async () => {
-    const phone = await AsyncStorage.getItem("phone"); // получение телефона из хранилища
-    const res = await axios.get(domain_web + "/get_address_moika", { params: { phone: phone } }); // запрос на получение адреса мойки ближайшего заказа
-    setWashes(res.data); // сохранеине адреса в State
+    setTitleError("Пытаемся установить соединение с сервером");
+    const state = await NetInfo.fetch();
+    if (!state.isConnected) {
+      setTitleError("Ошибка сети. Проверьте интернет соединение.");
+      setNetworkError(true);
+      setRepeatFunc(() => getOrderWashes);
+    } else {
+      try {
+        const phone = await AsyncStorage.getItem("phone"); // получение телефона из хранилища
+        const res = await axios.get(domain_web + "/get_address_moika", { params: { phone: phone } }); // запрос на получение адреса мойки ближайшего заказа
+        setWashes(res.data); // сохранеине адреса в State
+        setNetworkError(false);
+      }
+      catch {
+        console.log("error order");
+        setTitleError("Ошибка при получении заказа. Проверьте интернет соединение.");
+        setNetworkError(true);
+        setRepeatFunc(() => getOrderWashes);
+      }
+    }
   }
 
 
@@ -49,10 +74,28 @@ function MapScreen({ navigation, route }) {
 
 
   const getWasheses = async (loc) => {
-    let phone = await AsyncStorage.getItem("phone");
-    const ret = await axios.get(domain_web + "/get_all_washes", { params: { location: loc, phone: phone } })
-    setWasheses(ret.data);
-    setTimeout(() => setLoading(false), 1000);
+    setTitleError("Пытаемся установить соединение с сервером");
+    const state = await NetInfo.fetch();
+    if (!state.isConnected) {
+      setTitleError("Ошибка сети. Проверьте интернет соединение.");
+      setNetworkError(true);
+      setRepeatFunc(() => getWasheses);
+    } else {
+      try {
+        let phone = await AsyncStorage.getItem("phone");
+        const ret = await axios.get(domain_web + "/get_all_washes", { params: { location: loc, phone: phone } })
+        setWasheses(ret.data);
+        setTimeout(() => setLoading(false), 1000);
+        setNetworkError(false);
+      }
+      catch {
+        console.log("error washeses");
+        setTitleError("Ошибка при получении моек. Проверьте интернет соединение.");
+        setNetworkError(true);
+        setRepeatFunc(() => getWasheses);
+      }
+    }
+
   }
 
 
@@ -198,11 +241,11 @@ function MapScreen({ navigation, route }) {
         remoteMessage,
       );
       navigation.navigate("PersonalAccount");
-          navigation.navigate("MyOrders");
-          navigation.navigate('OrderDetails', { orderId: remoteMessage.data.order });
-          navigation.navigate('EvaluateService', { orderId: remoteMessage.data.order });
-          return;
-    //   navigation.navigate(remoteMessage.data.type);
+      navigation.navigate("MyOrders");
+      navigation.navigate('OrderDetails', { orderId: remoteMessage.data.order });
+      navigation.navigate('EvaluateService', { orderId: remoteMessage.data.order });
+      return;
+      //   navigation.navigate(remoteMessage.data.type);
     });
 
   }, []);
@@ -383,6 +426,14 @@ function MapScreen({ navigation, route }) {
     )
 
   }
+
+  if (networkError) {
+    return (
+      <ErrorNetwork reconnectServer={repeatFunc} title={titleError} />
+    )
+  }
+
+
 
   return (
     <View style={styles.container}>

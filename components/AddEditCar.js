@@ -38,7 +38,7 @@ function AddEditCar({ navigation, route }) {
       setNetworkError(false);
     } catch {
       setTitleError("Ошибка при получении данных. Проверьте соединение.");
-      setRepeatFunc(checkInternet);
+      setRepeatFunc(() => checkInternet);
       setNetworkError(true);
     }
 
@@ -48,7 +48,7 @@ function AddEditCar({ navigation, route }) {
     const state = await NetInfo.fetch();
     if (!state.isConnected) {
       setTitleError("Ошибка сети. Проверьте интернет соединение.");
-      setRepeatFunc(checkInternet)
+      setRepeatFunc(() => checkInternet)
       setNetworkError(true);
     } else {
       setNetworkError(false);
@@ -79,15 +79,16 @@ function AddEditCar({ navigation, route }) {
   }, [navigation]);
 
   const saveCar = async () => {
+
+    setTitleError("Пытаемся установить соединение с сервером");
+    const state = await NetInfo.fetch();
+    if (!state.isConnected) {
+      setTitleError("Ошибка сети. Проверьте интернет соединение.");
+      setRepeatFunc(() => saveCar)
+      setNetworkError(true);
+      return;
+    }
     try {
-      setTitleError("Пытаемся установить соединение с сервером");
-      const state = await NetInfo.fetch();
-      if (!state.isConnected) {
-        setTitleError("Ошибка сети. Проверьте интернет соединение.");
-        setRepeatFunc(saveCar)
-        setNetworkError(true);
-        return;
-      }
       if (number.length >= 8) {
         const token = await AsyncStorage.getItem("token");
         const res = await axios.post(domain_mobile + "/api/edit_car",
@@ -103,28 +104,34 @@ function AddEditCar({ navigation, route }) {
           }
         );
       }
-      if (route.params.id == null) {
-        const cars = await AsyncStorage.getItem("cars")
-        await AsyncStorage.setItem("cars", (parseFloat(cars) + 1).toString());
-      }
       setNetworkError(false);
-      navigation.dispatch(
-        CommonActions.reset({
-          index: 0,
-          routes: [{ name: "PersonalAccountScreen" }, { name: "MyCars" }]
-        }));
+      if (res.data.status) {
+        if (route.params.id == null) {
+          const cars = await AsyncStorage.getItem("cars")
+          await AsyncStorage.setItem("cars", (parseFloat(cars) + 1).toString());
+        }
+
+        navigation.dispatch(
+          CommonActions.reset({
+            index: 0,
+            routes: [{ name: "PersonalAccountScreen" }, { name: "MyCars" }]
+          }));
+      } else {
+        setNetworkError(false);
+        Alert.alert("Ошибка", "У Вас уже есть автомобиль с таким номером");
+      }
     }
     catch (err) {
-      setNetworkError(false);
-      Alert.alert("Ошибка", "У Вас уже есть автомобиль с таким номером");
-      console.log(err);
+      setTitleError("Ошибка сети. Проверьте интернет соединение.");
+      setRepeatFunc(() => saveCar)
+      setNetworkError(true);
     }
 
   }
 
-  if (networkError){
-    return(
-    <ErrorNetwork reconnectServer={repeatFunc} title={titleError} />
+  if (networkError) {
+    return (
+      <ErrorNetwork reconnectServer={repeatFunc} title={titleError} />
     )
   }
   return (

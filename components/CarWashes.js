@@ -166,12 +166,17 @@ function CarWashes({ navigation, route }) {
     try {
       setTitleError("Пытаемся установить соединение с сервером");
       const location = await getCity();
-      let data = await getDataFromStorage();
-      await loadCatalogData(data.stocks, data.washes, location, loc);
+      if (route?.params?.change_filters) {
+        await loadCatalogData(null, null, location, loc);
+      } else {
+        let data = await getDataFromStorage();
+        await loadCatalogData(data.stocks, data.washes, location, loc);
+      }
+
       setNetworkError(false);
     } catch {
       setTitleError("Ошибка при получении данных. Проверьте соединение.");
-      setRepeatFunc(checkInternet);
+      setRepeatFunc(() => checkInternet);
       setNetworkError(true);
       return;
     }
@@ -185,7 +190,7 @@ function CarWashes({ navigation, route }) {
     if (!state.isConnected) {
       setTitleError("Ошибка сети. Проверьте интернет соединение.");
       setNetworkError(true);
-      setRepeatFunc(checkInternet);
+      setRepeatFunc(() => checkInternet);
     } else {
       setNetworkError(false);
       getDataFromServer();
@@ -199,7 +204,7 @@ function CarWashes({ navigation, route }) {
     if (!state.isConnected) {
       setTitleError("Ошибка сети. Проверьте интернет соединение.");
       setNetworkError(true);
-      setRepeatFunc(checkUpdate);
+      setRepeatFunc(() => checkUpdate);
     } else {
       const loc = await getGeoLocation();
       try {
@@ -209,7 +214,7 @@ function CarWashes({ navigation, route }) {
       }
       catch (err) {
         setTitleError("Ошибка при обновлении данных. Проверьте соединение.");
-        setRepeatFunc(checkUpdate);
+        setRepeatFunc(() => checkUpdate);
         setNetworkError(true);
       }
     }
@@ -258,7 +263,7 @@ function CarWashes({ navigation, route }) {
 
 
 
-  const newLocation = async (value) => { // изменение города
+  const newLocation = async (value) => { // изменение города !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! ПРОВЕРИТЬ›
     setTitleError("Пытаемся установить соединение с сервером");
     const state = await NetInfo.fetch();
     if (!state.isConnected) {
@@ -292,7 +297,7 @@ function CarWashes({ navigation, route }) {
     if (!state.isConnected) {
       setTitleError("Ошибка сети. Проверьте интернет соединение.");
       setNetworkError(true);
-      setRepeatFunc(refresh);
+      setRepeatFunc(() => refresh);
     } else {
       setRefresing(true); // установка загруки в true
       try {
@@ -306,7 +311,7 @@ function CarWashes({ navigation, route }) {
       }
       catch (err) {
         setTitleError("Ошибка при обновлении. Проверьте соединение.");
-        setRepeatFunc(refresh);
+        setRepeatFunc(() => refresh);
         setNetworkError(true);
       }
     }
@@ -314,13 +319,13 @@ function CarWashes({ navigation, route }) {
 
   const EmptyComponent = () => { // рендеринг в случае пустого массива моек
     return (
-      <SkeletonGroup numberOfItems={4} direction="column" stagger={{ delay: 1 }}>
-        <Skeleton color='#7C8183' w={'100%'} h={100} />
-      </SkeletonGroup>
-      // <View style={{ marginTop: '5%' }}>
-      //   <Text style={[styles.stocks, { textAlign: 'center' }]}>В данном городе автомоек с такими фильтрами нет</Text>
-      //   <Skeleton color='#7C8183' w={'97%'} h={'100%'} />
-      // </View>
+      // <SkeletonGroup numberOfItems={4} direction="column" stagger={{ delay: 1 }}>
+      //   <Skeleton color='#7C8183' w={'100%'} h={100} />
+      // </SkeletonGroup>
+      <View style={{ marginTop: '5%' }}>
+        <Text style={[styles.stocks, { textAlign: 'center' }]}>В данном городе автомоек с такими фильтрами нет</Text>
+        {/* <Skeleton color='#7C8183' w={'97%'} h={'100%'} /> */}
+      </View>
     )
   }
 
@@ -485,7 +490,9 @@ function CarWashes({ navigation, route }) {
                 renderItem={renderWashes}
                 ListEmptyComponent={<EmptyComponent />}
               />
-              : <ActivityIndicator />}
+              : <SkeletonGroup numberOfItems={4} direction="column" stagger={{ delay: 1 }}>
+                <Skeleton color='#7C8183' w={'100%'} h={100} />
+              </SkeletonGroup>}
           </View>
         </TouchableWithoutFeedback>
       </View>

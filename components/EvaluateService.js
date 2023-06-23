@@ -28,7 +28,7 @@ function EvaluateService({ navigation, route }) {
     if (!state.isConnected) {
       setTitleError("Ошибка сети. Проверьте интернет соединение.");
       setNetworkError(true);
-      setRepeatFunc(addComment);
+      setRepeatFunc(() => addComment);
     } else {
       if (text != "") {
         setDisable(true);
@@ -49,7 +49,7 @@ function EvaluateService({ navigation, route }) {
             }));
         } catch (err) {
           setTitleError("Ошибка при отправке комментария. Проверьте соединение.");
-          setRepeatFunc(addComment);
+          setRepeatFunc(() => addComment);
           setNetworkError(true);
         }
       } else {

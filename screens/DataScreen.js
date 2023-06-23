@@ -44,7 +44,7 @@ function DataScreen({ navigation }) {
             setNetworkError(false);
         } catch {
             setTitleError("Ошибка при получении данных. Проверьте соединение.");
-            setRepeatFunc(checkInternet);
+            setRepeatFunc(() => checkInternet);
             setNetworkError(true);
         }
 
@@ -54,7 +54,7 @@ function DataScreen({ navigation }) {
         const state = await NetInfo.fetch();
         if (!state.isConnected) {
             setTitleError("Ошибка сети. Проверьте интернет соединение.");
-            setRepeatFunc(checkInternet)
+            setRepeatFunc(() => checkInternet)
             setNetworkError(true);
         } else {
             setNetworkError(false);
@@ -95,7 +95,7 @@ function DataScreen({ navigation }) {
         const state = await NetInfo.fetch();
         if (!state.isConnected) {
             setTitleError("Ошибка сети. Проверьте интернет соединение.");
-            setRepeatFunc(sendData)
+            setRepeatFunc(() => sendData)
             setNetworkError(true);
         } else {
 
@@ -125,7 +125,7 @@ function DataScreen({ navigation }) {
                 }
                 catch (err) {
                     setTitleError("Ошибка при отправке данных. Проверьте интернет соединение.");
-                    setRepeatFunc(sendData)
+                    setRepeatFunc(() => sendData)
                     setNetworkError(true);
                 }
             } else {

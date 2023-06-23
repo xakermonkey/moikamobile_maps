@@ -82,7 +82,7 @@ function Feedback({ navigation }) {
       catch (err) {
         setNetworkError(true);
         setTitleError("Ошибка при отправке заявки. Проверьте интернет соединение.");
-        setRepeatFunc(checkInternet)
+        setRepeatFunc(() => checkInternet)
       }
     } else {
       setLoading(true);
@@ -96,7 +96,7 @@ function Feedback({ navigation }) {
     if (!state.isConnected) {
       setTitleError("Ошибка сети. Проверьте интернет соединение.");
       setNetworkError(true);
-      setRepeatFunc(checkInternet);
+      setRepeatFunc(() => checkInternet);
     } else {
       setNetworkError(false);
       send();

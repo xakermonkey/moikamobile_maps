@@ -57,7 +57,7 @@ function PersonalAccount({ navigation }) {
     if (!state.isConnected) {
       setTitleError("Ошибка сети. Проверьте интернет соединение.");
       setNetworkError(true);
-      setRepeatFunc(Logout);
+      setRepeatFunc(() => Logout);
     } else {
       const token = await AsyncStorage.getItem("token");
       const pushToken = await AsyncStorage.getItem("pushToken");
@@ -71,7 +71,7 @@ function PersonalAccount({ navigation }) {
           }));
       } catch (err) {
         setTitleError("Ошибка при выходе из аккаунта. Проверьте соединение.");
-        setRepeatFunc(checkUpdate);
+        setRepeatFunc(() => Logout);
         setNetworkError(true);
       }
     }

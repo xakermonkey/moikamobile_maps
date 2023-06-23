@@ -31,7 +31,7 @@ function FaQ({ navigation }) {
       setNetworkError(false);
     } catch {
       setTitleError("Ошибка при получении данных. Проверьте соединение.");
-      setRepeatFunc(checkInternet);
+      setRepeatFunc(() => checkInternet);
       setNetworkError(true);
     }
 
@@ -41,7 +41,7 @@ function FaQ({ navigation }) {
     const state = await NetInfo.fetch();
     if (!state.isConnected) {
       setTitleError("Ошибка сети. Проверьте интернет соединение.");
-      setRepeatFunc(checkInternet)
+      setRepeatFunc(() => checkInternet)
       setNetworkError(true);
     } else {
       setNetworkError(false);

@@ -51,7 +51,7 @@ function SelectDate({ navigation }) {
       }
     } catch {
       setTitleError("Ошибка при получении данных. Проверьте соединение.");
-      setRepeatFunc(checkInternet);
+      setRepeatFunc(() => checkInternet);
       setNetworkError(true);
     }
 
@@ -61,7 +61,7 @@ function SelectDate({ navigation }) {
     const state = await NetInfo.fetch();
     if (!state.isConnected) {
       setTitleError("Ошибка сети. Проверьте интернет соединение.");
-      setRepeatFunc(checkInternet)
+      setRepeatFunc(() => checkInternet)
       setNetworkError(true);
     } else {
       setNetworkError(false);

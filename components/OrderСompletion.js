@@ -84,7 +84,7 @@ function OrderСompletion({ navigation }) {
       setNetworkError(false);
     } catch {
       setTitleError("Ошибка при получении данных. Проверьте соединение.");
-      setRepeatFunc(checkInternet);
+      setRepeatFunc(() => checkInternet);
       setNetworkError(true);
       return;
     }
@@ -97,7 +97,7 @@ function OrderСompletion({ navigation }) {
     if (!state.isConnected) {
       setTitleError("Ошибка сети. Проверьте интернет соединение.");
       setNetworkError(true);
-      setRepeatFunc(checkInternet);
+      setRepeatFunc(() => checkInternet);
     } else {
       setNetworkError(false);
       getDataFromServer();
@@ -117,13 +117,13 @@ function OrderСompletion({ navigation }) {
       if (!state.isConnected) {
         setTitleError("Ошибка сети. Проверьте интернет соединение.");
         setNetworkError(true);
-        setRepeatFunc(checkPayment);
+        setRepeatFunc(() => checkPayment);
       } else {
         try {
           const res = await axios.post(domain_mobile + "/api/check_payment", { "uuid": uuid }, { headers: { "Authorization": "Token " + token } });
         } catch {
           setTitleError("Ошибка при проверке оплаты. Проверьте соединение.");
-          setRepeatFunc(checkInternet);
+          setRepeatFunc(() => checkInternet);
           setNetworkError(true);
           return;
         }
@@ -177,14 +177,14 @@ function OrderСompletion({ navigation }) {
     if (!state.isConnected) {
       setTitleError("Ошибка сети. Проверьте интернет соединение.");
       setNetworkError(true);
-      setRepeatFunc(canselPayment);
+      setRepeatFunc(() => canselPayment);
     } else {
       try {
         await axios.post(domain_mobile + "/api/cancel_payment", { "uuid": uuid }, { headers: { "Authorization": "Token " + token } });
       } catch {
         setTitleError("Ошибка при отмене оплаты. Проверьте интернет соединение.");
         setNetworkError(true);
-        setRepeatFunc(canselPayment);
+        setRepeatFunc(() => canselPayment);
       }
     }
   }
@@ -195,7 +195,7 @@ function OrderСompletion({ navigation }) {
     if (!state.isConnected) {
       setTitleError("Ошибка сети. Проверьте интернет соединение.");
       setNetworkError(true);
-      setRepeatFunc(createOrderWeb);
+      setRepeatFunc(() => createOrderWeb);
     } else {
       try {
         const phone = await AsyncStorage.getItem("phone");
@@ -232,7 +232,7 @@ function OrderСompletion({ navigation }) {
       catch {
         setTitleError("Ошибка при формировании заказа. Проверьте интернет соединение.");
         setNetworkError(true);
-        setRepeatFunc(createOrderWeb);
+        setRepeatFunc(() => createOrderWeb);
       }
     }
   }
@@ -242,7 +242,7 @@ function OrderСompletion({ navigation }) {
     if (!state.isConnected) {
       setTitleError("Ошибка сети. Проверьте интернет соединение.");
       setNetworkError(true);
-      setRepeatFunc(createOrderMobile);
+      setRepeatFunc(() => createOrderMobile);
     } else {
       try {
         const token = await AsyncStorage.getItem("token");
@@ -262,7 +262,7 @@ function OrderСompletion({ navigation }) {
       catch {
         setTitleError("Ошибка при формировании заказа №2. Проверьте интернет соединение.");
         setNetworkError(true);
-        setRepeatFunc(createOrderMobile);
+        setRepeatFunc(() => createOrderMobile);
       }
     }
   }
@@ -273,7 +273,7 @@ function OrderСompletion({ navigation }) {
     if (!state.isConnected) {
       setTitleError("Ошибка сети. Проверьте интернет соединение.");
       setNetworkError(true);
-      setRepeatFunc(acceptPeyment);
+      setRepeatFunc(() => acceptPeyment);
     } else {
       try {
         const token = await AsyncStorage.getItem("token");
@@ -287,7 +287,7 @@ function OrderСompletion({ navigation }) {
       catch {
         setTitleError("Ошибка при подтверждении заказа. Проверьте интернет соединение.");
         setNetworkError(true);
-        setRepeatFunc(acceptPeyment);
+        setRepeatFunc(() => acceptPeyment);
         throw new Error("Network Error");
       }
     }
@@ -302,7 +302,7 @@ function OrderСompletion({ navigation }) {
     if (!state.isConnected) {
       setTitleError("Ошибка сети. Проверьте интернет соединение.");
       setNetworkError(true);
-      setRepeatFunc(createOrder);
+      setRepeatFunc(() => createOrder);
     } else {
       await createOrderWeb(washer, time, date, body, sale, servise, payment, uuid);
     }

@@ -31,7 +31,7 @@ function OrderDetails({ navigation, route }) {
       setNetworkError(false);
     } catch {
       setTitleError("Ошибка при получении данных. Проверьте соединение.");
-      setRepeatFunc(checkInternet);
+      setRepeatFunc(() => checkInternet);
       setNetworkError(true);
       return;
     }
@@ -44,7 +44,7 @@ function OrderDetails({ navigation, route }) {
     if (!state.isConnected) {
       setTitleError("Ошибка сети. Проверьте интернет соединение.");
       setNetworkError(true);
-      setRepeatFunc(checkInternet);
+      setRepeatFunc(() => checkInternet);
     } else {
       setNetworkError(false);
       getDataFromServer();
@@ -79,7 +79,7 @@ function OrderDetails({ navigation, route }) {
     if (!state.isConnected) {
       setTitleError("Ошибка сети. Проверьте интернет соединение.");
       setNetworkError(true);
-      setRepeatFunc(deleteOrder);
+      setRepeatFunc(() => deleteOrder);
     } else {
       setLoading(true);
       try {
@@ -92,7 +92,7 @@ function OrderDetails({ navigation, route }) {
       }
       catch {
         setTitleError("Ошибка при удалении заказа. Проверьте соединение.");
-        setRepeatFunc(deleteOrder);
+        setRepeatFunc(() => deleteOrder);
         setNetworkError(true);
       }
       setLoading(false);

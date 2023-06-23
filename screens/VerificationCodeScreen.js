@@ -42,7 +42,7 @@ function VerificationCodeScreen({ navigation, route }) {
         const state = await NetInfo.fetch();
         if (!state.isConnected) {
             setTitleError("Ошибка сети. Проверьте интернет соединение.");
-            setRepeatFunc(sendCode)
+            setRepeatFunc(() => sendCode)
             setNetworkError(true);
         } else {
             setDisable(true);
@@ -74,7 +74,7 @@ function VerificationCodeScreen({ navigation, route }) {
             }
             catch (err) {
                 setTitleError("Ошибка при отправке кода. Проверьте интернет соединение.");
-                setRepeatFunc(sendCode)
+                setRepeatFunc(() => sendCode)
                 setNetworkError(true);
             }
             setDisable(false);

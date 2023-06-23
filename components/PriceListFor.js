@@ -44,7 +44,7 @@ function PriceListFor({ navigation, route }) {
       setNetworkError(false);
     } catch {
       setTitleError("Ошибка при получении данных. Проверьте соединение.");
-      setRepeatFunc(checkInternet);
+      setRepeatFunc(() => checkInternet);
       setNetworkError(true);
     }
 
@@ -54,7 +54,7 @@ function PriceListFor({ navigation, route }) {
     const state = await NetInfo.fetch();
     if (!state.isConnected) {
       setTitleError("Ошибка сети. Проверьте интернет соединение.");
-      setRepeatFunc(checkInternet)
+      setRepeatFunc(() => checkInternet)
       setNetworkError(true);
     } else {
       setNetworkError(false);
