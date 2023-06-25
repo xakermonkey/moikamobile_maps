@@ -121,16 +121,17 @@ function OrderСompletion({ navigation }) {
       } else {
         try {
           const res = await axios.post(domain_mobile + "/api/check_payment", { "uuid": uuid }, { headers: { "Authorization": "Token " + token } });
+          console.log(res.data);
+          if (res.data.status) {
+            await createOrder(washer, time, date, body, sale, servise, payment, uuid);
+          } else {
+            Alert.alert("Внимание!", "Оплата была незавершена или отменена");
+          }
         } catch {
           setTitleError("Ошибка при проверке оплаты. Проверьте соединение.");
           setRepeatFunc(() => checkInternet);
           setNetworkError(true);
           return;
-        }
-        if (res.data.status) {
-          await createOrder(washer, time, date, body, sale, servise, payment, uuid);
-        } else {
-          Alert.alert("Внимание!", "Оплата была незавершена или отменена");
         }
       }
       setLoading(false);
@@ -158,9 +159,7 @@ function OrderСompletion({ navigation }) {
           setLinkListener(listener);
         }
         const results = await WebBrowser.openBrowserAsync(payUri);
-        if (results.type != "dismiss") {
-          checkPayment();
-        }
+        checkPayment();
         return;
       } else {
         // setLoading(true);
@@ -187,6 +186,12 @@ function OrderСompletion({ navigation }) {
         setRepeatFunc(() => canselPayment);
       }
     }
+  }
+
+  const successfulCreateOrder = () => {
+    setLoading(false);
+    navigation.navigate("PointCarWash");
+    setTimeout(() => navigation.navigate("Successful"), 1000)
   }
 
 
@@ -223,11 +228,10 @@ function OrderСompletion({ navigation }) {
               routes: [{ name: "GeneralPriceList" }, { name: "PriceListFor" }, { name: "SelectDate" }]
             }));
           setDisable(false);
-          // navigation.navigate("SelectDate")
           return;
         }
         await AsyncStorage.setItem("order_id", res.data.id.toString());
-        await createOrderMobile(res.data.id);
+        await createOrderMobile(res.data.id, uuid);
       }
       catch {
         setTitleError("Ошибка при формировании заказа. Проверьте интернет соединение.");
@@ -237,7 +241,7 @@ function OrderСompletion({ navigation }) {
     }
   }
 
-  const createOrderMobile = async (order_id) => {
+  const createOrderMobile = async (order_id, uuid) => {
     const state = await NetInfo.fetch();
     if (!state.isConnected) {
       setTitleError("Ошибка сети. Проверьте интернет соединение.");
@@ -256,7 +260,9 @@ function OrderСompletion({ navigation }) {
             }
           });
         if (payment == "Безналичный расчёт") {
-          await acceptPeyment();
+          await acceptPeyment(uuid);
+        } else {
+          successfulCreateOrder();
         }
       }
       catch {
@@ -280,9 +286,7 @@ function OrderСompletion({ navigation }) {
         await axios.post(domain_mobile + "/api/accept_payment", { "uuid": uuid }, { headers: { "Authorization": "Token " + token } });
         let keys = await AsyncStorage.getAllKeys()
         await AsyncStorage.multiRemove(keys.filter(key => key.startsWith("stock") || key.startsWith("servise_")))
-        setLoading(false);
-        navigation.navigate("PointCarWash");
-        setTimeout(() => navigation.navigate("Successful"), 1000)
+        successfulCreateOrder();
       }
       catch {
         setTitleError("Ошибка при подтверждении заказа. Проверьте интернет соединение.");

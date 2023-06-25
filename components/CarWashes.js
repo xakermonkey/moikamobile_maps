@@ -84,9 +84,15 @@ function CarWashes({ navigation, route }) {
       location = countries[0]
       setLocation(countries[0]);
     }
+    console.log(countries);
     const index = countries.indexOf(location);
-    countries.splice(index, 1);
-    countries = [location, ...countries];
+    if (index != -1){
+      countries.splice(index, 1);
+      countries = [location, ...countries];
+    }else{
+      countries = [location, ...countries];
+    }
+   
     setLocations(countries) // передача городов в useState
     console.log("location from city", location);
     return location
@@ -273,12 +279,12 @@ function CarWashes({ navigation, route }) {
     } else {
       console.log("new loc", value);
       setLoading(true); // устанавливаем загрузку в true
+      setLocation(value); // передаем в useState название города (локации)
+      await AsyncStorage.setItem("location", value); // сохранение города в хранилище
       const loc = await getGeoLocation();
       try {
         await loadCatalogData(null, null, value, loc);
         setNetworkError(false)
-        setLocation(value); // передаем в useState название города (локации)
-        await AsyncStorage.setItem("location", value); // сохранение города в хранилище
         setLoading(false) // конец загрузки установка load в false
         setBVeiw(false)
       }
