@@ -31,7 +31,7 @@ function MyOrders({ navigation }) {
           phone: phone
         }
       })
-      console.log(res.data);
+      // console.log(res.data);
       setOrders(res.data);
       setLoading(false);
       setNetworkError(false);

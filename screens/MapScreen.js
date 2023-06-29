@@ -8,13 +8,14 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios from 'axios';
 import { domain_mobile, domain_web } from '../domain';
 import * as Device from 'expo-device';
-import * as Notifications from 'expo-notifications';
 import { StatusBar } from 'expo-status-bar';
 import { CommonActions } from '@react-navigation/native';
+
+import * as Notifications from 'expo-notifications';
 import messaging from '@react-native-firebase/messaging';
+
 import NetInfo from "@react-native-community/netinfo";
 import ErrorNetwork from '../components/ErrorNetwork';
-
 
 function MapScreen({ navigation, route }) {
 
@@ -32,6 +33,8 @@ function MapScreen({ navigation, route }) {
   const [networkError, setNetworkError] = useState(false);
   const [titleError, setTitleError] = useState("Пытаемся установить соединение с сервером");
   const [repeatFunc, setRepeatFunc] = useState(null);
+
+  const notificationListener = useRef();
 
   YaMap.init('b5f1cf2d-be55-4198-9e5d-66f0be967a30');
   YaMap.setLocale('ru_RU');
@@ -199,9 +202,13 @@ function MapScreen({ navigation, route }) {
   useEffect(() => {
     registerForPushNotificationsAsync();
 
+    notificationListener.current = Notifications.addNotificationReceivedListener(response => {
+      console.log('addNotificationReceivedListener');
+      console.log(response);
+    });
+
     responseListener.current = Notifications.addNotificationResponseReceivedListener(response => {
-      console.log('response');
-      console.log(response.notification.request.content.data.category);
+      console.log('addNotificationResponseReceivedListener');
       if (Platform.OS == "ios") {
         if (response.notification.request.content.categoryIdentifier == "successful") {
           navigation.navigate("PersonalAccount");
@@ -216,17 +223,13 @@ function MapScreen({ navigation, route }) {
         }
       }
       else if (Platform.OS == "android") {
-        // if (response.notification.request.trigger.remoteMessage.notification.tag == "successful") {
         if (response.notification.request.content.data.category == "successful") {
           navigation.navigate("PersonalAccount");
           navigation.navigate("MyOrders");
-          // navigation.navigate('OrderDetails', { orderId: response.notification.request.trigger.remoteMessage.data.order });
-          // navigation.navigate('EvaluateService', { orderId: response.notification.request.trigger.remoteMessage.data.order });
           navigation.navigate('OrderDetails', { orderId: response.notification.request.content.data.order });
           navigation.navigate('EvaluateService', { orderId: response.notification.request.content.data.order });
           return;
         }
-        // else if (response.notification.request.trigger.remoteMessage.notification.tag == "new_stock") {
         else if (response.notification.request.content.data.category == "new_stock") {
           navigation.navigate("Catalog");
           return;
@@ -237,7 +240,7 @@ function MapScreen({ navigation, route }) {
 
     messaging().onNotificationOpenedApp(remoteMessage => {
       console.log(
-        'Notification caused app to open from background state:',
+        'Map Notification caused app to open from background state:',
         remoteMessage,
       );
       navigation.navigate("PersonalAccount");
@@ -255,6 +258,7 @@ function MapScreen({ navigation, route }) {
     if (Device.isDevice) {
       const devicePushToken = (await Notifications.getDevicePushTokenAsync()).data
       console.log(devicePushToken);
+      console.log(await messaging().getToken());
       // if (pushtoken == null) {
       try {
         const token = await AsyncStorage.getItem("token");
@@ -285,16 +289,6 @@ function MapScreen({ navigation, route }) {
     } else {
       alert('Must use physical device for Push Notifications');
     }
-
-    // if (Platform.OS === 'android') {
-    //   await Notifications.setNotificationChannelAsync('miscellaneous', {
-    //     name: 'Miscellaneous',
-    //     sound: true,
-    //     importance: Notifications.AndroidImportance.MAX,
-    //     vibrationPattern: [0, 250, 250, 250],
-    //     lightColor: '#FF231F7C',
-    //   });
-    // }
 
   }
 
@@ -350,13 +344,13 @@ function MapScreen({ navigation, route }) {
   findRoute = async () => { // поиск пути
     setDisable(true);
     if (Object.keys(washes).length != 0) { // если есть адрес автомойки в которой открыт заказ
-      console.log(washes)
+      // console.log(washes)
 
       if (map.current) {
         let { status } = await Location.getForegroundPermissionsAsync(); // проверка на наличие прав
         const loc = await Location.getCurrentPositionAsync(); // получение ТОЧНОЙ позиции
         if (Object.keys(washes).length != 0) { // если есть адрес автомойки в которой открыт заказ
-          console.log(washes)
+          // console.log(washes)
 
           if (status !== 'granted' || loc == null) { // если нет прав иил не получена геопозиция
             Alert.alert("Ошибка", "Для построения маршрута необходимо включить определение геопозиции");
@@ -376,7 +370,7 @@ function MapScreen({ navigation, route }) {
             for (let i = 0; i < len; i++) {
               arr = [...arr, ...event.routes[0].sections[i].points];
             }
-            console.log(arr);
+            // console.log(arr);
             setRoute(arr);
             setDisable(false);
           })

@@ -17,7 +17,7 @@
 	<key>CFBundlePackageType</key>
 	<string>$(PRODUCT_BUNDLE_PACKAGE_TYPE)</string>
 	<key>CFBundleShortVersionString</key>
-	<string>$(MARKETING_VERSION)</string>
+	<string>1.0.0</string>
 	<key>CFBundleSignature</key>
 	<string>????</string>
 	<key>CFBundleURLTypes</key>
@@ -25,6 +25,7 @@
 		<dict>
 			<key>CFBundleURLSchemes</key>
 			<array>
+				<string>ru.t4yc.moikamobile</string>
 				<string>ru.t4yc.moikamobile</string>
 			</array>
 		</dict>
@@ -37,33 +38,27 @@
 	<dict>
 		<key>NSAllowsArbitraryLoads</key>
 		<true/>
-		<key>NSAllowsArbitraryLoadsForMedia</key>
-		<true/>
-		<key>NSAllowsLocalNetworking</key>
-		<true/>
-		<key>UIBackgroundModes</key>
-		<array>
-			<string>audio</string>
-		</array>
-		<key>usesIcloudStorage</key>
-		<true/>
+		<key>NSExceptionDomains</key>
+		<dict>
+			<key>localhost</key>
+			<dict>
+				<key>NSExceptionAllowsInsecureHTTPLoads</key>
+				<true/>
+			</dict>
+		</dict>
 	</dict>
+	<key>NSCameraUsageDescription</key>
+	<string>Allow $(PRODUCT_NAME) to access your camera</string>
 	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
-	<string>Для определения ближайшей мойки необходимо предоставить T4YC доступ к вашему местоположению</string>
+	<string>Allow $(PRODUCT_NAME) to access your location</string>
 	<key>NSLocationAlwaysUsageDescription</key>
-	<string>Для определения ближайшей мойки необходимо предоставить T4YC доступ к вашему местоположению</string>
+	<string>Allow $(PRODUCT_NAME) to access your location</string>
 	<key>NSLocationWhenInUseUsageDescription</key>
-	<string>Для определения ближайшей мойки необходимо предоставить T4YC доступ к вашему местоположению</string>
+	<string>Allow $(PRODUCT_NAME) to access your location</string>
 	<key>NSMicrophoneUsageDescription</key>
-	<string>Микрофон используется для записи вашей речи и преобразования ее в текст</string>
+	<string>Allow $(PRODUCT_NAME) to access your microphone</string>
 	<key>NSPhotoLibraryUsageDescription</key>
-	<string>Предоставьте T4YC доступ к фотографиям, чтобы Вы могли прикрепить к своему запросу ранее сделанный скриншот</string>
-	<key>UIBackgroundModes</key>
-	<array>
-		<string>fetch</string>
-		<string>location</string>
-		<string>remote-notification</string>
-	</array>
+	<string>Allow $(PRODUCT_NAME) to access your photos</string>
 	<key>UILaunchStoryboardName</key>
 	<string>SplashScreen</string>
 	<key>UIRequiredDeviceCapabilities</key>
@@ -73,7 +68,7 @@
 	<key>UIRequiresFullScreen</key>
 	<false/>
 	<key>UIStatusBarStyle</key>
-	<string></string>
+	<string>UIStatusBarStyleDefault</string>
 	<key>UISupportedInterfaceOrientations</key>
 	<array>
 		<string>UIInterfaceOrientationPortrait</string>
@@ -85,6 +80,8 @@
 		<string>UIInterfaceOrientationPortrait</string>
 		<string>UIInterfaceOrientationPortraitUpsideDown</string>
 	</array>
+	<key>UIUserInterfaceStyle</key>
+	<string>Light</string>
 	<key>UIViewControllerBasedStatusBarAppearance</key>
 	<false/>
 </dict>

@@ -27,19 +27,18 @@ const Stack = createNativeStackNavigator();
 //   .then((result) => console.log(`SplashScreen.preventAutoHideAsync() succeeded: ${result}`))
 //   .catch(console.warn); // it's good to explicitly catch and inspect any error
 
+Notifications.setNotificationHandler({
+  handleNotification: async () => ({
+    shouldShowAlert: true,
+    shouldPlaySound: true,
+    shouldSetBadge: true,
+  }),
+});
+
 export default function App() {
 
-  const notificationListener = useRef();
   const [push, setPush] = useState(null);
-
-  Notifications.setNotificationHandler({
-    handleNotification: async () => ({
-      shouldShowAlert: true,
-      shouldPlaySound: true,
-      shouldSetBadge: true,
-      priority: Notifications.AndroidNotificationPriority.MAX,
-    }),
-  });
+  
   useEffect(() => {
     (async () => {
       await AsyncStorage.setItem("sorted", "0");
@@ -47,6 +46,7 @@ export default function App() {
     })();
 
     setNotificationChannel();
+
     messaging().onMessage(async remoteMessage => {
       console.log('FBremoteMessage');
       console.log(remoteMessage);
@@ -55,43 +55,24 @@ export default function App() {
           title: remoteMessage.notification.title,
           body: remoteMessage.notification.body,
           data: remoteMessage.data,
-          // categoryIdentifier: remoteMessage.notification.data,
         },
-        trigger: null, // Передайте null, чтобы уведомление было показано немедленно
+        trigger: null,
       });
     });
 
+
     messaging().setBackgroundMessageHandler(async remoteMessage => {
-      console.log('Message handled in the background!', remoteMessage);
+      console.log('App.js Message handled in the background!', remoteMessage);
       setPush(remoteMessage);
       return;
     });
-
     // messaging().onNotificationOpenedApp(remoteMessage => {
     //   console.log(
-    //     'Notification caused app to open from background state:',
+    //     'App.js Notification caused app to open from background state:',
     //     remoteMessage,
     //   );
-    //   navigation.navigate("PersonalAccount");
-    //       navigation.navigate("MyOrders");
-    //       navigation.navigate('OrderDetails', { orderId: remoteMessage.notification.request.content.data.order });
-    //       navigation.navigate('EvaluateService', { orderId: remoteMessage.notification.request.content.data.order });
-    //       return;
-    // //   navigation.navigate(remoteMessage.data.type);
     // });
 
-    notificationListener.current = Notifications.addNotificationReceivedListener(response => {
-      console.log(response);
-    });
-    // notificationListener = firebase.notifications().onNotification((response) => {
-    //   if (response.notification.request.content.data.category == "successful") {
-    //     navigation.navigate("PersonalAccount");
-    //     navigation.navigate("MyOrders");
-    //     navigation.navigate('OrderDetails', { orderId: response.notification.request.content.data.order });
-    //     navigation.navigate('EvaluateService', { orderId: response.notification.request.content.data.order });
-    //     return;
-    //   }
-    // });
   }, []);
 
   const setNotificationChannel = async () => {
