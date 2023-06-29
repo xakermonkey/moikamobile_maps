@@ -95,8 +95,8 @@ function RatingAndReviews({ navigation }) {
         <View style={styles.gradient_background_padding}>
           <View style={styles.view_row_between}>
             <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
-              <Text style={[styles.bold_text, {width:'60%'}]}>{item.name}</Text>
-              <View style={[styles.view_row, {width:'40%'}]}>
+              <Text style={[styles.bold_text, {width:'70%'}]}>{item.name}</Text>
+              <View style={[styles.view_row, {width:'30%'}]}>
                 <FontAwesome name={'star'} size={18} color={item.rate > 0 ? '#FFF737' : '#7C8183'} style={{ marginRight: '2%' }} />
                 <FontAwesome name={'star'} size={18} color={item.rate > 1 ? '#FFF737' : '#7C8183'} style={{ marginRight: '2%' }} />
                 <FontAwesome name={'star'} size={18} color={item.rate > 2 ? '#FFF737' : '#7C8183'} style={{ marginRight: '2%' }} />

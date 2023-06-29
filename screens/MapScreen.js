@@ -131,13 +131,13 @@ function MapScreen({ navigation, route }) {
 
   const createRoute = async () => {
     setDisable(true);
-    if (route.params?.washes != undefined) { // если есть адрес автомойки в которой открыт заказ
-      const state = await NetInfo.fetch();
+    const state = await NetInfo.fetch();
       if (!state.isConnected) {
         Alert.alert("Ошибка", "Для построения маршрута необходимо включить интернет");
         setDisable(false);
         return;
-      } else {
+      }
+    if (route.params?.washes != undefined) { // если есть адрес автомойки в которой открыт заказ
         if (map.current) {
           let { status } = await Location.getForegroundPermissionsAsync(); // проверка на наличие прав
           if (status !== 'granted') { // если нет прав иил не получена геопозиция
@@ -163,8 +163,6 @@ function MapScreen({ navigation, route }) {
               setDisable(false);
             })
           }
-
-        }
       }
     }
     setDisable(false);
@@ -349,14 +347,14 @@ function MapScreen({ navigation, route }) {
 
   findRoute = async () => { // поиск пути
     setDisable(true);
-    if (Object.keys(washes).length != 0) { // если есть адрес автомойки в которой открыт заказ
-      console.log(washes)
-      const state = await NetInfo.fetch();
+    const state = await NetInfo.fetch();
       if (!state.isConnected) {
         Alert.alert("Ошибка", "Для построения маршрута необходимо включить интернет");
         setDisable(false);
         return;
-      } else {
+      }
+    if (Object.keys(washes).length != 0) { // если есть адрес автомойки в которой открыт заказ
+      // console.log(washes)
         if (map.current) {
           let { status } = await Location.getForegroundPermissionsAsync(); // проверка на наличие прав
           if (status !== 'granted') { // если нет прав иил не получена геопозиция
@@ -383,7 +381,6 @@ function MapScreen({ navigation, route }) {
             setRoute(arr);
             setDisable(false);
           })
-        }
       }
     } else {
       Alert.alert("Внимание", "Чтобы построить маршрут, необходимо оформить заказ");

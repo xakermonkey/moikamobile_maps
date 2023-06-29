@@ -9,6 +9,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { StatusBar } from 'expo-status-bar';
 import NetInfo from "@react-native-community/netinfo";
 import ErrorNetwork from '../components/ErrorNetwork';
+import { Skeleton, SkeletonGroup } from 'react-native-skeleton-loaders'
 
 function GeneralPriceList({ navigation }) {
 
@@ -84,7 +85,7 @@ function GeneralPriceList({ navigation }) {
           <View style={{ flex: 1 }}></View>
         </View>
 
-        <ScrollView style={styles.mt}>
+        {cars != [] ? <ScrollView style={styles.mt}>
           {cars.filter(obj => myCars.indexOf(obj.name) != -1).map((obj) => {
             return (
               <TouchableOpacity key={obj.id} onPress={() => setBody(obj)} activeOpacity={0.7} >
@@ -100,7 +101,13 @@ function GeneralPriceList({ navigation }) {
               </TouchableOpacity>
             )
           })}
-        </ScrollView>
+        </ScrollView> : 
+        <View style={styles.mt}>
+          <SkeletonGroup numberOfItems={10} direction="column" stagger={{ delay: 1 }}>
+            <Skeleton color='#7C8183' w={'100%'} h={120} />
+          </SkeletonGroup>
+      </View>
+        }
 
         {/* </BlurView> */}
       </View>

@@ -1,34 +1,47 @@
-import React, { useState } from "react";
-import { StyleSheet, View, Text, SafeAreaView, TouchableOpacity, Switch } from 'react-native';
+import React, { useState, useCallback, useEffect, useLayoutEffect } from "react";
+import { StyleSheet, View, Text, SafeAreaView, TouchableOpacity, Switch, Alert } from 'react-native';
 // import { ButtonGroup } from 'react-native-elements'
 import { ButtonGroup } from '@rneui/themed';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
 import { StatusBar } from 'expo-status-bar';
 import * as Notifications from 'expo-notifications';
+import { useFocusEffect } from '@react-navigation/native';
 
 
 function ApplicationSettings({ navigation }) {
-  const [isEnabled, setIsEnabled] = useState(async () => {
-    if (await Notifications.getPermissionsAsync() == 'granted') {
-      return true;
-    } else {
-      return false;
-    }
-  });
+  const [isEnabled, setIsEnabled] = useState(false);
 
   const toggleSwitch = async () => {
     const { status: existingStatus } = await Notifications.getPermissionsAsync();
-    if (existingStatus == 'granted') {
+    if (existingStatus == 'granted' && !isEnabled) {
       setIsEnabled(true);
+    } else if (existingStatus == 'granted') {
+      Alert.alert("Информация", "Вы можете отключить уведомления в системных настройках");
+      setIsEnabled(true);
+    } else if (existingStatus != 'granted' && isEnabled) {
+      setIsEnabled(false);
     } else {
-      await Notifications.requestPermissionsAsync();
+      Alert.alert("Информация", "Необходимо разрешить уведомления в системных настройках");
       setIsEnabled(false);
     }
   }
 
-  const [selectedIndex, setSelectedIndex] = useState(0);
+  const checkPermissions = async () => {
+    const { status: existingStatus } = await Notifications.getPermissionsAsync();
+    if (existingStatus == 'granted') {
+      setIsEnabled(true);
+    } else {
+      setIsEnabled(false);
+    }
+  }
+
+  const [selectedIndex, setSelectedIndex] = useState(2);
   const [selectedIndexes, setSelectedIndexes] = useState([0, 2, 3]);
+
+  useFocusEffect(useCallback(() => {
+    checkPermissions();
+  }));
 
   return (
     <SafeAreaView style={styles.container} >
@@ -43,7 +56,7 @@ function ApplicationSettings({ navigation }) {
           style={styles.gradient_background} >
 
           <View>
-            <TouchableOpacity activeOpacity={0.7}>
+            <TouchableOpacity disabled activeOpacity={0.7}>
               <View style={styles.row}>
                 <Text style={styles.item}>Язык приложения</Text>
                 <Text style={styles.item_white}>Русский</Text>
@@ -72,7 +85,8 @@ function ApplicationSettings({ navigation }) {
                 buttons={['Авто', 'Светлая', 'Темная']}
                 selectedIndex={selectedIndex}
                 onPress={(value) => {
-                  setSelectedIndex(value);
+      Alert.alert("Информация", "Темы будут доступны в будущих обновлениях");
+                  // setSelectedIndex(value);
                 }}
                 containerStyle={{ width: '80%', borderRadius: 5, height: 28, backgroundColor: '#35343499', borderColor: '#35343499' }}
                 textStyle={{ color: '#CBCBCB' }}

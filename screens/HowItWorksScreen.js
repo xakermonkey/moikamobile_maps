@@ -92,6 +92,8 @@ function HowItWorksScreen({ navigation }) {
       <StatusBar/>
       <View style={{ height:'70%' }}>
         <Carousel
+        enableMomentum={true}
+        decelerationRate={0.9}
           data={videos}
           // style={{ flex: 1 }}
           renderItem={horizontalCarousel}
