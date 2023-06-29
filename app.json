@@ -1,12 +1,17 @@
 {
   "expo": {
-    "name": "moika",
+    "name": "T4YC",
     "slug": "moika",
     "version": "1.0.0",
     "scheme": "ru.t4yc.moikamobile",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
+    "plugins": [
+      [
+        "expo-notifications"
+      ]
+    ],
     "splash": {
       "image": "./assets/splash.png",
       "resizeMode": "contain",
