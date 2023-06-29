@@ -47,6 +47,10 @@ export function DrawerContent(props) {
         }
     }
 
+    const showNotWorking = () => {
+        Alert.alert("Внимание", "В данной автомойки пока нет открытых боксов");
+    }
+
     if (washer == null){
         return (<View style={{ marginTop:'10%' }}>
         <Text style={{ textAlign: 'center', textTransform:'uppercase', color:'#fff', fontFamily:'Montserrat_700Bold' }}>Загрузка</Text>
@@ -74,7 +78,7 @@ export function DrawerContent(props) {
                 style={styles.mt}
                 label="Хочу помыть"
                 labelStyle={{ color: '#fff', fontSize: 14, fontFamily: 'Raleway_400Regular', textTransform: 'uppercase' }}
-                onPress={() => isAuthenticated ? props.navigation.navigate('MakingOrderModal') : showAlert()}
+                onPress={() => isAuthenticated ? washer.is_working ? props.navigation.navigate('MakingOrderModal') : showNotWorking() : showAlert()}
             />
             <DrawerItem
                 icon={({ color, size }) => (
