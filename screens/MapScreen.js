@@ -163,9 +163,8 @@ function MapScreen({ navigation, route }) {
           })
         }
       }
-    }
     setDisable(false);
-  }
+    }
 
   useLayoutEffect(() => {
     if (route.params?.push) {
@@ -206,12 +205,10 @@ function MapScreen({ navigation, route }) {
     registerForPushNotificationsAsync();
 
     notificationListener.current = Notifications.addNotificationReceivedListener(response => {
-      console.log('addNotificationReceivedListener');
-      console.log(response);
+      return;
     });
 
     responseListener.current = Notifications.addNotificationResponseReceivedListener(response => {
-      console.log('addNotificationResponseReceivedListener');
       if (Platform.OS == "ios") {
         if (response.notification.request.content.categoryIdentifier == "successful") {
           navigation.navigate("PersonalAccount");
@@ -242,16 +239,11 @@ function MapScreen({ navigation, route }) {
     });
 
     messaging().onNotificationOpenedApp(remoteMessage => {
-      console.log(
-        'Map Notification caused app to open from background state:',
-        remoteMessage,
-      );
       navigation.navigate("PersonalAccount");
       navigation.navigate("MyOrders");
       navigation.navigate('OrderDetails', { orderId: remoteMessage.data.order });
       navigation.navigate('EvaluateService', { orderId: remoteMessage.data.order });
       return;
-      //   navigation.navigate(remoteMessage.data.type);
     });
 
   }, []);
@@ -315,9 +307,7 @@ function MapScreen({ navigation, route }) {
   }
   zoomUp = async () => { // приближение
     const position = await getCurrentPosition();
-    // console.log(position);
     if (map.current) {
-      // console.warn(map.current.props['children'][1]);
       map.current.setZoom(position.zoom * 1.1, 0.5);
     }
   };
@@ -353,7 +343,6 @@ function MapScreen({ navigation, route }) {
         return;
       }
     if (washes != null) { // если есть адрес автомойки в которой открыт заказ
-      // console.log(washes)
         if (map.current) {
           let { status } = await Location.getForegroundPermissionsAsync(); // проверка на наличие прав
           if (status !== 'granted') { // если нет прав иил не получена геопозиция
@@ -364,7 +353,6 @@ function MapScreen({ navigation, route }) {
           const loc = await Location.getCurrentPositionAsync(); // получение ТОЧНОЙ позиции
           console.warn({ lon: loc.coords.longitude, lat: loc.coords.latitude });
           map.current.findDrivingRoutes([{ lon: loc.coords.longitude, lat: loc.coords.latitude }, { lon: parseFloat(washes.lon), lat: parseFloat(washes.lat) }], (event) => {
-            // console.log(event.routes[0])
             if (event.routes.length == 0) {
               Alert.alert("Внимание", "Не удалось построить маршрут");
               map.current.setCenter({ lon: loc.coords.longitude, lat: loc.coords.latitude }, 12, 0, 0, 1, Animation.SMOOTH);
@@ -376,7 +364,6 @@ function MapScreen({ navigation, route }) {
             for (let i = 0; i < len; i++) {
               arr = [...arr, ...event.routes[0].sections[i].points];
             }
-            // console.log(arr);
             setRoute(arr);
             setDisable(false);
           })
@@ -418,11 +405,11 @@ function MapScreen({ navigation, route }) {
 
   }
 
-  if (networkError) {
-    return (
-      <ErrorNetwork reconnectServer={repeatFunc} title={titleError} />
-    )
-  }
+  // if (networkError) {
+  //   return (
+  //     <ErrorNetwork reconnectServer={repeatFunc} title={titleError} />
+  //   )
+  // }
 
 
 

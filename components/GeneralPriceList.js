@@ -19,8 +19,10 @@ function GeneralPriceList({ navigation }) {
   const [networkError, setNetworkError] = useState(false);
   const [titleError, setTitleError] = useState("Пытаемся установить соединение с сервером");
   const [repeatFunc, setRepeatFunc] = useState(null);
+  const [loading, setLoading] = useState(false); // Отображение загрузки
 
   const getDataFromServer = async () => {
+    setLoading(true);
     try {
       setTitleError("Пытаемся установить соединение с сервером");
       const washer = await AsyncStorage.getItem("washer")
@@ -30,10 +32,12 @@ function GeneralPriceList({ navigation }) {
       const ret = await axios.get(domain_mobile + "/api/get_cars", { headers: { "Authorization": "Token " + token } });
       setMyCars(ret.data.map(obj => obj.body))
       setNetworkError(false);
+      setLoading(false);
     } catch {
       setTitleError("Ошибка при получении данных. Проверьте соединение.");
       setRepeatFunc(() => checkInternet);
       setNetworkError(true);
+      setLoading(false);
       return;
     }
   }
@@ -85,7 +89,7 @@ function GeneralPriceList({ navigation }) {
           <View style={{ flex: 1 }}></View>
         </View>
 
-        {cars != [] ? <ScrollView style={styles.mt}>
+        {!loading ? <ScrollView style={styles.mt}>
           {cars.filter(obj => myCars.indexOf(obj.name) != -1).map((obj) => {
             return (
               <TouchableOpacity key={obj.id} onPress={() => setBody(obj)} activeOpacity={0.7} >

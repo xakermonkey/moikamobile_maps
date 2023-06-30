@@ -3,9 +3,6 @@ import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import React, { useEffect, useState, useRef } from 'react';
 import { Platform } from 'react-native';
 
-// import { NavigationContainer } from '@react-navigation/native';
-// import { createStackNavigator } from '@react-navigation/stack';
-
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 
@@ -24,9 +21,6 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 // import * as SplashScreen from "expo-splash-screen";
 
 const Stack = createNativeStackNavigator();
-// SplashScreen.preventAutoHideAsync()
-//   .then((result) => console.log(`SplashScreen.preventAutoHideAsync() succeeded: ${result}`))
-//   .catch(console.warn); // it's good to explicitly catch and inspect any error
 
 Notifications.setNotificationHandler({
   handleNotification: async () => ({
@@ -49,8 +43,6 @@ export default function App() {
     setNotificationChannel();
 
     messaging().onMessage(async remoteMessage => {
-      console.log('FBremoteMessage');
-      console.log(remoteMessage);
       await Notifications.scheduleNotificationAsync({
         content: {
           title: remoteMessage.notification.title,
@@ -63,16 +55,9 @@ export default function App() {
 
 
     messaging().setBackgroundMessageHandler(async remoteMessage => {
-      console.log('App.js Message handled in the background!', remoteMessage);
       setPush(remoteMessage);
       return;
     });
-    // messaging().onNotificationOpenedApp(remoteMessage => {
-    //   console.log(
-    //     'App.js Notification caused app to open from background state:',
-    //     remoteMessage,
-    //   );
-    // });
 
   }, []);
 
@@ -113,25 +98,11 @@ export default function App() {
         }} />
         <Stack.Screen name="how_it_works" component={HowItWorksScreen} />
         <Stack.Screen name="VerificationCode" component={VerificationCodeScreen} options={{
-          title: '', // Код из СМС
-          // // headerBackTitle: '',
-          // headerBackTitleVisible: false,
+          title: '',
           headerShadowVisible: false,
           headerStyle: {
             backgroundColor: '#6E7476',
           },
-          // headerTintColor: '#fff',
-          // headerTitleStyle: {
-          //   fontWeight: 'bold',
-          //   fontFamily: 'Raleway_700Bold',
-          // },
-          //   navigationOptions: ({ navigation }) => 
-          //   ({ headerLeft: () => (
-          //     <TouchableOpacity onPress={() => navigation.navigate('Login')} activeOpacity={0.7}>
-          //       <Ionicons name='chevron-back' size={28} color={'#7CD0D7'} />
-          //     </TouchableOpacity>
-          //   ),
-          // })
         }} />
         <Stack.Screen name="Data" component={DataScreen} options={{
           title: 'ВАШИ ДАННЫЕ',
@@ -145,13 +116,6 @@ export default function App() {
             fontWeight: 'bold',
             fontFamily: 'Raleway_700Bold',
           },
-          // navigationOptions: ({ navigation }) => 
-          // ({ headerLeft: () => (
-          // <TouchableOpacity onPress={() => navigation.navigate('LoginScreen')} activeOpacity={0.7}>
-          // <Ionicons name='chevron-back' size={28} color={'#7CD0D7'} />
-          // </TouchableOpacity>
-          // ),
-          // })
         }} />
         <Stack.Screen name="MainMenu" component={MainMenuScreen} initialParams={{push: push}} options={{
           headerShown: false,

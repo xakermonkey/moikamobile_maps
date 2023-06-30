@@ -39,7 +39,6 @@ function LoginScreen({ navigation }) {
                 return;
             }
             const res = await axios.get(domain_web + "/get_code_region");
-            // console.log(res);
             setRegions(res.data);
             setSelectReg(0)
 
@@ -53,9 +52,7 @@ function LoginScreen({ navigation }) {
             setRepeatFunc(() => checkInternet);
             setNetworkError(true);
         }
-
     }
-
 
     const checkInternet = async () =>{
         setTitleError("Пытаемся установить соединение с сервером");

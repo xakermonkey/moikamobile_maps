@@ -23,17 +23,21 @@ function FaQ({ navigation }) {
   const [networkError, setNetworkError] = useState(false);
   const [titleError, setTitleError] = useState("Пытаемся установить соединение с сервером");
   const [repeatFunc, setRepeatFunc] = useState(null);
+  const [loading, setLoading] = useState(false); // Отображение загрузки
 
   const getDataFromServer = async () => {
+    setLoading(true);
     try {
       setTitleError("Пытаемся установить соединение с сервером");
       const res = await axios.get(domain_web + "/get_faq")
       setFAQ(res.data);
       setNetworkError(false);
+      setLoading(false);
     } catch {
       setTitleError("Ошибка при получении данных. Проверьте соединение.");
       setRepeatFunc(() => checkInternet);
       setNetworkError(true);
+      setLoading(false);
     }
 
   }
@@ -87,7 +91,7 @@ function FaQ({ navigation }) {
   return (
     <SafeAreaView style={styles.container} >
       <StatusBar />
-      {select != [] ? <View showsVerticalScrollIndicator='false' style={styles.main}>
+      {!loading ? <View showsVerticalScrollIndicator='false' style={styles.main}>
         {faq.map((obj, ind) => {
           return (<Answer key={ind} obj={obj} ind={ind} />)
         })}

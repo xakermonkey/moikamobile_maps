@@ -49,6 +49,8 @@ function VerificationCodeScreen({ navigation, route }) {
             setNetworkError(false);
             try {
                 const res = await axios.post(domain_mobile + "/api/set_code", { "number": route.params.number, "code": code });
+                console.log(res.data.user.location.location);
+                console.log(res.data.user.location);
                 if (res.data.status) {
                     await AsyncStorage.setItem("token", res.data.token);
                     await AsyncStorage.setItem("phone", route.params.number);

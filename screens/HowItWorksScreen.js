@@ -48,7 +48,6 @@ function HowItWorksScreen({ navigation }) {
   }, [navigation]);
 
   const handlePlay = (index) => {
-    console.log(videos[index][2]);
     setVideos((prevVideos) => {
       const newVideos = [...prevVideos];
       newVideos[index][2] = true;
