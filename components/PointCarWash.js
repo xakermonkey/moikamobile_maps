@@ -1,16 +1,20 @@
 import React, { useRef, useLayoutEffect, useState, useCallback } from 'react';
 import { ActivityIndicator, StyleSheet, View, Text, Dimensions, Alert, TouchableOpacity, Image, Platform } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
+import { Ionicons, AntDesign } from '@expo/vector-icons';
 import axios from 'axios';
 import { domain_web } from '../domain';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { CommonActions, useFocusEffect } from '@react-navigation/native';
-import Carousel, { Pagination } from 'react-native-snap-carousel';
+// import Carousel, { Pagination } from 'react-native-snap-carousel';
 import { StatusBar } from 'expo-status-bar';
 import FastImage from 'react-native-fast-image';
 import { Skeleton } from 'react-native-skeleton-loaders'
 import NetInfo from "@react-native-community/netinfo";
 import ErrorNetwork from '../components/ErrorNetwork';
+
+import Carousel from 'react-native-reanimated-carousel';
+import PaginationDot from 'react-native-animated-pagination-dot'
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
 
 function PointCarWash({ navigation, route }) {
 
@@ -167,31 +171,85 @@ function PointCarWash({ navigation, route }) {
 
   const horizontalCarousel = ({ item, index }) => {
     return ( // Внутрянняя
-      <View style={{ width: "100%", height: "87%" }} >
-        <Carousel
-        enableMomentum={true}
-        decelerationRate={0.9}
-          data={photo[item]}
-          renderItem={renderPhoto}
-          sliderWidth={Dimensions.get("window").width * 0.9}
-          itemWidth={Dimensions.get("window").width * 0.8}
-          onSnapToItem={ind => setCurrentIndex([...currentIndex.slice(0, index), ind, ...currentIndex.slice(index + 1,)])}
+      <View>
+        <View style={{ alignItems: 'flex-end' }}>
 
-        />
-        <Text style={{ textAlign: 'center', fontSize: 18, fontFamily: 'Raleway_700Bold', color: '#fff', marginTop: '2%' }} >{item}</Text>
-        <Pagination
-          activeDotIndex={currentIndex[index]}
-          dotsLength={photo[item].length}
-          dotStyle={{ backgroundColor: '#7BCFD6', width: 15, height: 15, borderRadius: 50 }}
-        />
+          <Carousel
+            panGestureHandlerProps={{
+              activeOffsetX: [-10, 10],
+            }}
+            loop={false}
+            width={Dimensions.get("window").width}
+            height={Dimensions.get("window").height * 0.8}
+            data={photo[item]}
+            scrollAnimationDuration={1000}
+            onSnapToItem={ind => setCurrentIndex([...currentIndex.slice(0, index), ind, ...currentIndex.slice(index + 1,)])}
+            renderItem={renderPhoto}
+          />
+
+        </View>
+        <View style={{ alignItems: 'center' }}>
+          <Text style={{ textAlign: 'center', fontSize: 18, fontFamily: 'Raleway_700Bold', color: '#fff', marginTop: '2%' }} >{item}</Text>
+          <PaginationDot
+            activeDotColor={'#7BCFD6'}
+            curPage={currentIndex[index]}
+            maxPage={photo[item].length}
+            sizeRatio={1.6}
+          /></View>
       </View>
+      // <View style={{ width: "100%", height: "87%" }} >
+      //   <Carousel
+      //   // enableMomentum={true}
+      //   // decelerationRate={0.9}
+      //     data={photo[item]}
+      //     renderItem={renderPhoto}
+      //     sliderWidth={Dimensions.get("window").width * 0.9}
+      //     itemWidth={Dimensions.get("window").width * 0.8}
+      //     onSnapToItem={ind => setCurrentIndex([...currentIndex.slice(0, index), ind, ...currentIndex.slice(index + 1,)])}
+
+      //   />
+      //   <Text style={{ textAlign: 'center', fontSize: 18, fontFamily: 'Raleway_700Bold', color: '#fff', marginTop: '2%' }} >{item}</Text>
+      //   <Pagination
+      //     activeDotIndex={currentIndex[index]}
+      //     dotsLength={photo[item].length}
+      //     dotStyle={{ backgroundColor: '#7BCFD6', width: 15, height: 15, borderRadius: 50 }}
+      //   />
+      // </View>
     )
   }
 
   return ( // Внешняя
-    <View style={styles.container}>
-      <StatusBar />
-      <Pagination
+      <View style={styles.container}>
+        <StatusBar />
+
+        <View style={{ flexDirection: 'row' }}>
+          <View style={{ marginLeft: '3%', justifyContent: 'center', width: '5%' }}>
+            
+            <PaginationDot
+              activeDotColor={'#7BCFD6'}
+              curPage={selectFilt}
+              maxPage={filt.length}
+              sizeRatio={1.6}
+              vertical={true}
+            />
+            </View>
+
+          <Carousel
+            loop={false}
+            panGestureHandlerProps={{
+              activeOffsetY: [-10, 10],
+            }}
+            width={Dimensions.get("window").width}
+            height={Dimensions.get("window").height}
+            data={filt}
+            scrollAnimationDuration={700}
+            onSnapToItem={(ind) => { setSelectFilt(ind); }}
+            renderItem={horizontalCarousel}
+            vertical={true}
+          />
+
+        </View>
+        {/* <Pagination
         activeDotIndex={selectFilt}
         dotsLength={filt.length}
         vertical={true}
@@ -202,8 +260,8 @@ function PointCarWash({ navigation, route }) {
       />
       <View style={{ alignItems: 'flex-end', width: "100%" }}>
         <Carousel
-        enableMomentum={true}
-        decelerationRate={0.9}
+        // enableMomentum={false}
+        // decelerationRate={'normal'}
           ref={carouselRef}
           data={filt}
           renderItem={horizontalCarousel}
@@ -212,9 +270,10 @@ function PointCarWash({ navigation, route }) {
           vertical={true}
           onSnapToItem={(ind) => { setSelectFilt(ind); }}
         // containerCustomStyle={{backgroundColor:'#f0f'}}
-        /></View>
+        />
+        </View> */}
 
-    </View>
+      </View>
   );
 }
 

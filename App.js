@@ -88,7 +88,7 @@ export default function App() {
   // }
 
   return (
-    <GestureHandlerRootView style={{ flex: 1 }}>
+    // <GestureHandlerRootView style={{ flex: 1 }}>
     <NavigationContainer
     // onReady={componentDidMount} 
     >
@@ -122,7 +122,7 @@ export default function App() {
         }} />
       </Stack.Navigator>
     </NavigationContainer>
-    </GestureHandlerRootView>
+    // </GestureHandlerRootView>
   );
 
 }
