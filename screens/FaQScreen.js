@@ -10,6 +10,7 @@ import { domain_web } from "../domain";
 import { StatusBar } from 'expo-status-bar';
 import NetInfo from "@react-native-community/netinfo";
 import ErrorNetwork from '../components/ErrorNetwork';
+import { Skeleton, SkeletonGroup } from 'react-native-skeleton-loaders'
 
 const Stack = createNativeStackNavigator();
 
@@ -86,11 +87,16 @@ function FaQ({ navigation }) {
   return (
     <SafeAreaView style={styles.container} >
       <StatusBar />
-      <View showsVerticalScrollIndicator='false' style={styles.main}>
+      {select != [] ? <View showsVerticalScrollIndicator='false' style={styles.main}>
         {faq.map((obj, ind) => {
           return (<Answer key={ind} obj={obj} ind={ind} />)
         })}
-      </View>
+      </View> : 
+      <View style={{paddingHorizontal: '5%'}}>
+      <SkeletonGroup numberOfItems={50} direction="column" stagger={{ delay: 1 }}>
+        <Skeleton color='#7C8183' w={'100%'} h={50} />
+      </SkeletonGroup>
+    </View>}
     </SafeAreaView>
   );
 }

@@ -48,7 +48,7 @@ export function DrawerContent(props) {
     }
 
     const showNotWorking = () => {
-        Alert.alert("Внимание", "В данной автомойки пока нет открытых боксов");
+        Alert.alert("Уведомление", "В настоящее время запись невозможна. Пожалуйста, попробуйте позже");
     }
 
     if (washer == null){

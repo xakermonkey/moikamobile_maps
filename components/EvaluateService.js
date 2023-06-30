@@ -71,7 +71,7 @@ function EvaluateService({ navigation, route }) {
       <Image blurRadius={91} style={[StyleSheet.absoluteFill, styles.image]} source={require('../assets/images/blur_background.png')} resizeMode='cover' />
       {/* <BlurView intensity={100} style={styles.blurContainer}> */}
       <View style={styles.blurContainer}>
-        <View style={[styles.row, { justifyContent: 'center', marginTop: '5%', width: "100%" }]}>
+        <View style={[styles.row, { justifyContent: 'center', marginTop: '10%', width: "100%" }]}>
           <TouchableOpacity style={{ flex: 1 }} onPress={() => navigation.navigate('OrderDetails')} activeOpacity={0.7} >
             <Ionicons name='close' size={28} color={'#7CD0D7'} />
           </TouchableOpacity>
@@ -98,7 +98,7 @@ function EvaluateService({ navigation, route }) {
           start={[0, 1]}
           style={styles.gradient_background_comment} >
 
-          <TextInput style={styles.text} multiline={true} value={text} onChangeText={setText} placeholder='комментарий' placeholderTextColor={'#B2B2B2'} />
+          <TextInput style={styles.text} multiline={true} value={text} onChangeText={setText} textAlignVertical='top' placeholder='комментарий' placeholderTextColor={'#B2B2B2'} />
         </LinearGradient>
 
         <TouchableOpacity activeOpacity={0.8} onPress={addComment} style={{ marginTop: '5%' }} >

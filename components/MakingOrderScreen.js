@@ -100,6 +100,7 @@ function MakingOrderModal({ navigation }) {
 
       <Stack.Screen name="OrderСompletion" component={OrderСompletion} options={{
         headerShown: false,
+        gestureEnabled: false,
       }} />
     </Stack.Navigator>
   )

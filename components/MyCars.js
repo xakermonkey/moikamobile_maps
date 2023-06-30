@@ -28,6 +28,7 @@ function MyCars({ navigation }) {
       setTitleError("Успешно!");
       setCars(res.data);
       setNetworkError(false);
+      setLoading(false);
     } catch {
       setTitleError("Ошибка при получении данных. Проверьте соединение.");
       setRepeatFunc(() => checkInternet);
@@ -73,7 +74,6 @@ function MyCars({ navigation }) {
     });
     (async () => {
       await checkInternet();
-      setLoading(false);
     })();
   }, [navigation])
 
@@ -165,6 +165,7 @@ function MyCars({ navigation }) {
             ListEmptyComponent={<EmptyComponent />}
             keyExtractor={item => item.id}
             renderItem={carView}
+          showsVerticalScrollIndicator={false}
           />
         </LinearGradient>
 
