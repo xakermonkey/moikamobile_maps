@@ -80,7 +80,13 @@ function DataScreen({ navigation }) {
             let location = await Location.getLastKnownPositionAsync();
             if (location != null) {
                 let geocod = await Location.reverseGeocodeAsync({ latitude: location.coords.latitude, longitude: location.coords.longitude });
-                setLocation(geocod[0].city)
+                if (country.indexOf(geocod[0].city) != -1){
+                    setLocation(geocod[0].city)
+                }else{
+                    Alert.alert("Упс...", "К сожалению, наш сервис пока не работает в вашем городе. Но вы можете всегда им воспользоваться в любом из списка.")
+                    setLocation(country[0]);
+                }
+                
             }
         } else {
             Alert.alert("Внимание", "Необходимо включить определение геопозиции");
