@@ -3,9 +3,12 @@ import { View, StyleSheet, TouchableOpacity, Dimensions, Text, Platform, Image }
 import { Video } from 'expo-av';
 import { AntDesign } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import Carousel, { Pagination } from 'react-native-snap-carousel';
+// import Carousel, { Pagination } from 'react-native-snap-carousel';
 import { StatusBar } from 'expo-status-bar';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
+
+import Carousel from 'react-native-reanimated-carousel';
+import PaginationDot from 'react-native-animated-pagination-dot'
 
 function HowItWorksScreen({ navigation }) {
 
@@ -91,7 +94,17 @@ function HowItWorksScreen({ navigation }) {
     <View style={styles.container}>
       <StatusBar/>
       <View style={{ height:'70%' }}>
-        <Carousel
+      <Carousel
+                loop
+                width={Dimensions.get("window").width}
+                height={Dimensions.get("window").height * 0.65}
+                // autoPlay={true}
+                data={videos}
+                scrollAnimationDuration={500}
+                onSnapToItem={(index) => {setSelectSnap(index); handleStop(index);}}
+                renderItem={horizontalCarousel}
+            />
+        {/* <Carousel
         enableMomentum={true}
         decelerationRate={0.9}
           data={videos}
@@ -100,18 +113,27 @@ function HowItWorksScreen({ navigation }) {
           sliderWidth={Dimensions.get("window").width}
           itemWidth={Dimensions.get('window').width}
           onSnapToItem={(ind) => { setSelectSnap(ind); handleStop(ind); }}
-        />
+        /> */}
         </View>
       <View style={{ height:'30%' }} >
         <Text style={{fontFamily:'Raleway_700Bold', textTransform:'uppercase', color:'#fff', fontSize:18, marginTop:'5%'}}>{videos[selectSnap][0]}</Text>
-        <Pagination
+        
+        <View style={{marginTop: '5%', alignItems:'center'}}>
+        <PaginationDot
+            activeDotColor={'#7BCFD6'}
+            curPage={selectSnap}
+            maxPage={videos.length}
+            sizeRatio={1.6}
+        />
+        </View>
+        {/* <Pagination
           activeDotIndex={selectSnap}
           dotsLength={videos.length}
           containerStyle={{ height: '100%' }}
           // dotColor='#7BCFD6'
           dotStyle={{ backgroundColor: '#7BCFD6', width: 15, height: 15, borderRadius: 50 }}
           dotContainerStyle={{ height: '5%' }}
-        />
+        /> */}
       </View>
     </View>
   );
