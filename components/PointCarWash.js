@@ -30,7 +30,7 @@ function PointCarWash({ navigation, route }) {
   const [titleError, setTitleError] = useState("Пытаемся установить соединение с сервером");
   const [repeatFunc, setRepeatFunc] = useState(null);
 
-  const carouselRef = useRef()
+  // const carouselRef = useRef()
 
   const goToCatalog = () => {
     navigation.navigate("Catalog");
@@ -152,7 +152,7 @@ function PointCarWash({ navigation, route }) {
   const renderPhoto = ({ item, index }) => {
     return (
       <View style={{ alignItems: 'center' }}>
-        {loading && <Skeleton color='#7C8183' w={'97%'} h={'100%'} />}
+        {loading && <Skeleton color='#7C8183' w={'80%'} h={'100%'} />}
         <FastImage
           style={{ width: "97%", height: "100%" }}
           width="97%"
@@ -182,7 +182,7 @@ function PointCarWash({ navigation, route }) {
             width={Dimensions.get("window").width}
             height={Dimensions.get("window").height * 0.8}
             data={photo[item]}
-            scrollAnimationDuration={1000}
+            scrollAnimationDuration={700}
             onSnapToItem={ind => setCurrentIndex([...currentIndex.slice(0, index), ind, ...currentIndex.slice(index + 1,)])}
             renderItem={renderPhoto}
           />

@@ -33,7 +33,7 @@ Notifications.setNotificationHandler({
 export default function App() {
 
   const [push, setPush] = useState(null);
-  
+
   useEffect(() => {
     (async () => {
       await AsyncStorage.setItem("sorted", "0");
@@ -88,41 +88,41 @@ export default function App() {
   // }
 
   return (
-    // <GestureHandlerRootView style={{ flex: 1 }}>
-    <NavigationContainer
-    // onReady={componentDidMount} 
-    >
-      <Stack.Navigator initialRouteName='Login' >
-        <Stack.Screen name="Login" component={LoginScreen} options={{
-          headerShown: false,
-        }} />
-        <Stack.Screen name="how_it_works" component={HowItWorksScreen} />
-        <Stack.Screen name="VerificationCode" component={VerificationCodeScreen} options={{
-          title: '',
-          headerShadowVisible: false,
-          headerStyle: {
-            backgroundColor: '#6E7476',
-          },
-        }} />
-        <Stack.Screen name="Data" component={DataScreen} options={{
-          title: 'ВАШИ ДАННЫЕ',
-          headerBackTitleVisible: false,
-          headerShadowVisible: false,
-          headerStyle: {
-            backgroundColor: '#6E7476',
-          },
-          headerTintColor: '#fff',
-          headerTitleStyle: {
-            fontWeight: 'bold',
-            fontFamily: 'Raleway_700Bold',
-          },
-        }} />
-        <Stack.Screen name="MainMenu" component={MainMenuScreen} initialParams={{push: push}} options={{
-          headerShown: false,
-        }} />
-      </Stack.Navigator>
-    </NavigationContainer>
-    // </GestureHandlerRootView>
+    <GestureHandlerRootView style={{ flex: 1 }}>
+      <NavigationContainer
+      // onReady={componentDidMount} 
+      >
+        <Stack.Navigator initialRouteName='Login' >
+          <Stack.Screen name="Login" component={LoginScreen} options={{
+            headerShown: false,
+          }} />
+          <Stack.Screen name="how_it_works" component={HowItWorksScreen} />
+          <Stack.Screen name="VerificationCode" component={VerificationCodeScreen} options={{
+            title: '',
+            headerShadowVisible: false,
+            headerStyle: {
+              backgroundColor: '#6E7476',
+            },
+          }} />
+          <Stack.Screen name="Data" component={DataScreen} options={{
+            title: 'ВАШИ ДАННЫЕ',
+            headerBackTitleVisible: false,
+            headerShadowVisible: false,
+            headerStyle: {
+              backgroundColor: '#6E7476',
+            },
+            headerTintColor: '#fff',
+            headerTitleStyle: {
+              fontWeight: 'bold',
+              fontFamily: 'Raleway_700Bold',
+            },
+          }} />
+          <Stack.Screen name="MainMenu" component={MainMenuScreen} initialParams={{ push: push }} options={{
+            headerShown: false,
+          }} />
+        </Stack.Navigator>
+      </NavigationContainer>
+    </GestureHandlerRootView>
   );
 
 }

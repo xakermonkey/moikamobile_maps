@@ -325,12 +325,13 @@ function CarWashes({ navigation, route }) {
 
   const EmptyComponent = () => { // рендеринг в случае пустого массива моек
     return (
-      // <SkeletonGroup numberOfItems={4} direction="column" stagger={{ delay: 1 }}>
-      //   <Skeleton color='#7C8183' w={'100%'} h={100} />
-      // </SkeletonGroup>
+      !loading ?
+      <SkeletonGroup numberOfItems={4} direction="column" stagger={{ delay: 1 }}>
+        <Skeleton color='#7C8183' w={'100%'} h={100} />
+      </SkeletonGroup>
+      :
       <View style={{ marginTop: '5%' }}>
         <Text style={[styles.stocks, { textAlign: 'center' }]}>В данном городе автомоек с такими фильтрами нет</Text>
-        {/* <Skeleton color='#7C8183' w={'97%'} h={'100%'} /> */}
       </View>
     )
   }

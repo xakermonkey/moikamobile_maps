@@ -19,7 +19,7 @@ function HowItWorksScreen({ navigation }) {
     ["Оформление заказа", Platform.OS == 'ios' ? require('../assets/videos/ios/order.mp4') : require('../assets/videos/order.mp4'), false],
     ["Добавление автомобиля", Platform.OS == 'ios' ? require('../assets/videos/ios/add_car.mp4') : require('../assets/videos/add_car.mp4'), false]]);
 
-    const videoRefs = useRef(videos.map(() => React.createRef()));
+  const videoRefs = useRef(videos.map(() => React.createRef()));
 
   const [selectSnap, setSelectSnap] = useState(0);
 
@@ -34,10 +34,10 @@ function HowItWorksScreen({ navigation }) {
       headerTintColor: '#fff',
       // headerTitleStyle: {
       //   fontWeight: 'bold',
-        fontFamily: 'Raleway_700Bold',
+      fontFamily: 'Raleway_700Bold',
       // },
       headerLeft: () => (
-        <TouchableOpacity style={{left:Platform.OS == 'ios' ? 15 : 0}} activeOpacity={0.7} onPress={() => navigation.goBack()}>
+        <TouchableOpacity style={{ left: Platform.OS == 'ios' ? 15 : 0 }} activeOpacity={0.7} onPress={() => navigation.goBack()}>
           <AntDesign name="close" size={28} color={'#7CD0D7'} />
         </TouchableOpacity>
       )
@@ -70,20 +70,20 @@ function HowItWorksScreen({ navigation }) {
 
   const horizontalCarousel = ({ item, index }) => {
     return (
-      <View style={{ flex: 1, justifyContent: "center", alignItems: 'center',padding:10 }} >
+      <View style={{ flex: 1, justifyContent: "center", alignItems: 'center', padding: 10 }} >
         <Video
           ref={videoRefs.current[index]}
-          style={{ height: "100%", width: "100%", borderRadius:5  }}
+          style={{ height: "100%", width: "100%", borderRadius: 5 }}
           source={videos[index][1]}
           useNativeControls
           resizeMode="contain"
           onPlaybackStatusUpdate={status => setStatus(() => status)}
         />
         {!videos[index][2] && (
-        <TouchableOpacity style={{position: 'absolute'}} onPress={() => handlePlay(index)} >
-          <MaterialCommunityIcons name="play" size={64} color="#fff" />
-        </TouchableOpacity>
-      )}
+          <TouchableOpacity style={{ position: 'absolute' }} onPress={() => handlePlay(index)} >
+            <MaterialCommunityIcons name="play" size={64} color="#fff" />
+          </TouchableOpacity>
+        )}
 
       </View>
     )
@@ -91,18 +91,21 @@ function HowItWorksScreen({ navigation }) {
 
   return (
     <View style={styles.container}>
-      <StatusBar/>
-      <View style={{ height:'70%' }}>
-      <Carousel
-                loop
-                width={Dimensions.get("window").width}
-                height={Dimensions.get("window").height * 0.65}
-                // autoPlay={true}
-                data={videos}
-                scrollAnimationDuration={500}
-                onSnapToItem={(index) => {setSelectSnap(index); handleStop(index);}}
-                renderItem={horizontalCarousel}
-            />
+      <StatusBar />
+      <View style={{ height: '70%' }}>
+        <Carousel
+          panGestureHandlerProps={{
+            activeOffsetX: [-10, 10],
+          }}
+          loop={false}
+          width={Dimensions.get("window").width}
+          height={Dimensions.get("window").height * 0.65}
+          data={videos}
+          scrollAnimationDuration={700}
+          onSnapToItem={(index) => { setSelectSnap(index); }}
+          onScrollBegin={() => { handleStop(); }}
+          renderItem={horizontalCarousel}
+        />
         {/* <Carousel
         enableMomentum={true}
         decelerationRate={0.9}
@@ -113,17 +116,17 @@ function HowItWorksScreen({ navigation }) {
           itemWidth={Dimensions.get('window').width}
           onSnapToItem={(ind) => { setSelectSnap(ind); handleStop(ind); }}
         /> */}
-        </View>
-      <View style={{ height:'30%' }} >
-        <Text style={{fontFamily:'Raleway_700Bold', textTransform:'uppercase', color:'#fff', fontSize:18, marginTop:'5%'}}>{videos[selectSnap][0]}</Text>
-        
-        <View style={{marginTop: '5%', alignItems:'center'}}>
-        <PaginationDot
+      </View>
+      <View style={{ height: '30%' }} >
+        <Text style={{ fontFamily: 'Raleway_700Bold', textTransform: 'uppercase', color: '#fff', fontSize: 18, marginTop: '5%' }}>{videos[selectSnap][0]}</Text>
+
+        <View style={{ marginTop: '5%', alignItems: 'center' }}>
+          <PaginationDot
             activeDotColor={'#7BCFD6'}
             curPage={selectSnap}
             maxPage={videos.length}
             sizeRatio={1.6}
-        />
+          />
         </View>
         {/* <Pagination
           activeDotIndex={selectSnap}

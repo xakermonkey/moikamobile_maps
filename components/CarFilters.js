@@ -13,6 +13,7 @@ import { StatusBar } from 'expo-status-bar';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import NetInfo from "@react-native-community/netinfo";
 import ErrorNetwork from '../components/ErrorNetwork';
+import { Skeleton, SkeletonGroup } from 'react-native-skeleton-loaders'
 
 function CarFilters({ navigation, route }) {
 
@@ -27,6 +28,7 @@ function CarFilters({ navigation, route }) {
   const [networkError, setNetworkError] = useState(false);
   const [titleError, setTitleError] = useState("Пытаемся установить соединение с сервером");
   const [repeatFunc, setRepeatFunc] = useState(null);
+  const [loading, setLoading] = useState(true);
 
 
   const getDataFromServer = async () => {
@@ -35,10 +37,12 @@ function CarFilters({ navigation, route }) {
       const res = await axios.get(domain_web + "/get_filter");
       setFilters([...res.data, { name: "Безналичный расчет" }, { name: "Наличный расчет" }])
       setNetworkError(false);
+      setLoading(false);
     } catch {
       setTitleError("Ошибка при отправке данных. Проверьте соединение.");
       setRepeatFunc(() => checkInternet);
       setNetworkError(true);
+      setLoading(false);
     }
 
   }
@@ -222,7 +226,13 @@ function CarFilters({ navigation, route }) {
             style={styles.gradient_background} >
             <View>
               <Text style={styles.subtext}>фильтры</Text>
-              {filters.map((obj, id) => {
+              {loading ?
+              <View style={{marginTop: '5%'}}>
+              <SkeletonGroup numberOfItems={7} direction="column" stagger={{ delay: 1 }}>
+                <Skeleton color='#7C8183' w={'100%'} h={40} />
+              </SkeletonGroup>
+              </View> :
+               filters.map((obj, id) => {
                 return (
                   <View key={id} style={styles.checkbox}>
                     <CheckBox containerStyle={{ padding: 0, margin: 0, marginRight: 0, marginLeft: 0, backgroundColor: null }}
