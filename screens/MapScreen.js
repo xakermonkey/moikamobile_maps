@@ -132,50 +132,64 @@ function MapScreen({ navigation, route }) {
   const createRoute = async () => {
     setDisable(true);
     const state = await NetInfo.fetch();
-      if (!state.isConnected) {
-        Alert.alert("Ошибка", "Для построения маршрута необходимо включить интернет");
-        setDisable(false);
-        return;
-      }
+    if (!state.isConnected) {
+      Alert.alert("Ошибка", "Для построения маршрута необходимо включить интернет");
+      setDisable(false);
+      return;
+    }
     if (route.params?.washes != undefined) { // если есть адрес автомойки в которой открыт заказ
-        if (map.current) {
-          let { status } = await Location.getForegroundPermissionsAsync(); // проверка на наличие прав
-          if (status !== 'granted') { // если нет прав иил не получена геопозиция
-            Alert.alert("Ошибка", "Для построения маршрута необходимо включить определение геопозиции");
-            setDisable(false);
+      if (map.current) {
+        let { status } = await Location.getForegroundPermissionsAsync(); // проверка на наличие прав
+        if (status !== 'granted') { // если нет прав иил не получена геопозиция
+          Alert.alert("Ошибка", "Для построения маршрута необходимо включить определение геопозиции");
+          setDisable(false);
+          return;
+        }
+        const loc = await Location.getCurrentPositionAsync(); // получение ТОЧНОЙ позиции
+        map.current.findDrivingRoutes([{ lon: loc.coords.longitude, lat: loc.coords.latitude }, { lon: parseFloat(route.params.washes.lon), lat: parseFloat(route.params.washes.lat) }], (event) => {
+          if (event.routes.length == 0) {
+            Alert.alert("Внимание", "Не удалось построить маршрут"); // Приятной дороги // Идет поиск самого короткого маршрута
+            map.current.setCenter({ lon: loc.coords.longitude, lat: loc.coords.latitude }, 12, 0, 0, 1, Animation.SMOOTH);
             return;
           }
-          const loc = await Location.getCurrentPositionAsync(); // получение ТОЧНОЙ позиции
-          map.current.findDrivingRoutes([{ lon: loc.coords.longitude, lat: loc.coords.latitude }, { lon: parseFloat(route.params.washes.lon), lat: parseFloat(route.params.washes.lat) }], (event) => {
-            if (event.routes.length == 0) {
-              Alert.alert("Внимание", "Не удалось построить маршрут"); // Приятной дороги // Идет поиск самого короткого маршрута
-              map.current.setCenter({ lon: loc.coords.longitude, lat: loc.coords.latitude }, 12, 0, 0, 1, Animation.SMOOTH);
-              return;
-            }
-            Alert.alert("Маршрут построен", "Приятной дороги"); // Приятной дороги // Идет поиск самого короткого маршрута
-            const len = event.routes[0].sections.length
-            let arr = new Array();
-            for (let i = 0; i < len; i++) {
-              arr = [...arr, ...event.routes[0].sections[i].points];
-            }
-            setRoute(arr);
-            setDisable(false);
-          })
-        }
+          Alert.alert("Маршрут построен", "Приятной дороги"); // Приятной дороги // Идет поиск самого короткого маршрута
+          const len = event.routes[0].sections.length
+          let arr = new Array();
+          for (let i = 0; i < len; i++) {
+            arr = [...arr, ...event.routes[0].sections[i].points];
+          }
+          setRoute(arr);
+          setDisable(false);
+        })
       }
-    setDisable(false);
     }
+    setDisable(false);
+  }
 
   useLayoutEffect(() => {
-    if (route.params?.push) {
-      setTimeout(() => {
-        navigation.navigate("PersonalAccount");
-        navigation.navigate("MyOrders");
-        navigation.navigate('OrderDetails', { orderId: route.params.push.data.order });
-        navigation.navigate('EvaluateService', { orderId: route.params.push.data.order });
-      }, 1000);
-    }
+    // if (route.params?.push) {
+    //   setTimeout(() => {
+    //     navigation.navigate("PersonalAccount");
+    //     navigation.navigate("MyOrders");
+    //     navigation.navigate('OrderDetails', { orderId: route.params.push.data.order });
+    //     navigation.navigate('EvaluateService', { orderId: route.params.push.data.order });
+    //   }, 1000);
+    // }
     (async () => {
+      if (Platform.OS == 'android') {
+        const remoteMessage = await AsyncStorage.getItem('remoteMessage');
+        console.log('remoteMessage', remoteMessage);
+        if (remoteMessage == 'new_stock') {
+          navigation.navigate("Catalog");
+        } else if (remoteMessage) {
+          navigation.navigate("PersonalAccount");
+          navigation.navigate("MyOrders");
+          navigation.navigate('OrderDetails', { orderId: remoteMessage });
+          navigation.navigate('EvaluateService', { orderId: remoteMessage });
+        }
+        await AsyncStorage.removeItem('remoteMessage');
+      }
+
       await navigation.dispatch(DrawerActions.closeDrawer());
       initMap();
       const loc = await getCity();
@@ -235,14 +249,17 @@ function MapScreen({ navigation, route }) {
           return;
         }
       }
-
     });
 
     messaging().onNotificationOpenedApp(remoteMessage => {
-      navigation.navigate("PersonalAccount");
-      navigation.navigate("MyOrders");
-      navigation.navigate('OrderDetails', { orderId: remoteMessage.data.order });
-      navigation.navigate('EvaluateService', { orderId: remoteMessage.data.order });
+      if (remoteMessage.data.category == 'successful') {
+        navigation.navigate("PersonalAccount");
+        navigation.navigate("MyOrders");
+        navigation.navigate('OrderDetails', { orderId: remoteMessage.data.order });
+        navigation.navigate('EvaluateService', { orderId: remoteMessage.data.order });
+      } else if (remoteMessage.data.category == 'new_stock') {
+        navigation.navigate("Catalog");
+      }
       return;
     });
 
@@ -337,36 +354,36 @@ function MapScreen({ navigation, route }) {
   findRoute = async () => { // поиск пути
     setDisable(true);
     const state = await NetInfo.fetch();
-      if (!state.isConnected) {
-        Alert.alert("Ошибка", "Для построения маршрута необходимо включить интернет");
-        setDisable(false);
-        return;
-      }
+    if (!state.isConnected) {
+      Alert.alert("Ошибка", "Для построения маршрута необходимо включить интернет");
+      setDisable(false);
+      return;
+    }
     if (washes != null) { // если есть адрес автомойки в которой открыт заказ
-        if (map.current) {
-          let { status } = await Location.getForegroundPermissionsAsync(); // проверка на наличие прав
-          if (status !== 'granted') { // если нет прав иил не получена геопозиция
-            Alert.alert("Ошибка", "Для построения маршрута необходимо включить определение геопозиции");
-            setDisable(false);
+      if (map.current) {
+        let { status } = await Location.getForegroundPermissionsAsync(); // проверка на наличие прав
+        if (status !== 'granted') { // если нет прав иил не получена геопозиция
+          Alert.alert("Ошибка", "Для построения маршрута необходимо включить определение геопозиции");
+          setDisable(false);
+          return;
+        }
+        const loc = await Location.getCurrentPositionAsync(); // получение ТОЧНОЙ позиции
+        console.warn({ lon: loc.coords.longitude, lat: loc.coords.latitude });
+        map.current.findDrivingRoutes([{ lon: loc.coords.longitude, lat: loc.coords.latitude }, { lon: parseFloat(washes.lon), lat: parseFloat(washes.lat) }], (event) => {
+          if (event.routes.length == 0) {
+            Alert.alert("Внимание", "Не удалось построить маршрут");
+            map.current.setCenter({ lon: loc.coords.longitude, lat: loc.coords.latitude }, 12, 0, 0, 1, Animation.SMOOTH);
             return;
           }
-          const loc = await Location.getCurrentPositionAsync(); // получение ТОЧНОЙ позиции
-          console.warn({ lon: loc.coords.longitude, lat: loc.coords.latitude });
-          map.current.findDrivingRoutes([{ lon: loc.coords.longitude, lat: loc.coords.latitude }, { lon: parseFloat(washes.lon), lat: parseFloat(washes.lat) }], (event) => {
-            if (event.routes.length == 0) {
-              Alert.alert("Внимание", "Не удалось построить маршрут");
-              map.current.setCenter({ lon: loc.coords.longitude, lat: loc.coords.latitude }, 12, 0, 0, 1, Animation.SMOOTH);
-              return;
-            }
-            Alert.alert("Маршрут построен", "Приятной дороги"); // Приятной дороги // Идет поиск самого короткого маршрута
-            const len = event.routes[0].sections.length
-            let arr = new Array();
-            for (let i = 0; i < len; i++) {
-              arr = [...arr, ...event.routes[0].sections[i].points];
-            }
-            setRoute(arr);
-            setDisable(false);
-          })
+          Alert.alert("Маршрут построен", "Приятной дороги"); // Приятной дороги // Идет поиск самого короткого маршрута
+          const len = event.routes[0].sections.length
+          let arr = new Array();
+          for (let i = 0; i < len; i++) {
+            arr = [...arr, ...event.routes[0].sections[i].points];
+          }
+          setRoute(arr);
+          setDisable(false);
+        })
       }
     } else {
       Alert.alert("Внимание", "Чтобы построить маршрут, необходимо оформить заказ");

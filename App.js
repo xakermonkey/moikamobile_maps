@@ -43,6 +43,7 @@ export default function App() {
     setNotificationChannel();
 
     messaging().onMessage(async remoteMessage => {
+      console.log('onMessage', remoteMessage);
       await Notifications.scheduleNotificationAsync({
         content: {
           title: remoteMessage.notification.title,
@@ -52,12 +53,11 @@ export default function App() {
         trigger: null,
       });
     });
-
-
-    messaging().setBackgroundMessageHandler(async remoteMessage => {
-      setPush(remoteMessage);
-      return;
-    });
+    
+    // messaging().onNotificationOpenedApp(async remoteMessage => {
+    //   console.log('onNotificationOpenedApp');
+    //   return;
+    // });
 
   }, []);
 
