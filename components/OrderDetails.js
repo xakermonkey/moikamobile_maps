@@ -168,8 +168,8 @@ function OrderDetails({ navigation, route }) {
             <LinearGradient colors={['#00266F', '#7BCFD6']} start={[1, 0]} style={styles.gradient_line} />
           </View>
           <View style={styles.gradient_background_padding}>
-            <Text style={styles.subtext}>итого</Text>
-            <Text style={styles.text}>{order.status == "Готов" ? order.end_price : order.start_price}</Text>
+            <Text style={styles.subtext}>{order.status == "Готов" ? "итого" : "предварительная стоимость"}</Text>
+            <Text style={styles.text}>{order.status == "Готов" ? order.end_price : Math.floor(order.start_price * (1 - (parseInt(order.discount) / 100)))}</Text>
           </View>
         </LinearGradient>
         {order.status == "Готов" ?
