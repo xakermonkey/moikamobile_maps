@@ -156,20 +156,20 @@ function OrderDetails({ navigation, route }) {
             <Text style={styles.subtext}>информация</Text>
             {servise.map(obj => {
               return (<View key={obj[0]} style={styles.view_row}>
-                <Text style={styles.text}>{obj[0]}</Text>
-                <Text style={styles.text}>{obj[1]}</Text>
+                <Text style={[styles.text, { width: '70%' }]}>{obj[0]}</Text>
+                <Text style={styles.text}>{obj[1]} руб</Text>
               </View>)
             })}
             <LinearGradient colors={['#00266F', '#7BCFD6']} start={[1, 0]} style={styles.gradient_line} />
           </View>
           <View style={styles.gradient_background_padding}>
             <Text style={styles.subtext}>скидка</Text>
-            <Text style={styles.text}>{order.discount}</Text>
+            <Text style={styles.text}>{order.discount}%</Text>
             <LinearGradient colors={['#00266F', '#7BCFD6']} start={[1, 0]} style={styles.gradient_line} />
           </View>
           <View style={styles.gradient_background_padding}>
             <Text style={styles.subtext}>{order.status == "Готов" ? "итого" : "предварительная стоимость"}</Text>
-            <Text style={styles.text}>{order.status == "Готов" ? order.end_price : Math.floor(order.start_price * (1 - (parseInt(order.discount) / 100)))}</Text>
+            <Text style={styles.text}>{order.status == "Готов" ? order.end_price : Math.floor(order.start_price * (1 - (parseInt(order.discount) / 100)))} руб</Text>
           </View>
         </LinearGradient>
         {order.status == "Готов" ?

@@ -374,7 +374,7 @@ function OrderСompletion({ navigation }) {
                 return (
                   <View style={styles.view_row} key={obj.id}>
                     <Text style={[styles.text, { width: '70%' }]}>{obj.name}</Text>
-                    <Text style={styles.text}>{obj.price}</Text>
+                    <Text style={styles.text}>{obj.price} руб</Text>
                   </View>
                 )
               })}
@@ -387,7 +387,7 @@ function OrderСompletion({ navigation }) {
             </View>
             <View style={styles.gradient_background_padding}>
               <Text style={styles.subtext}>итого</Text>
-              <Text style={styles.text}>{Math.ceil(parseInt(total) * (1 - parseInt(sale) / 100))}</Text>
+              <Text style={styles.text}>{Math.ceil(parseInt(total) * (1 - parseInt(sale) / 100))} руб</Text>
             </View>
           </LinearGradient>
 
