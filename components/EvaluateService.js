@@ -93,12 +93,20 @@ function EvaluateService({ navigation, route }) {
           </View>
         </LinearGradient>
 
+        <Text style={styles.counter}>{text.length}/200</Text>
         <LinearGradient
           colors={['#01010199', '#35343499']}
           start={[0, 1]}
           style={styles.gradient_background_comment} >
-
-          <TextInput style={styles.text} multiline={true} value={text} onChangeText={setText} textAlignVertical='top' placeholder='комментарий' placeholderTextColor={'#B2B2B2'} />
+          <TextInput
+            style={styles.text}
+            maxLength={200}
+            multiline={true}
+            value={text}
+            onChangeText={setText}
+            textAlignVertical='top'
+            placeholder='комментарий'
+            placeholderTextColor={'#B2B2B2'} />
         </LinearGradient>
 
         <TouchableOpacity activeOpacity={0.8} onPress={addComment} style={{ marginTop: '5%' }} >
@@ -154,11 +162,17 @@ const styles = StyleSheet.create({
     // minHeight: '20%',
   },
   text: {
-    marginTop: '2%',
+    // marginTop: '2%',
     fontSize: 14,
     color: '#fff',
     fontFamily: 'Raleway_400Regular',
     minHeight: '18%',
+  },
+  counter: {
+    marginTop: '2%',
+    fontSize: 14,
+    color: '#fff',
+    fontFamily: 'Raleway_400Regular',
   },
 
   text_btn: {
