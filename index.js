@@ -12,7 +12,6 @@ import { AppRegistry } from 'react-native';
 import messaging from '@react-native-firebase/messaging';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-
 messaging().setBackgroundMessageHandler(async (remoteMessage) => {
     if (remoteMessage.data.category == 'successful') {
         await AsyncStorage.setItem("remoteMessage", remoteMessage.data.order);

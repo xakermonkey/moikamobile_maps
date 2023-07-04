@@ -268,9 +268,23 @@ function MapScreen({ navigation, route }) {
   const registerForPushNotificationsAsync = async () => {
     // const pushtoken = await AsyncStorage.getItem("pushToken");
     if (Device.isDevice) {
+      const { status: existingStatus } = await Notifications.getPermissionsAsync();
+      let finalStatus = existingStatus;
+      if (existingStatus !== 'granted') {
+        const { status } = await Notifications.requestPermissionsAsync();
+        finalStatus = status;
+      }
+      if (finalStatus !== 'granted') {
+        alert('Failed to get push token for push notification!');
+        return;
+      }
+
       const devicePushToken = (await Notifications.getDevicePushTokenAsync()).data
       console.log(devicePushToken);
-      console.log(await messaging().getToken());
+      if (Platform.OS == 'ios') {
+        await messaging().registerDeviceForRemoteMessages();
+        console.log(await messaging().getToken());
+      }
       // if (pushtoken == null) {
       try {
         const token = await AsyncStorage.getItem("token");
@@ -287,16 +301,6 @@ function MapScreen({ navigation, route }) {
 
       // }
 
-      const { status: existingStatus } = await Notifications.getPermissionsAsync();
-      let finalStatus = existingStatus;
-      if (existingStatus !== 'granted') {
-        const { status } = await Notifications.requestPermissionsAsync();
-        finalStatus = status;
-      }
-      if (finalStatus !== 'granted') {
-        alert('Failed to get push token for push notification!');
-        return;
-      }
       return devicePushToken;
     } else {
       alert('Must use physical device for Push Notifications');
@@ -359,7 +363,8 @@ function MapScreen({ navigation, route }) {
       setDisable(false);
       return;
     }
-    if (washes != null) { // если есть адрес автомойки в которой открыт заказ
+    // if (washes != null) { // если есть адрес автомойки в которой открыт заказ СТАБИЛЬНО ДЛЯ АНДРОЙДА
+    if (Object.keys(washes).length != 0) { // если есть адрес автомойки в которой открыт заказ
       if (map.current) {
         let { status } = await Location.getForegroundPermissionsAsync(); // проверка на наличие прав
         if (status !== 'granted') { // если нет прав иил не получена геопозиция
