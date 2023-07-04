@@ -94,8 +94,18 @@ function PriceListFor({ navigation, route }) {
   }
 
 
+  const removeServiceFromStorage = async () => {
+    let keys = await AsyncStorage.getAllKeys()
+    const stock = keys.filter(key => key.startsWith("stock_"));
+    await AsyncStorage.multiRemove(stock)
+    const serv = keys.filter(key => key.startsWith("servise_"));
+      await AsyncStorage.multiRemove(serv);
+  }
+
+
 
   const NextStep = async () => {
+    await removeServiceFromStorage();
     if (selectServise.length != 0) {
       await AsyncStorage.setItem("uncache", "true");
       if (selectStock.length != 0) {
