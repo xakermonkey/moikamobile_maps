@@ -364,7 +364,7 @@ function MapScreen({ navigation, route }) {
       return;
     }
     // if (washes != null) { // если есть адрес автомойки в которой открыт заказ СТАБИЛЬНО ДЛЯ АНДРОЙДА
-    if (Object.keys(washes).length != 0) { // если есть адрес автомойки в которой открыт заказ
+    if (Object.keys(washes).length != 0) { // если есть адрес автомойки в которой открыт заказ ДЛЯ АЙОС
       if (map.current) {
         let { status } = await Location.getForegroundPermissionsAsync(); // проверка на наличие прав
         if (status !== 'granted') { // если нет прав иил не получена геопозиция
@@ -373,7 +373,7 @@ function MapScreen({ navigation, route }) {
           return;
         }
         const loc = await Location.getCurrentPositionAsync(); // получение ТОЧНОЙ позиции
-        console.warn({ lon: loc.coords.longitude, lat: loc.coords.latitude });
+        // console.warn({ lon: loc.coords.longitude, lat: loc.coords.latitude });
         map.current.findDrivingRoutes([{ lon: loc.coords.longitude, lat: loc.coords.latitude }, { lon: parseFloat(washes.lon), lat: parseFloat(washes.lat) }], (event) => {
           if (event.routes.length == 0) {
             Alert.alert("Внимание", "Не удалось построить маршрут");
