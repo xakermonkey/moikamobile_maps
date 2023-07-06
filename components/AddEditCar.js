@@ -103,22 +103,22 @@ function AddEditCar({ navigation, route }) {
             }
           }
         );
-      }
-      setNetworkError(false);
-      if (res.data.status) {
-        if (route.params.id == null) {
-          const cars = await AsyncStorage.getItem("cars")
-          await AsyncStorage.setItem("cars", (parseFloat(cars) + 1).toString());
-        }
-
-        navigation.dispatch(
-          CommonActions.reset({
-            index: 0,
-            routes: [{ name: "PersonalAccountScreen" }, { name: "MyCars" }]
-          }));
-      } else {
         setNetworkError(false);
-        Alert.alert("Ошибка", "У Вас уже есть автомобиль с таким номером");
+        if (res.data.status) {
+          if (route.params.id == null) {
+            const cars = await AsyncStorage.getItem("cars")
+            await AsyncStorage.setItem("cars", (parseFloat(cars) + 1).toString());
+          }
+
+          navigation.dispatch(
+            CommonActions.reset({
+              index: 0,
+              routes: [{ name: "PersonalAccountScreen" }, { name: "MyCars" }]
+            }));
+        } else {
+          setNetworkError(false);
+          Alert.alert("Ошибка", "У Вас уже есть автомобиль с таким номером");
+        }
       }
     }
     catch (err) {
