@@ -12,12 +12,12 @@ import PaginationDot from 'react-native-animated-pagination-dot'
 
 function HowItWorksScreen({ navigation }) {
 
-  const [status, setStatus] = useState({});
+  const [status, setStatus] = useState([{}]);
 
   const [videos, setVideos] = useState([
-    ["Авторизация", Platform.OS == 'ios' ? require('../assets/videos/ios/auth.mp4') : require('../assets/videos/auth.mp4'), false],
-    ["Оформление заказа", Platform.OS == 'ios' ? require('../assets/videos/ios/order.mp4') : require('../assets/videos/order.mp4'), false],
-    ["Добавление автомобиля", Platform.OS == 'ios' ? require('../assets/videos/ios/add_car.mp4') : require('../assets/videos/add_car.mp4'), false]]);
+    ["Авторизация", Platform.OS == 'ios' ? require('../assets/videos/ios/auth.mp4') : require('../assets/videos/auth.mp4'), false, false],
+    ["Оформление заказа", Platform.OS == 'ios' ? require('../assets/videos/ios/order.mp4') : require('../assets/videos/order.mp4'), false, false],
+    ["Добавление автомобиля", Platform.OS == 'ios' ? require('../assets/videos/ios/add_car.mp4') : require('../assets/videos/add_car.mp4'), false, false]]);
 
   const videoRefs = useRef(videos.map(() => React.createRef()));
 
@@ -56,13 +56,13 @@ function HowItWorksScreen({ navigation }) {
     videoRefs.current[index].current.playAsync();
   };
 
-  const handleStop = (index) => {
+  const handleStop = () => {
     if (Platform.OS == 'android') {
-    setVideos((prevVideos) => {
-      const newVideos = prevVideos.map((video) => ({ ...video, [2]: false }));
-      return newVideos;
-    });
-  }
+      setVideos((prevVideos) => {
+        const newVideos = prevVideos.map((video) => ({ ...video, [2]: false }));
+        return newVideos;
+      });
+    }
     videoRefs.current.forEach((ref) => {
       ref.current.pauseAsync();
     });
@@ -79,9 +79,18 @@ function HowItWorksScreen({ navigation }) {
           source={videos[index][1]}
           useNativeControls
           resizeMode="contain"
-          onPlaybackStatusUpdate={status => setStatus(() => status)}
+          onPlaybackStatusUpdate={status => {
+            if (Platform.OS == 'android') {
+              setVideos((prevVideos) => {
+                const newVideos = [...prevVideos];
+                newVideos[index][2] = status.isPlaying;
+                newVideos[index][3] = status.isPlaying;
+                return newVideos;
+              });
+            }
+          }}
         />
-        {!videos[index][2] && (
+        {!videos[index][2] && !videos[index][3] && (
           <TouchableOpacity style={{ position: 'absolute' }} onPress={() => handlePlay(index)} >
             <MaterialCommunityIcons name="play" size={64} color="#fff" />
           </TouchableOpacity>
@@ -97,7 +106,7 @@ function HowItWorksScreen({ navigation }) {
       <View style={{ height: '70%' }}>
         <Carousel
           panGestureHandlerProps={{
-            activeOffsetX: [-10, 10],
+            activeOffsetX: [-30, 30],
           }}
           loop={false}
           width={Dimensions.get("window").width}
@@ -105,7 +114,7 @@ function HowItWorksScreen({ navigation }) {
           data={videos}
           scrollAnimationDuration={700}
           onSnapToItem={(index) => { setSelectSnap(index); }}
-          onScrollBegin={() => { handleStop(); }}
+          onScrollEnd={() => { handleStop(); }}
           renderItem={horizontalCarousel}
         />
         {/* <Carousel
