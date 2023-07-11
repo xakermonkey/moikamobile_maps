@@ -57,10 +57,12 @@ function HowItWorksScreen({ navigation }) {
   };
 
   const handleStop = (index) => {
+    if (Platform.OS == 'android') {
     setVideos((prevVideos) => {
       const newVideos = prevVideos.map((video) => ({ ...video, [2]: false }));
       return newVideos;
     });
+  }
     videoRefs.current.forEach((ref) => {
       ref.current.pauseAsync();
     });
