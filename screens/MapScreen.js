@@ -75,6 +75,12 @@ function MapScreen({ navigation, route }) {
     return loc;
   }
 
+  const checkPermissionAndEnableLocation = async () => {
+    let { status } = await Location.requestForegroundPermissionsAsync(); // запрос прав на определение геопозиции
+    const service = await Location.hasServicesEnabledAsync();
+    return status === 'granted' && service
+  }
+
 
   const getWasheses = async (loc) => {
     setTitleError("Пытаемся установить соединение с сервером");
@@ -108,8 +114,8 @@ function MapScreen({ navigation, route }) {
       setDrawer(false)
     }
     if (map.current) {
-      let { status } = await Location.requestForegroundPermissionsAsync(); // запрос прав на определение геопозиции
-      if (status !== 'granted') {
+      const status = await checkPermissionAndEnableLocation();
+      if (!status) {
         Alert.alert("Ошибка", "Необходимо включить определение геопозиции");
         return;
       }
@@ -139,8 +145,8 @@ function MapScreen({ navigation, route }) {
     }
     if (route.params?.washes != undefined) { // если есть адрес автомойки в которой открыт заказ
       if (map.current) {
-        let { status } = await Location.getForegroundPermissionsAsync(); // проверка на наличие прав
-        if (status !== 'granted') { // если нет прав иил не получена геопозиция
+        let status = await checkPermissionAndEnableLocation() // проверка на наличие прав
+        if (!status) { // если нет прав иил не получена геопозиция
           Alert.alert("Ошибка", "Для построения маршрута необходимо включить определение геопозиции");
           setDisable(false);
           return;
@@ -366,8 +372,8 @@ function MapScreen({ navigation, route }) {
     // if (washes != null) { // если есть адрес автомойки в которой открыт заказ СТАБИЛЬНО ДЛЯ АНДРОЙДА
     if (Object.keys(washes).length != 0) { // если есть адрес автомойки в которой открыт заказ ДЛЯ АЙОС
       if (map.current) {
-        let { status } = await Location.getForegroundPermissionsAsync(); // проверка на наличие прав
-        if (status !== 'granted') { // если нет прав иил не получена геопозиция
+        let  status = await checkPermissionAndEnableLocation(); // проверка на наличие прав
+        if (!status) { // если нет прав иил не получена геопозиция
           Alert.alert("Ошибка", "Для построения маршрута необходимо включить определение геопозиции");
           setDisable(false);
           return;
